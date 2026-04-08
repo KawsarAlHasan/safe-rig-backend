@@ -1,0 +1,18 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AllStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+// npx prisma studio --port 5001
+// npx prisma migrate dev --name add-profile
+// npx prisma generate

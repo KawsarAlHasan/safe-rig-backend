@@ -1,0 +1,59 @@
+model AdminRole {
+    id          Int          @id @default(autoincrement())
+    name        String       @unique
+    permissions Permission[]
+    status      AllStatus    @default(ACTIVE)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    admins    Admin[]
+}
+
+model Admin {
+    id         Int       @id @default(autoincrement())
+    email      String    @unique
+    name       String?
+    phone      String?
+    profilePic String?
+    password   String
+    status     AllStatus @default(ACTIVE)
+
+    roleId Int
+    role   AdminRole @relation(fields: [roleId], references: [id], onDelete: Restrict)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model Permission {
+    id Int @id @default(autoincrement())
+
+    accessibleModule AccessibleModule
+
+    view            Boolean @default(false)
+    create          Boolean @default(false)
+    edit            Boolean @default(false)
+    delete          Boolean @default(false)
+    statusChange    Boolean @default(false)
+    selectTodayGame Boolean @default(false)
+    approve         Boolean @default(false)
+    clientView      Boolean @default(false)
+
+    roleId Int
+    role   AdminRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+    @@unique([roleId, accessibleModule])
+    @@index([roleId])
+}
+
+enum AccessibleModule {
+    dashboard
+    client_management
+    administrators
+    game_management
+    content_management
+    annotation
+    subscription_plan
+    promo_code
+    client_view
+}

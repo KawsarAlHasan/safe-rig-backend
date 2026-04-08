@@ -1,8 +1,9 @@
 import { z } from "zod";
 import { statusName } from "../../../shared/statusName";
 
-export const createCompanyZodSchema = z.object({
+export const companyZodSchema = z.object({
   body: z.object({
+    id: z.number().optional(),
     name: z.string().min(1, "Name is required"),
     email: z.string().optional(),
     phone: z.string().optional(),

@@ -6,41 +6,6 @@
     "auditLog": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\error\\.f987ab1a8c258f1922ed5299e74a75e41efd6632-audit.json",
     "files": [
         {
-            "date": 1775529076170,
-            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\error\\07-04-2026-08-error.log",
-            "hash": "e321e656c60fc6c33a4bbbb2006e179463e61c40bfd359eaf20a2708c58e2217"
-        },
-        {
-            "date": 1775533489584,
-            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\error\\07-04-2026-09-error.log",
-            "hash": "26e6614169cf9caad25b90c08eb4e2d777d47aaaf10abf156c9cc1ff317528f9"
-        },
-        {
-            "date": 1775534419837,
-            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\error\\07-04-2026-10-error.log",
-            "hash": "e305af071fed802d71f22362861ae29765a38bb63214bee2eecad45a9abe828e"
-        },
-        {
-            "date": 1775539898645,
-            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\error\\07-04-2026-11-error.log",
-            "hash": "ea6a6b2885a97076f49bef820c8e845e44f36e55c4ac0236abb89902e3988fa2"
-        },
-        {
-            "date": 1775542657992,
-            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\error\\07-04-2026-12-error.log",
-            "hash": "4cadb2c80ee561f2883cfdea5fb2f5b10b3c893917ef24b3946882d12bf1e674"
-        },
-        {
-            "date": 1775549689804,
-            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\error\\07-04-2026-14-error.log",
-            "hash": "e14dffd5d33560c73c55102413add1a33747aec819876a30103f259b6241faf5"
-        },
-        {
-            "date": 1775552402666,
-            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\error\\07-04-2026-15-error.log",
-            "hash": "851d6f3bf2b86214aa5d9b12b63ba84d73ad58567bc6688c2eae59572c0c3344"
-        },
-        {
             "date": 1775557351768,
             "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\error\\07-04-2026-16-error.log",
             "hash": "fc3241a4a408cdfc11ff34363121760834db3015bacf074a385dd43503211859"
@@ -49,6 +14,41 @@
             "date": 1775559735843,
             "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\error\\07-04-2026-17-error.log",
             "hash": "6c5951735318d1044521944820de8b9a2e6cb793f86438bb25ecc4893d7b091e"
+        },
+        {
+            "date": 1775618666390,
+            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\error\\08-04-2026-09-error.log",
+            "hash": "2a256a68f2099c7ef08870dd329ff289e7df293ab370e953c9e7cd5dcc9330f8"
+        },
+        {
+            "date": 1775620909591,
+            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\error\\08-04-2026-10-error.log",
+            "hash": "395ad4f24f4934e509e3b1e6a86dd6fb8f6c16b94c5d2ccec79bd8ff6bbc5f06"
+        },
+        {
+            "date": 1775626573326,
+            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\error\\08-04-2026-11-error.log",
+            "hash": "2a5510a4c2a442fff987e65ff439e9a8ac317e184093688c0bca1b4019d88cac"
+        },
+        {
+            "date": 1775628219507,
+            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\error\\08-04-2026-12-error.log",
+            "hash": "a9ad8336fb22751c83898646eb0d438226c84110a1fdfd55c34a37182f763842"
+        },
+        {
+            "date": 1775631620303,
+            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\error\\08-04-2026-13-error.log",
+            "hash": "ca167a0d996ac6b05d8bab773edd4760d7511e8c802aec215f8fd95fee350c01"
+        },
+        {
+            "date": 1775638976251,
+            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\error\\08-04-2026-15-error.log",
+            "hash": "ddbab0aaddfdd16795794e4ca4e4fca4c97ee14765dfb45185bf91c893b53cf2"
+        },
+        {
+            "date": 1775642701986,
+            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\error\\08-04-2026-16-error.log",
+            "hash": "ecece4526f048e2c7671fe31ef0e1d498fa9238922d66c2af5499d5b15b77e13"
         }
     ],
     "hashType": "sha256"

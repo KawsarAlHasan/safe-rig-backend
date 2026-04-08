@@ -1,14 +1,32 @@
 import { StatusCodes } from "http-status-codes";
+import { Prisma } from "../../../../generated/prisma/client";
 import bcrypt from "bcrypt";
 import ApiError from "../../../errors/ApiError";
 import { dbClient } from "../../../lib/prisma";
 import config from "../../../config";
 import { statusName } from "../../../shared/statusName";
+import { IQuery } from "../../../types/company";
 
 // create new company
 export const companyCreateService = async (payload: any) => {
   const { name, email, phone, clientName, clientEmail, clientPassword, logo } =
     payload;
+
+  // check if company exist
+  const isExistCompany = await dbClient.company.findUnique({
+    where: { name },
+  });
+  if (isExistCompany) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Company already exists!");
+  }
+
+  // check if client exist
+  const isExistClient = await dbClient.client.findUnique({
+    where: { email: clientEmail },
+  });
+  if (isExistClient) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Client already exists!");
+  }
 
   // create Company
   const result = await dbClient.company.create({
@@ -25,93 +43,271 @@ export const companyCreateService = async (payload: any) => {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to create company!");
   }
 
+  //hash password
+  const hashedPassword = await bcrypt.hash(
+    clientPassword,
+    Number(config.bcrypt_salt_rounds),
+  );
+
+  // create client
+  await dbClient.client.create({
+    data: {
+      name: clientName,
+      email: clientEmail,
+      password: hashedPassword,
+      isMainClient: true,
+      companyId: result.id,
+    },
+  });
+
   return result;
 };
 
-// get all Admin
-export const getAllAdminService = async () => {
-  const result = await dbClient.admin.findMany({
+// get all company
+export const getAllCompanyService = async (query: IQuery) => {
+  const page = Number(query.page) || 1;
+  const limit = Number(query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const andConditions: Prisma.CompanyWhereInput[] = [];
+
+  // Company search (name, email, phone)
+  if (query.search) {
+    andConditions.push({
+      OR: [
+        {
+          name: {
+            contains: query.search,
+            mode: "insensitive",
+          },
+        },
+        {
+          email: {
+            contains: query.search,
+            mode: "insensitive",
+          },
+        },
+        {
+          phone: {
+            contains: query.search,
+            mode: "insensitive",
+          },
+        },
+      ],
+    });
+  }
+
+  // Main Client search (name/email)
+  if (query.clientSearch) {
+    andConditions.push({
+      clients: {
+        some: {
+          isMainClient: true,
+          OR: [
+            {
+              name: {
+                contains: query.clientSearch,
+                mode: "insensitive",
+              },
+            },
+            {
+              email: {
+                contains: query.clientSearch,
+                mode: "insensitive",
+              },
+            },
+          ],
+        },
+      },
+    });
+  }
+
+  // status filter
+  if (query.status) {
+    andConditions.push({
+      status: query.status as any,
+    });
+  } else {
+    // exclude DELETED by default
+    andConditions.push({
+      NOT: {
+        status: "DELETED",
+      },
+    });
+  }
+
+  const whereCondition: Prisma.CompanyWhereInput =
+    andConditions.length > 0 ? { AND: andConditions } : {};
+
+  const result = await dbClient.company.findMany({
+    where: whereCondition,
+    skip,
+    take: limit,
+    orderBy: {
+      id: "desc",
+    },
     include: {
-      role: {
-        include: {
-          permissions: true,
+      clients: {
+        where: {
+          isMainClient: true, // only main client
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
         },
       },
     },
   });
 
-  // check admin creation
-  if (!result) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to fetch admin!");
+  const total = await dbClient.company.count({
+    where: whereCondition,
+  });
+
+  if (!result.length) {
+    throw new ApiError(StatusCodes.NOT_FOUND, "No company found!");
   }
 
-  // check if no admin
-  if (result.length === 0) {
-    throw new ApiError(StatusCodes.NOT_FOUND, "No admins found!");
-  }
-
-  return result;
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+      totalPage: Math.ceil(total / limit),
+    },
+    data: result,
+  };
 };
 
-// Update an existing Admin
-export const updateAdminService = async (payload: any) => {
-  const { id, name, phone, roleId } = payload;
+// Update an existing Company
+export const updateCompanyService = async (payload: any) => {
+  const {
+    id,
+    name,
+    email,
+    phone,
+    clientName,
+    clientEmail,
+    clientPassword,
+    logo,
+  } = payload;
 
-  // check Admin exist
-  const isExistAdmin = await dbClient.admin.findUnique({
+  // check Company exist
+  const isExistCompany = await dbClient.company.findUnique({
     where: { id: id },
+    include: {
+      clients: {
+        where: {
+          isMainClient: true,
+        },
+      },
+    },
   });
-  if (!isExistAdmin) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Admin doesn't exist!");
+
+  if (!isExistCompany) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Company doesn't exist!");
   }
 
-  // find role by roleId
-  const roleData = await dbClient.adminRole.findUnique({
-    where: { id: roleId },
-  });
+  // check duplicate name
+  if (name && name !== isExistCompany.name) {
+    const isDuplicateName = await dbClient.company.findUnique({
+      where: { name: name },
+    });
 
-  if (!roleData) {
-    throw new ApiError(StatusCodes.NOT_FOUND, "Role not found!");
+    if (isDuplicateName) {
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        `Company with name ${name} already exists!`,
+      );
+    }
   }
 
-  // update Admin
-  const result = await dbClient.admin.update({
+  const isExistClient = isExistCompany?.clients[0];
+
+  // check duplicate email
+  if (clientEmail && clientEmail !== isExistClient?.email) {
+    const isDuplicateEmail = await dbClient.client.findUnique({
+      where: { email: clientEmail },
+    });
+
+    if (isDuplicateEmail) {
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        `Client with email ${clientEmail} already exists!`,
+      );
+    }
+  }
+
+  // update Company
+  const result = await dbClient.company.update({
     where: { id: id },
     data: {
-      name: name,
-      phone: phone,
-      roleId: roleId,
-    },
-    include: {
-      role: true,
+      name: name || isExistCompany.name,
+      email: email || isExistCompany.email,
+      phone: phone || isExistCompany.phone,
+      logo: logo || isExistCompany.logo,
     },
   });
 
   if (!result) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to update admin!");
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to update company!");
+  }
+
+  if (clientName || clientEmail || clientPassword) {
+    if (isExistClient) {
+      //hash password
+      const hashedPassword = clientPassword
+        ? await bcrypt.hash(clientPassword, Number(config.bcrypt_salt_rounds))
+        : isExistClient.password;
+
+      await dbClient.client.update({
+        where: { id: isExistClient.id },
+        data: {
+          name: clientName || isExistClient.name,
+          email: clientEmail || isExistClient.email,
+          password: hashedPassword,
+          isMainClient: true,
+        },
+      });
+    } else {
+      const hashedPassword = await bcrypt.hash(
+        clientPassword || "12345678",
+        Number(config.bcrypt_salt_rounds),
+      );
+      await dbClient.client.create({
+        data: {
+          name: clientName,
+          email: clientEmail,
+          password: hashedPassword,
+          isMainClient: true,
+          companyId: id,
+        },
+      });
+    }
   }
 
   return result;
 };
 
 // status change
-export const updateAdminStatusService = async (payload: any) => {
+export const updateCompanyStatusService = async (payload: any) => {
   const { id, status } = payload;
 
   if (!statusName.includes(status)) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Invalid status!");
   }
 
-  // check Admin exist
-  const isExistAdmin = await dbClient.admin.findUnique({
+  // check Company exist
+  const isExistCompany = await dbClient.company.findUnique({
     where: { id: id },
   });
-  if (!isExistAdmin) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Admin doesn't exist!");
+  if (!isExistCompany) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Company doesn't exist!");
   }
 
   // status change
-  const result = await dbClient.admin.update({
+  const result = await dbClient.company.update({
     where: { id: id },
     data: {
       status: status,
@@ -125,25 +321,25 @@ export const updateAdminStatusService = async (payload: any) => {
   return result;
 };
 
-// Delete an existing Admin
-export const deleteAdminService = async (adminId: any) => {
-  const id = parseInt(adminId);
+// permanent company delete
+export const deleteCompanyService = async (companyId: any) => {
+  const id = parseInt(companyId);
 
-  // check Admin exist
-  const isExistAdmin = await dbClient.admin.findUnique({
+  // check Company exist
+  const isExistCompany = await dbClient.company.findUnique({
     where: { id: id },
   });
-  if (!isExistAdmin) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Admin doesn't exist!");
+  if (!isExistCompany) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Company doesn't exist!");
   }
 
-  // delete Admin
-  const result = await dbClient.admin.delete({
+  // delete Company
+  const result = await dbClient.company.delete({
     where: { id: id },
   });
 
   if (!result) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to delete admin!");
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to delete company!");
   }
 
   return result;

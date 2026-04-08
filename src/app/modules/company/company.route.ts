@@ -1,29 +1,23 @@
 import express from "express";
 import validateRequest from "../../middlewares/validateRequest";
-// import {
-//   createNewAdmin,
-//   getAllAdmin,
-//   updateAdmin,
-//   deleteAdmin,
-//   adminStatusChange,
-// } from "./admin.controller";
-// import {
-//   createAdminZodSchema,
-//   updateAdminStatusZodSchema,
-//   updateAdminZodSchema,
-// } from "./admin.validation";
-import { createNewCompany } from "./company.controller";
-import { createCompanyZodSchema } from "./company.validation";
+import {
+  companyStatusChange,
+  createNewCompany,
+  getAllCompany,
+  permanentDeleteCompany,
+  updateCompany,
+} from "./company.controller";
+import { companyZodSchema } from "./company.validation";
 const router = express.Router();
 
 router.post(
   "/create",
-  validateRequest(createCompanyZodSchema),
+  validateRequest(companyZodSchema),
   createNewCompany,
 );
-// router.get("/", getAllAdmin);
-// router.patch("/update", validateRequest(updateAdminZodSchema), updateAdmin);
-// router.patch("/update-status", adminStatusChange);
-// router.delete("/:id", deleteAdmin);
+router.get("/", getAllCompany);
+router.put("/update", validateRequest(companyZodSchema), updateCompany);
+router.patch("/update-status", companyStatusChange);
+router.delete("/:id", permanentDeleteCompany);
 
 export const CompanyRoutes = router;

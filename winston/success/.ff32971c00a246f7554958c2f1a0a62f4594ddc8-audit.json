@@ -6,41 +6,6 @@
     "auditLog": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\success\\.ff32971c00a246f7554958c2f1a0a62f4594ddc8-audit.json",
     "files": [
         {
-            "date": 1775529076166,
-            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\success\\07-04-2026-08-success.log",
-            "hash": "f6e7bae033be85918de0b500715a51c58b0ef19f1d65b71ab6b4fecc7ced48e2"
-        },
-        {
-            "date": 1775533489581,
-            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\success\\07-04-2026-09-success.log",
-            "hash": "676dafb748f0d613accd2c7d456bf75724d082a290ff2dada459e9bb536023bd"
-        },
-        {
-            "date": 1775534419833,
-            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\success\\07-04-2026-10-success.log",
-            "hash": "feb5b9a2899e2e727ffadfac4978c4cb46e6103ebcd6d135600229dd8892d0bb"
-        },
-        {
-            "date": 1775539898642,
-            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\success\\07-04-2026-11-success.log",
-            "hash": "437a398a57c449c9f4d1aab42dc29d9881e711bb8db37de15bad744dfb06528b"
-        },
-        {
-            "date": 1775542657987,
-            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\success\\07-04-2026-12-success.log",
-            "hash": "f5706cc8208d15576453736722f03cc24334d757493a28e8372893b9dd7a9164"
-        },
-        {
-            "date": 1775549689801,
-            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\success\\07-04-2026-14-success.log",
-            "hash": "90d4a633469d59632b34a7193f57354b2bd3d5316461a7105484a7c7a8f0a14c"
-        },
-        {
-            "date": 1775552402662,
-            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\success\\07-04-2026-15-success.log",
-            "hash": "addd7841c5b6709b096ade8f28abf2e658ec69c488e06a77ae3d1201788b120d"
-        },
-        {
             "date": 1775557351765,
             "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\success\\07-04-2026-16-success.log",
             "hash": "cfe7cdb55d2fc10ecc5ca51316cd160fcbeee1517028a11ee8f75cb15a24b8bf"
@@ -49,6 +14,41 @@
             "date": 1775559735841,
             "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\success\\07-04-2026-17-success.log",
             "hash": "455c820bf4aa8b4e1f5e05b8e743a03cf1d835cb2c00e8bf08f95401c9c67f47"
+        },
+        {
+            "date": 1775618666387,
+            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\success\\08-04-2026-09-success.log",
+            "hash": "4c91d4563bea95ede927686be22b977557ce8e41956fa455a5b68bb3973d3c34"
+        },
+        {
+            "date": 1775620909587,
+            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\success\\08-04-2026-10-success.log",
+            "hash": "8dc43f2904da8b571027da82aef9ea05b965c918b433b89513e53d5a27e03deb"
+        },
+        {
+            "date": 1775626573323,
+            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\success\\08-04-2026-11-success.log",
+            "hash": "e3778576eaec1afaa632b5ee202131d04028ce258f1d52a07599a62b43216e34"
+        },
+        {
+            "date": 1775628219504,
+            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\success\\08-04-2026-12-success.log",
+            "hash": "0f8f7aa2aec62c4ac25f21228b2026c3e3289ecae21a9d97c3180f8712e41dd0"
+        },
+        {
+            "date": 1775631620300,
+            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\success\\08-04-2026-13-success.log",
+            "hash": "ed6b98ffe2a4f0033584250f922a59f653ea1dff4dd7ed1d65bbd60fe13231cd"
+        },
+        {
+            "date": 1775638976247,
+            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\success\\08-04-2026-15-success.log",
+            "hash": "8aed19c19957530e848cdf51357dbcbac9f5762aa130491f022ee6faf6109fa7"
+        },
+        {
+            "date": 1775642701984,
+            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\success\\08-04-2026-16-success.log",
+            "hash": "091b467adf1856503e8dbb42242873725fdeb9ebdba1981044235b69edb2db51"
         }
     ],
     "hashType": "sha256"

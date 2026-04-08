@@ -64,9 +64,6 @@ export const getAllAdminService = async () => {
         include: {
           permissions: true,
         },
-        orderBy: {
-          id: "desc",
-        },
       },
     },
   });

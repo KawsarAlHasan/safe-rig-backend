@@ -11,8 +11,9 @@ enum AllStatus {
   ACTIVE
   INACTIVE
   SUSPENDED
+  DELETED
 }
 
-// npx prisma studio --port 5001
 // npx prisma migrate dev --name add-profile
 // npx prisma generate
+// npx prisma studio --port 5001

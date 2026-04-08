@@ -2,18 +2,24 @@ import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
-import { companyCreateService } from "./company.service";
+import {
+  companyCreateService,
+  deleteCompanyService,
+  getAllCompanyService,
+  updateCompanyService,
+  updateCompanyStatusService,
+} from "./company.service";
 
 // create new Company
 export const createNewCompany = catchAsync(
   async (req: Request, res: Response) => {
-    // Build base URL for uploaded file access
-    const baseUrl = `${req.protocol}://${req.get("host")}`;
+    // // Build base URL for uploaded file access
+    // const baseUrl = `${req.protocol}://${req.get("host")}`;
 
     let logo;
-    if (req.files && "image" in req.files && req.files.image[0]) {
-      logo = `${baseUrl}/images/${req.files.image[0].filename}`;
-    }
+    // if (req.files && "image" in req.files && req.files.image[0]) {
+    //   logo = `${baseUrl}/images/${req.files.image[0].filename}`;
+    // }
 
     const payload = {
       ...req.body,
@@ -31,58 +37,61 @@ export const createNewCompany = catchAsync(
   },
 );
 
-// // get all Admin
-// export const getAllAdmin = catchAsync(async (req: Request, res: Response) => {
-//   const result = await getAllAdminService();
+// get all Company
+export const getAllCompany = catchAsync(async (req: Request, res: Response) => {
+  const result = await getAllCompanyService(req.query);
 
-//   sendResponse(res, {
-//     success: true,
-//     statusCode: StatusCodes.OK,
-//     message: "Admin fetched successfully",
-//     data: result,
-//   });
-// });
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "Company fetched successfully",
+    pagination: result.meta,
+    data: result.data,
+  });
+});
 
-// // Update an existing Admin
-// export const updateAdmin = catchAsync(async (req: Request, res: Response) => {
-//   const { ...adminData } = req.body;
+// Update an existing Company
+export const updateCompany = catchAsync(async (req: Request, res: Response) => {
+  const { ...companyData } = req.body;
 
-//   const result = await updateAdminService(adminData);
+  const result = await updateCompanyService(companyData);
 
-//   sendResponse(res, {
-//     success: true,
-//     statusCode: StatusCodes.OK,
-//     message: "Admin updated successfully",
-//     data: result,
-//   });
-// });
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "Company updated successfully",
+    data: result,
+  });
+});
 
-// // status change
-// export const adminStatusChange = catchAsync(
-//   async (req: Request, res: Response) => {
-//     const { ...adminData } = req.body;
+// status change
+export const companyStatusChange = catchAsync(
+  async (req: Request, res: Response) => {
+    const { ...companyData } = req.body;
 
-//     const result = await updateAdminStatusService(adminData);
+    const result = await updateCompanyStatusService(companyData);
 
-//     sendResponse(res, {
-//       success: true,
-//       statusCode: StatusCodes.OK,
-//       message: "Admin status changed successfully",
-//       data: result,
-//     });
-//   },
-// );
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Company status changed successfully",
+      data: result,
+    });
+  },
+);
 
-// // Delete an existing Admin
-// export const deleteAdmin = catchAsync(async (req: Request, res: Response) => {
-//   const adminId = req.params.id;
+// Delete permanent company
+export const permanentDeleteCompany = catchAsync(
+  async (req: Request, res: Response) => {
+    const id = req.params.id;
 
-//   const result = await deleteAdminService(adminId);
+    const result = await deleteCompanyService(id);
 
-//   sendResponse(res, {
-//     success: true,
-//     statusCode: StatusCodes.OK,
-//     message: "Admin deleted successfully",
-//     data: result,
-//   });
-// });
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Company deleted successfully",
+      data: result,
+    });
+  },
+);

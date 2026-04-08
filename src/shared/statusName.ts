@@ -1,1 +1,1 @@
-export const statusName = ["ACTIVE", "INACTIVE", "SUSPENDED"];
+export const statusName = ["ACTIVE", "INACTIVE", "SUSPENDED", "DELETED"];

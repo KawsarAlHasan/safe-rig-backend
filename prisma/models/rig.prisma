@@ -1,0 +1,12 @@
+
+model Rig {
+    id        Int       @id @default(autoincrement())
+    name      String    @unique
+    email     String?
+    // phone     String?
+    // logo      String?
+    // status    AllStatus @default(ACTIVE)
+    // clients   Client[]
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt 
+}

@@ -3,5 +3,4 @@ model User {
     email   String  @unique
     name    String?
     profile String?
-    posts   Post[]
 }

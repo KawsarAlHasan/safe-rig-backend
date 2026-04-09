@@ -8,7 +8,7 @@ model Client {
     status       AllStatus @default(ACTIVE)
     isMainClient Boolean   @default(false)
 
-    company   Company @relation(fields: [companyId], references: [id], onDelete: Restrict)
+    company   Company? @relation(fields: [companyId], references: [id])
     companyId Int
 
     createdAt DateTime @default(now())

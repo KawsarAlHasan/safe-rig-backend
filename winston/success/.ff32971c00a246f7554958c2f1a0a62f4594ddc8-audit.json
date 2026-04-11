@@ -6,24 +6,29 @@
     "auditLog": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\success\\.ff32971c00a246f7554958c2f1a0a62f4594ddc8-audit.json",
     "files": [
         {
-            "date": 1775705754978,
-            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\success\\09-04-2026-09-success.log",
-            "hash": "743440a7679017231f870891ea269557460af002cbbe06fbd46a75941a6acc95"
+            "date": 1775819238822,
+            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\success\\10-04-2026-17-success.log",
+            "hash": "8fd211f6f764ae74367eaca94ff90792c814deb81c8596fd2ddf309efcaf2848"
         },
         {
-            "date": 1775709688774,
-            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\success\\09-04-2026-10-success.log",
-            "hash": "ab45906b83f1fcfea874f5f168e0397a0cdc65a19aba286e307eb63f6c95e01b"
+            "date": 1775874991082,
+            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\success\\11-04-2026-08-success.log",
+            "hash": "0e8000facbda64133c7f41fee31bc019364a09f326ce8aa918f9924385560130"
         },
         {
-            "date": 1775731299943,
-            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\success\\09-04-2026-16-success.log",
-            "hash": "bd0d970c6bddef44b0007e455f4b16f6d5ea668036c3baefbf8e38f17a1af851"
+            "date": 1775881887214,
+            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\success\\11-04-2026-10-success.log",
+            "hash": "85fe1f84c569428cf1ce1390ddcded869f68a1bba84dcfa4c1ce1ed8e5837185"
         },
         {
-            "date": 1775732908545,
-            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\success\\09-04-2026-17-success.log",
-            "hash": "a039662bac5c2b6a6f061640f5d32d6c8c8e7c58489967216d0667e4f9e85289"
+            "date": 1775886005792,
+            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\success\\11-04-2026-11-success.log",
+            "hash": "ae777f836ae1d6bff4bb92585813dc855330ca2249d402b5afabfa43144b137c"
+        },
+        {
+            "date": 1775887420533,
+            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\success\\11-04-2026-12-success.log",
+            "hash": "85ca3f6cf0e8e3d88fc39289c4d3bc0cc21bfb6103f883a98f8e48d13d584cef"
         }
     ],
     "hashType": "sha256"

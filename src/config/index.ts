@@ -1,6 +1,6 @@
-import dotenv from 'dotenv';
-import path from 'path';
-dotenv.config({ path: path.join(process.cwd(), '.env') });
+import dotenv from "dotenv";
+import path from "path";
+dotenv.config({ path: path.join(process.cwd(), ".env") });
 
 export default {
   ip_address: process.env.IP_ADDRESS,
@@ -9,7 +9,10 @@ export default {
   port: process.env.PORT,
   bcrypt_salt_rounds: process.env.BCRYPT_SALT_ROUNDS,
   jwt: {
-    jwt_secret: process.env.JWT_SECRET,
+    user_jwt_secret: process.env.USER_JWT_SECRET,
+    client_jwt_secret: process.env.CLIENT_JWT_SECRET,
+    admin_jwt_secret: process.env.ADMIN_JWT_SECRET,
+    rig_admin_jwt_secret: process.env.RIG_ADMIN_JWT_SECRET,
     jwt_expire_in: process.env.JWT_EXPIRE_IN,
   },
   email: {

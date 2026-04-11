@@ -4,6 +4,7 @@ import { AdminRoutes } from "../app/modules/admin/admin.route";
 import { AdminRoleRoutes } from "../app/modules/adminRole/role.route";
 import { CompanyRoutes } from "../app/modules/company/company.route";
 import { RigTypeRoutes } from "../app/modules/contentManagement/rigType/rigType.route";
+import { ClientAuthRoutes } from "../app/modules/auth/client/clientAuth.route";
 const router = express.Router();
 
 const apiRoutes = [
@@ -20,11 +21,15 @@ const apiRoutes = [
     route: CompanyRoutes,
   },
   {
+    path: "/auth/client",
+    route: ClientAuthRoutes,
+  },
+  {
     path: "/user",
     route: UserRoutes,
   },
   {
-    path: '/rig-type',
+    path: "/rig-type",
     route: RigTypeRoutes,
   },
 ];

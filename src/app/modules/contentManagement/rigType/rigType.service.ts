@@ -5,8 +5,8 @@ import { dbClient } from "../../../../lib/prisma";
 import { statusName } from "../../../../shared/statusName";
 
 // create new rig type
-export const rigTypeCreateService = async (roleData: any) => {
-  const { name, isDefault, companyId, isAllRigs, rigIds } = roleData;
+export const rigTypeCreateService = async (roleData: any, companyId: any) => {
+  const { name, isDefault, isAllRigs, rigIds } = roleData;
 
   // check rig type name
   const isExistName = await dbClient.rigType.findFirst({
@@ -38,7 +38,7 @@ export const rigTypeCreateService = async (roleData: any) => {
 };
 
 // get rig type
-export const getRigTypeService = async (query: any) => {
+export const getRigTypeService = async (query: any, companyId: any) => {
   const andConditions: Prisma.RigTypeWhereInput[] = [];
 
   // Search by name
@@ -75,8 +75,11 @@ export const getRigTypeService = async (query: any) => {
     });
   }
 
-  // Filter by companyId
-  if (query.companyId) {
+  if (companyId) {
+    andConditions.push({
+      companyId: Number(companyId),
+    });
+  } else if (query.companyId) {
     andConditions.push({
       companyId: Number(query.companyId),
     });
@@ -124,8 +127,8 @@ export const getRigTypeService = async (query: any) => {
 };
 
 // Update an existing Rig Type
-export const updateRigTypeService = async (payload: any) => {
-  const { id, name, isDefault, companyId, isAllRigs, rigIds } = payload;
+export const updateRigTypeService = async (payload: any, companyId: any) => {
+  const { id, name, isDefault, isAllRigs, rigIds } = payload;
 
   // check rig type exist
   const isExistRigType = await dbClient.rigType.findUnique({
@@ -170,16 +173,29 @@ export const updateRigTypeService = async (payload: any) => {
 };
 
 // status change
-export const changeRigTypeStatusService = async (payload: any) => {
+export const changeRigTypeStatusService = async (
+  payload: any,
+  companyId: any,
+) => {
   const { id, status } = payload;
 
   if (!statusName.includes(status)) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, `Invalid status! You can only change status to ${statusName}`);
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      `Invalid status! You can only change status to ${statusName}`,
+    );
+  }
+
+  // build where condition
+  const whereCondition: any = { id };
+
+  if (companyId) {
+    whereCondition.companyId = companyId;
   }
 
   // check RigType exist
   const isExistRigType = await dbClient.rigType.findUnique({
-    where: { id: id },
+    where: whereCondition,
   });
   if (!isExistRigType) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Rig Type doesn't exist!");
@@ -201,12 +217,19 @@ export const changeRigTypeStatusService = async (payload: any) => {
 };
 
 // permanent rig type delete
-export const deleteRigTypeService = async (paramsId: any) => {
+export const deleteRigTypeService = async (paramsId: any, companyId: any) => {
   const id = parseInt(paramsId);
+
+  // build where condition
+  const whereCondition: any = { id };
+
+  if (companyId) {
+    whereCondition.companyId = companyId;
+  }
 
   // check rig type exist
   const isExistRigType = await dbClient.rigType.findUnique({
-    where: { id: id },
+    where: whereCondition,
   });
   if (!isExistRigType) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Rig Type doesn't exist!");

@@ -6,11 +6,6 @@
     "auditLog": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\error\\.f987ab1a8c258f1922ed5299e74a75e41efd6632-audit.json",
     "files": [
         {
-            "date": 1775819238825,
-            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\error\\10-04-2026-17-error.log",
-            "hash": "8cbc5742f57defaacf78de303e2596b3841c07ed9c3190494382dc0f416ddda6"
-        },
-        {
             "date": 1775874991085,
             "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\error\\11-04-2026-08-error.log",
             "hash": "64bd39cc393d21dd0cfd57178464a63defd59b901b4509f7e1fa6a42f902954b"
@@ -29,6 +24,36 @@
             "date": 1775887420535,
             "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\error\\11-04-2026-12-error.log",
             "hash": "226961b6d3299116b245bcd6789bf311847ee5486aea727951be9e7391cfac99"
+        },
+        {
+            "date": 1775899870920,
+            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\error\\11-04-2026-15-error.log",
+            "hash": "69a66b06691e9cfd7966169e4095890a8046470a1c4d9e383fd7aeb9dc69770b"
+        },
+        {
+            "date": 1775903442136,
+            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\error\\11-04-2026-16-error.log",
+            "hash": "b0b9e929b115d74ce228f10e0d41406554946aefc146132187ab564caf893609"
+        },
+        {
+            "date": 1775905223350,
+            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\error\\11-04-2026-17-error.log",
+            "hash": "72545f2f150e6588c52c9fcb2db6e187dc42154cf4c11d95738a60106ea0856a"
+        },
+        {
+            "date": 1775908988097,
+            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\error\\11-04-2026-18-error.log",
+            "hash": "43df63bb44d9d99f8cfdd432d48a64c01376f2c4cf363fab089e1a78f5202510"
+        },
+        {
+            "date": 1775917766605,
+            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\error\\11-04-2026-20-error.log",
+            "hash": "cee1cd7132d1f78286bd668c5a93bcab6ecb179a777ebc372ac54a70a673c983"
+        },
+        {
+            "date": 1775920970076,
+            "name": "C:\\Users\\kawsa\\Desktop\\khairul-dewan\\winston\\error\\11-04-2026-21-error.log",
+            "hash": "c44d444d3791e8ef87ec1e627e04c954365ef639cb9925d8ac6ce44c8188a561"
         }
     ],
     "hashType": "sha256"

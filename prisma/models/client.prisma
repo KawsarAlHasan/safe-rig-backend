@@ -7,13 +7,13 @@ model Client {
     password     String
     status       AllStatus @default(ACTIVE)
     isMainClient Boolean   @default(false)
+    isVerified   Boolean   @default(true)
 
     company   Company? @relation(fields: [companyId], references: [id])
     companyId Int
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
-
 
     @@unique([companyId, isMainClient(map: "only_one_main_per_company")])
 }

@@ -1,9 +1,8 @@
 import { z } from "zod";
-import { statusName } from "../../../shared/statusName";
+import { statusName } from "../../../../shared/statusName";
 
-export const createAdminZodSchema = z.object({
+export const loginZodSchema = z.object({
   body: z.object({
-    name: z.string().min(1, "Name is required"),
     email: z
       .string()
       .min(1, "Email is required")
@@ -11,8 +10,6 @@ export const createAdminZodSchema = z.object({
     password: z
       .string()
       .min(1, "Password is required")
-      .min(6, "Password must be at least 6 characters"),
-    roleId: z.number().min(1, "Role is required"),
   }),
 });
 

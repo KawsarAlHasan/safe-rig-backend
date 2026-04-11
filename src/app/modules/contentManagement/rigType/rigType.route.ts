@@ -1,6 +1,11 @@
 import express from "express";
-
 import validateRequest from "../../../middlewares/validateRequest";
+import {
+  adminAuth,
+  clientAuth,
+  rigAdminAuth,
+  userAuth,
+} from "../../../middlewares/auth";
 import {
   createRigTypeZodSchema,
   updateRigTypeZodSchema,
@@ -12,16 +17,65 @@ import {
   rigTypeStatusChange,
   updateRigType,
 } from "./rigType.controller";
+
 const router = express.Router();
 
+// ───── Admin Routes ─────
 router.post(
-  "/create",
+  "/admin/create",
+  adminAuth(),
   validateRequest(createRigTypeZodSchema),
   createNewRigType,
 );
-router.get("/", getRigTypes);
-router.put("/update", validateRequest(updateRigTypeZodSchema), updateRigType);
-router.patch("/update-status", validateRequest(updateRigTypeZodSchema), rigTypeStatusChange);
-router.delete("/:id", permanentDeleteRigType);
+
+router.get("/admin", adminAuth(), getRigTypes);
+
+router.put(
+  "/admin/update",
+  adminAuth(),
+  validateRequest(updateRigTypeZodSchema),
+  updateRigType,
+);
+
+router.patch(
+  "/admin/update-status",
+  adminAuth(),
+  validateRequest(updateRigTypeZodSchema),
+  rigTypeStatusChange,
+);
+
+router.delete("/admin/:id", adminAuth(), permanentDeleteRigType);
+
+// ───── Client Routes ─────
+router.post(
+  "/client/create",
+  clientAuth(),
+  validateRequest(createRigTypeZodSchema),
+  createNewRigType,
+);
+
+router.get("/client", clientAuth(), getRigTypes);
+
+router.put(
+  "/client/update",
+  clientAuth(),
+  validateRequest(updateRigTypeZodSchema),
+  updateRigType,
+);
+
+router.patch(
+  "/client/update-status",
+  clientAuth(),
+  validateRequest(updateRigTypeZodSchema),
+  rigTypeStatusChange,
+);
+
+router.delete("/client/:id", clientAuth(), permanentDeleteRigType);
+
+// ───── RigAdmin Routes ─────
+router.get("/client", rigAdminAuth(), getRigTypes);
+
+// ───── User Routes ─────
+router.get("/", userAuth(), getRigTypes);
 
 export const RigTypeRoutes = router;

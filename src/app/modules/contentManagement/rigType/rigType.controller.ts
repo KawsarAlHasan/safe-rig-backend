@@ -9,13 +9,14 @@ import {
   rigTypeCreateService,
   updateRigTypeService,
 } from "./rigType.service";
+import resolveCompanyId from "../../../../helpers/resolveCompanyId";
 
 // create new rig type
 export const createNewRigType = catchAsync(
   async (req: Request, res: Response) => {
-    const { ...bodyData } = req.body;
+    const companyId = resolveCompanyId(req);
 
-    await rigTypeCreateService(bodyData);
+    await rigTypeCreateService(req.body, companyId);
 
     sendResponse(res, {
       success: true,
@@ -27,7 +28,9 @@ export const createNewRigType = catchAsync(
 
 // get rig type
 export const getRigTypes = catchAsync(async (req: Request, res: Response) => {
-  const result = await getRigTypeService(req.query);
+  const companyId = resolveCompanyId(req);
+
+  const result = await getRigTypeService(req.query, companyId);
 
   sendResponse(res, {
     success: true,
@@ -39,9 +42,9 @@ export const getRigTypes = catchAsync(async (req: Request, res: Response) => {
 
 // update rig type
 export const updateRigType = catchAsync(async (req: Request, res: Response) => {
-  const { ...bodyData } = req.body;
+  const companyId = resolveCompanyId(req);
 
-  await updateRigTypeService(bodyData);
+  await updateRigTypeService(req.body, companyId);
 
   sendResponse(res, {
     success: true,
@@ -53,9 +56,9 @@ export const updateRigType = catchAsync(async (req: Request, res: Response) => {
 // status change
 export const rigTypeStatusChange = catchAsync(
   async (req: Request, res: Response) => {
-    const { ...bodyData } = req.body;
+    const companyId = resolveCompanyId(req);
 
-    await changeRigTypeStatusService(bodyData);
+    await changeRigTypeStatusService(req.body, companyId);
 
     sendResponse(res, {
       success: true,
@@ -68,9 +71,10 @@ export const rigTypeStatusChange = catchAsync(
 // Delete permanent RigType
 export const permanentDeleteRigType = catchAsync(
   async (req: Request, res: Response) => {
+    const companyId = resolveCompanyId(req);
     const id = req.params.id;
 
-    await deleteRigTypeService(id);
+    await deleteRigTypeService(id, companyId);
 
     sendResponse(res, {
       success: true,

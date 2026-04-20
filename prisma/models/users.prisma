@@ -1,0 +1,23 @@
+model User {
+    id            Int       @id @default(autoincrement())
+    name          String?
+    email         String    @unique
+    profile       String?
+    entryCompany  String?
+    position      String?
+    phone         String?
+    password      String
+    isVerified    Boolean   @default(false)
+    approveStatus AllStatus @default(PENDING) // NOT_SUBMITTED
+    status        AllStatus @default(PENDING)
+    createdAt     DateTime  @default(now())
+    updatedAt     DateTime  @updatedAt
+
+    company   Company? @relation(fields: [companyId], references: [id])
+    companyId Int?
+    rig       Rig?     @relation(fields: [rigId], references: [id])
+    rigId     Int?
+
+    cardSubmissions CardSubmission[]
+    dailyDebriefs   DailyDebrief[]
+}

@@ -1,0 +1,23 @@
+model Rig {
+    id        Int     @id @default(autoincrement())
+    name      String
+    location  String?
+    latitude  String?
+    longitude String?
+
+    rigType   RigType @relation(fields: [rigTypeId], references: [id])
+    rigTypeId Int
+
+    company   Company @relation(fields: [companyId], references: [id])
+    companyId Int
+
+    status    AllStatus @default(ACTIVE)
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+
+    users           User[]
+    cardSubmissions CardSubmission[]
+    activity        Activity[]
+    typeOfDevrief   TypeOfDevrief[]
+    dailyDebriefs   DailyDebrief[]
+}

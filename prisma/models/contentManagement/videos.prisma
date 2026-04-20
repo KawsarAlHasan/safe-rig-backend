@@ -1,0 +1,26 @@
+model Videos {
+    id           Int       @id @default(autoincrement())
+    title         String?
+    description   String?
+    position      String @default("Library")
+    videoUrl      String?
+    thumbnail     String?
+
+    status       AllStatus @default(ACTIVE)
+    isDefault   Boolean @default(false)
+
+    company   Company? @relation(fields: [companyId], references: [id])
+    companyId Int?
+
+    isAllRigs   Boolean @default(false)
+    rigIds       Int[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+
+// enum AllPositon {
+//   Homepage
+//   Library
+// }

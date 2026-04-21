@@ -4,4 +4,5 @@ export type IQuery = {
   search?: string;
   status?: string;
   clientSearch?: string;
+  isUser?: boolean;
 };

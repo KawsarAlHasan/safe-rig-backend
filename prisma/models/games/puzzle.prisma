@@ -1,0 +1,23 @@
+model Puzzle {
+    id Int @id @default(autoincrement())
+
+    image String
+    title String?
+
+    mark1x Int
+    mark1y Int
+    mark2x Int
+    mark2y Int
+    mark3x Int
+    mark3y Int
+    mark4x Int
+    mark4y Int
+    
+    time   Int
+    isUsed Boolean @default(false)
+
+    status AllStatus @default(ACTIVE)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}

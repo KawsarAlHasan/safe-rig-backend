@@ -16,6 +16,6 @@ enum AllStatus {
   NOT_SUBMITTED
 }
 
-// npx prisma migrate dev --name add-profile
+// npx prisma migrate dev --name init
 // npx prisma generate
 // npx prisma studio --port 5001

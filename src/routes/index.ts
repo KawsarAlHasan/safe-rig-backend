@@ -18,6 +18,8 @@ import { ActivityRoutes } from "../app/modules/debriefsManagement/activity/activ
 import { TypeOfDevriefRoutes } from "../app/modules/debriefsManagement/typeOfDevrief/typeOfDevrief.route";
 import { DailyDebriefRoutes } from "../app/modules/debriefsManagement/dailyDebrief/dailyDebrief.route";
 import { AdminAuthRoutes } from "../app/modules/auth/admin/adminAuth.route";
+import { QuestionRoutes } from "../app/modules/games/questionAnwser/questionAnwser.route";
+import { PuzzleRoutes } from "../app/modules/games/puzzle/puzzle.route";
 const router = express.Router();
 
 const apiRoutes = [
@@ -97,6 +99,14 @@ const apiRoutes = [
   {
     path: "/daily-debrief",
     route: DailyDebriefRoutes,
+  },
+  {
+    path: "/question",
+    route: QuestionRoutes,
+  },
+  {
+    path: "/puzzle",
+    route: PuzzleRoutes,
   },
 ];
 

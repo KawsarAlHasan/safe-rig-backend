@@ -4,15 +4,7 @@ import catchAsync from "../../../../shared/catchAsync";
 import sendResponse from "../../../../shared/sendResponse";
 
 import resolveCompanyId from "../../../../helpers/resolveCompanyId";
-import {
-  // cardTypeCreateService,
-  changeCardTypeStatusService,
-  deleteCardTypeService,
-  getAllUserCardTypeService,
-  getCardTypeService,
-  updateCardTypeService,
-} from "./dailyDebrief.service";
-import { cardTypeCreateService } from "./dailyDebrief.service";
+import { getAllActiveDebriefService } from "./dailyDebrief.service";
 
 // create new Daily debrief
 export const createNewDailyDebrief = catchAsync(
@@ -29,26 +21,16 @@ export const createNewDailyDebrief = catchAsync(
   },
 );
 
-// get CardType
-export const getCardType = catchAsync(async (req: Request, res: Response) => {
-  const companyId = resolveCompanyId(req);
 
-  const result = await getCardTypeService(req.query, companyId);
-
-  sendResponse(res, {
-    success: true,
-    statusCode: StatusCodes.OK,
-    message: "Daily debrief fetched successfully",
-    data: result,
-  });
-});
-
-// get user all Daily debrief
-export const getAllUserCardType = catchAsync(
+// get active debrief
+export const getAllActiveDebrief = catchAsync(
   async (req: Request, res: Response) => {
     const user = (req as any).decodedUser;
 
-    const result = await getAllUserCardTypeService(user.companyId, user.rigId);
+    const result = await getAllActiveDebriefService(
+      user.companyId,
+      user.rigId,
+    );
 
     sendResponse(res, {
       success: true,
@@ -59,48 +41,79 @@ export const getAllUserCardType = catchAsync(
   },
 );
 
-// update CardType
-export const updateCardType = catchAsync(
-  async (req: Request, res: Response) => {
-    const companyId = resolveCompanyId(req);
 
-    await updateCardTypeService(req.body, companyId);
+// // get CardType
+// export const getCardType = catchAsync(async (req: Request, res: Response) => {
+//   const companyId = resolveCompanyId(req);
 
-    sendResponse(res, {
-      success: true,
-      statusCode: StatusCodes.OK,
-      message: "Daily debrief updated successfully",
-    });
-  },
-);
+//   const result = await getCardTypeService(req.query, companyId);
 
-// status change
-export const cardTypeStatusChange = catchAsync(
-  async (req: Request, res: Response) => {
-    const companyId = resolveCompanyId(req);
+//   sendResponse(res, {
+//     success: true,
+//     statusCode: StatusCodes.OK,
+//     message: "Daily debrief fetched successfully",
+//     data: result,
+//   });
+// });
 
-    await changeCardTypeStatusService(req.body, companyId);
+// // get user all Daily debrief
+// export const getAllUserCardType = catchAsync(
+//   async (req: Request, res: Response) => {
+//     const user = (req as any).decodedUser;
 
-    sendResponse(res, {
-      success: true,
-      statusCode: StatusCodes.OK,
-      message: "Daily debrief status changed successfully",
-    });
-  },
-);
+//     const result = await getAllUserCardTypeService(user.companyId, user.rigId);
 
-// Delete permanent CardType
-export const permanentDeleteCardType = catchAsync(
-  async (req: Request, res: Response) => {
-    const companyId = resolveCompanyId(req);
-    const id = req.params.id;
+//     sendResponse(res, {
+//       success: true,
+//       statusCode: StatusCodes.OK,
+//       message: "Daily debrief fetched successfully",
+//       data: result,
+//     });
+//   },
+// );
 
-    await deleteCardTypeService(id, companyId);
+// // update CardType
+// export const updateCardType = catchAsync(
+//   async (req: Request, res: Response) => {
+//     const companyId = resolveCompanyId(req);
 
-    sendResponse(res, {
-      success: true,
-      statusCode: StatusCodes.OK,
-      message: "Daily debrief deleted successfully",
-    });
-  },
-);
+//     await updateCardTypeService(req.body, companyId);
+
+//     sendResponse(res, {
+//       success: true,
+//       statusCode: StatusCodes.OK,
+//       message: "Daily debrief updated successfully",
+//     });
+//   },
+// );
+
+// // status change
+// export const cardTypeStatusChange = catchAsync(
+//   async (req: Request, res: Response) => {
+//     const companyId = resolveCompanyId(req);
+
+//     await changeCardTypeStatusService(req.body, companyId);
+
+//     sendResponse(res, {
+//       success: true,
+//       statusCode: StatusCodes.OK,
+//       message: "Daily debrief status changed successfully",
+//     });
+//   },
+// );
+
+// // Delete permanent CardType
+// export const permanentDeleteCardType = catchAsync(
+//   async (req: Request, res: Response) => {
+//     const companyId = resolveCompanyId(req);
+//     const id = req.params.id;
+
+//     await deleteCardTypeService(id, companyId);
+
+//     sendResponse(res, {
+//       success: true,
+//       statusCode: StatusCodes.OK,
+//       message: "Daily debrief deleted successfully",
+//     });
+//   },
+// );

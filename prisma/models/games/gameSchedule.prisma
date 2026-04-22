@@ -1,0 +1,35 @@
+model GameSchedule {
+    id           Int      @id @default(autoincrement())
+    scheduledFor String?
+    gameType     GameType
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+    puzzles   GameSchedulePuzzle[]
+    questions GameScheduleQuestion[]
+}
+
+model GameSchedulePuzzle {
+    id Int @id @default(autoincrement())
+
+    puzzle   Puzzle? @relation(fields: [puzzleId], references: [id])
+    puzzleId Int?
+
+    gameSchedule   GameSchedule? @relation(fields: [gameScheduleId], references: [id])
+    gameScheduleId Int?
+}
+
+model GameScheduleQuestion {
+    id Int @id @default(autoincrement())
+
+    questionAnwser QuestionAnwser? @relation(fields: [questionId], references: [id])
+    questionId     Int?
+
+    gameSchedule   GameSchedule? @relation(fields: [gameScheduleId], references: [id])
+    gameScheduleId Int?
+}
+
+enum GameType {
+    PUZZLE
+    QUESTION
+}

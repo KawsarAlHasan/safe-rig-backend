@@ -20,6 +20,8 @@ import { DailyDebriefRoutes } from "../app/modules/debriefsManagement/dailyDebri
 import { AdminAuthRoutes } from "../app/modules/auth/admin/adminAuth.route";
 import { QuestionRoutes } from "../app/modules/games/questionAnwser/questionAnwser.route";
 import { PuzzleRoutes } from "../app/modules/games/puzzle/puzzle.route";
+import { GameScheduleRoutes } from "../app/modules/games/gameSchedule/gameSchedule.route";
+
 const router = express.Router();
 
 const apiRoutes = [
@@ -99,6 +101,12 @@ const apiRoutes = [
   {
     path: "/daily-debrief",
     route: DailyDebriefRoutes,
+  },
+
+  // game routes
+  {
+    path: "/game",
+    route: GameScheduleRoutes,
   },
   {
     path: "/question",

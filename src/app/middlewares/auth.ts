@@ -133,7 +133,7 @@ export const userAuth = (options: AuthOptions = {}) => {
       if (!user) {
         throw new ApiError(
           StatusCodes.UNAUTHORIZED,
-          "No client found. Please login again",
+          "No user found. Please login again",
         );
       }
 

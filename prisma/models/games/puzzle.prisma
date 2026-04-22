@@ -12,7 +12,7 @@ model Puzzle {
     mark3y Int
     mark4x Int
     mark4y Int
-    
+
     time   Int
     isUsed Boolean @default(false)
 
@@ -20,4 +20,6 @@ model Puzzle {
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    GameSchedulePuzzles GameSchedulePuzzle[]
 }

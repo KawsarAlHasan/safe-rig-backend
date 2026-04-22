@@ -6,7 +6,7 @@ import {
   rigAdminAuth,
   userAuth,
 } from "../../../middlewares/auth";
-import { createNewDailyDebrief } from "./dailyDebrief.controller";
+import { createNewDailyDebrief, getAllActiveDebrief } from "./dailyDebrief.controller";
 import { createDailyDebriefZodSchema } from "./dailyDebrief.validation";
 
 const router = express.Router();
@@ -16,6 +16,12 @@ router.post(
   userAuth(),
   validateRequest(createDailyDebriefZodSchema),
   createNewDailyDebrief,
+);
+
+router.get(
+  "/get-active-debrief",
+  userAuth(),
+  getAllActiveDebrief,
 );
 
 export const DailyDebriefRoutes = router;

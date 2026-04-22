@@ -1,0 +1,45 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 1
+    },
+    "auditLog": "C:\\Users\\kawsa\\projects\\spark-teck\\Running\\nelsontan321 ll The offshore drilling HSE app ll 7,300 USD ll Code Muse\\backend\\winston\\success\\.6d7e04f592c31cb6583e54b772e759f19f004c1f-audit.json",
+    "files": [
+        {
+            "date": 1776825118570,
+            "name": "C:\\Users\\kawsa\\projects\\spark-teck\\Running\\nelsontan321 ll The offshore drilling HSE app ll 7,300 USD ll Code Muse\\backend\\winston\\success\\22-04-2026-08-success.log",
+            "hash": "30f72b07229b50c13d6fae768b09c3dfc5fc2f96554d810669b53ff6363ba432"
+        },
+        {
+            "date": 1776828793301,
+            "name": "C:\\Users\\kawsa\\projects\\spark-teck\\Running\\nelsontan321 ll The offshore drilling HSE app ll 7,300 USD ll Code Muse\\backend\\winston\\success\\22-04-2026-09-success.log",
+            "hash": "0a09d4253dc257c58e2c83eabcd33249248162804e5db43241a9c701ab264fe7"
+        },
+        {
+            "date": 1776830531646,
+            "name": "C:\\Users\\kawsa\\projects\\spark-teck\\Running\\nelsontan321 ll The offshore drilling HSE app ll 7,300 USD ll Code Muse\\backend\\winston\\success\\22-04-2026-10-success.log",
+            "hash": "beeffa6cc7ba1333446cd366831dbf3ac63f927e3ec7aed765d2bfaedb8aa6ac"
+        },
+        {
+            "date": 1776836110418,
+            "name": "C:\\Users\\kawsa\\projects\\spark-teck\\Running\\nelsontan321 ll The offshore drilling HSE app ll 7,300 USD ll Code Muse\\backend\\winston\\success\\22-04-2026-11-success.log",
+            "hash": "af77b85aed2452cec05b3f7288eae9b2ed75c4d12c5b3c9ae8138062738b46ef"
+        },
+        {
+            "date": 1776837686634,
+            "name": "C:\\Users\\kawsa\\projects\\spark-teck\\Running\\nelsontan321 ll The offshore drilling HSE app ll 7,300 USD ll Code Muse\\backend\\winston\\success\\22-04-2026-12-success.log",
+            "hash": "1a260bb0234dce0f4b97b80aa7ef6a72e5d70d003ab1961e08f12bcd171863c4"
+        },
+        {
+            "date": 1776845408088,
+            "name": "C:\\Users\\kawsa\\projects\\spark-teck\\Running\\nelsontan321 ll The offshore drilling HSE app ll 7,300 USD ll Code Muse\\backend\\winston\\success\\22-04-2026-14-success.log",
+            "hash": "f37477792a43a77d8cd811fcf9b5fe1f13a4a7095cf6403b1994679048401a2d"
+        },
+        {
+            "date": 1776848990209,
+            "name": "C:\\Users\\kawsa\\projects\\spark-teck\\Running\\nelsontan321 ll The offshore drilling HSE app ll 7,300 USD ll Code Muse\\backend\\winston\\success\\22-04-2026-15-success.log",
+            "hash": "2515a4851b517718cdf10c73b3c7ce5e3449002c4d58bc1083b49ea4e5d4021f"
+        }
+    ],
+    "hashType": "sha256"
+}

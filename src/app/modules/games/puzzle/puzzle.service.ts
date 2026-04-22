@@ -42,7 +42,5 @@ export const puzzleCreateService = async (payloadData: any) => {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to create Puzzle!");
   }
 
-  console.log(result);
-
-  return "result";
+  return result;
 };

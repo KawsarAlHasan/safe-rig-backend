@@ -1,0 +1,13 @@
+model GameResult {
+    id          Int      @id @default(autoincrement())
+    user        User     @relation(fields: [userId], references: [id])
+    userId      Int
+    date        String?
+    gameType    GameType
+    puzzleIds   Int[]
+    questionIds Int[]
+    score       Float
+    totalScore  Float
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+}

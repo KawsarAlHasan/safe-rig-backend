@@ -15,7 +15,8 @@ router.post(
   createNewQuestion,
 );
 
-router.get("/all", adminAuth(), getAllQuestion);
+// router.get("/all", adminAuth(), getAllQuestion);
+router.get("/all", getAllQuestion);
 
 // router.put(
 //   "/client/update",

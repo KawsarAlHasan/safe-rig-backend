@@ -1,0 +1,25 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 1
+    },
+    "auditLog": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\error\\.4568c86a8b59286fd0dea35a88eef744ac646570-audit.json",
+    "files": [
+        {
+            "date": 1777172855919,
+            "name": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\error\\26-04-2026-09-error.log",
+            "hash": "a8bf02011d79cbc5e134730b7d3cfc30de11ca5e613363b4799c6785c3064cc3"
+        },
+        {
+            "date": 1777184686999,
+            "name": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\error\\26-04-2026-12-error.log",
+            "hash": "55514e603e20286d16007fa8d4dfb00e7276ea010b6b24513ae778932b902eb3"
+        },
+        {
+            "date": 1777192868540,
+            "name": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\error\\26-04-2026-14-error.log",
+            "hash": "d815aa633f66322a9d8f55fcf1490ef9e7fcc8b6c6c6fcb05087d36010dae1c9"
+        }
+    ],
+    "hashType": "sha256"
+}

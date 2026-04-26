@@ -20,4 +20,5 @@ model User {
 
     cardSubmissions CardSubmission[]
     dailyDebriefs   DailyDebrief[]
+    gameResults     GameResult[]
 }

@@ -31,7 +31,7 @@ app.use(globalErrorHandler);
 app.use((req, res) => {
   res.status(StatusCodes.NOT_FOUND).json({
     success: false,
-    message: "API Not found",
+    message: "API DOESN'T EXIST",
     errorMessages: [
       {
         path: req.originalUrl,

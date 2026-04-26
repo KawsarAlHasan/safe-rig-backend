@@ -121,7 +121,7 @@ export const getCardTypeService = async (query: any, companyId: any) => {
   if (query.rigId) {
     andConditions.push({
       rigIds: {
-        has: Number(query.rigId), // PostgreSQL array filter
+        has: Number(query.rigId),
       },
     });
   }
@@ -140,20 +140,47 @@ export const getCardTypeService = async (query: any, companyId: any) => {
   const whereCondition: Prisma.CardTypeWhereInput =
     andConditions.length > 0 ? { AND: andConditions } : {};
 
-  const result = await dbClient.cardType.findMany({
-    where: whereCondition, // FIXED (important)
+  const cardTypes = await dbClient.cardType.findMany({
+    where: whereCondition,
     orderBy: {
       id: "desc",
     },
   });
 
-  if (!result) {
+  if (!cardTypes) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to fetch Card Types!");
   }
 
-  if (result.length === 0) {
+  if (cardTypes.length === 0) {
     throw new ApiError(StatusCodes.NOT_FOUND, "No Card Types found!");
   }
+
+  const allRigIds = cardTypes.flatMap((ct) => ct.rigIds);
+  const uniqueRigIds = [...new Set(allRigIds)];
+
+  let rigsMap = new Map();
+
+  if (uniqueRigIds.length > 0) {
+    const rigs = await dbClient.rig.findMany({
+      where: {
+        id: { in: uniqueRigIds },
+        status: "ACTIVE",
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+
+    rigsMap = new Map(rigs.map((rig) => [rig.id, rig]));
+  }
+
+  const result = cardTypes.map((cardType) => ({
+    ...cardType,
+    rigDetails: cardType.rigIds
+      .map((rigId) => rigsMap.get(rigId))
+      .filter((rig) => rig !== undefined),
+  }));
 
   return result;
 };

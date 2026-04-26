@@ -1,0 +1,14 @@
+model Game {
+    id           Int      @id @default(autoincrement())
+    scheduledFor String?
+    gameType     GameType
+    puzzleIds    Int[]
+    questionIds  Int[]
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+}
+
+enum GameType {
+    PUZZLE
+    QUESTION
+}

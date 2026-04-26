@@ -21,6 +21,7 @@ import { AdminAuthRoutes } from "../app/modules/auth/admin/adminAuth.route";
 import { QuestionRoutes } from "../app/modules/games/questionAnwser/questionAnwser.route";
 import { PuzzleRoutes } from "../app/modules/games/puzzle/puzzle.route";
 import { GameScheduleRoutes } from "../app/modules/games/gameSchedule/gameSchedule.route";
+import { NotificationRoutes } from "../app/modules/notification/notification.route";
 
 const router = express.Router();
 
@@ -115,6 +116,10 @@ const apiRoutes = [
   {
     path: "/puzzle",
     route: PuzzleRoutes,
+  },
+  {
+    path: "/notification",
+    route: NotificationRoutes,
   },
 ];
 

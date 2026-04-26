@@ -2,7 +2,7 @@ import express from "express";
 import validateRequest from "../../../middlewares/validateRequest";
 import { adminAuth, rigAdminAuth, userAuth } from "../../../middlewares/auth";
 import fileUploadHandler from "../../../middlewares/fileUploadHandler";
-import { createNewPuzzle } from "./puzzle.controller";
+import { createNewPuzzle, getAllPuzzles } from "./puzzle.controller";
 
 const router = express.Router();
 
@@ -14,7 +14,8 @@ router.post(
   createNewPuzzle,
 );
 
-// router.get("/all", adminAuth(), getAllQuestion);
+// router.get("/all", adminAuth(), getAllPuzzles);
+router.get("/all", getAllPuzzles);
 
 // router.put(
 //   "/client/update",

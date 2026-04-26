@@ -3,7 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import catchAsync from "../../../../shared/catchAsync";
 import sendResponse from "../../../../shared/sendResponse";
 import resolveCompanyId from "../../../../helpers/resolveCompanyId";
-import { puzzleCreateService } from "./puzzle.service";
+import { getAllPuzzleService, puzzleCreateService } from "./puzzle.service";
 
 // create new Puzzle
 export const createNewPuzzle = catchAsync(
@@ -21,27 +21,26 @@ export const createNewPuzzle = catchAsync(
       image,
     };
 
-    await puzzleCreateService(payload);
+    const result = await puzzleCreateService(payload);
 
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
       message: "Puzzle created successfully",
+      data: result,
     });
   },
 );
 
-// // get Puzzle
-// export const getAllQuestion = catchAsync(
-//   async (req: Request, res: Response) => {
-//     const result = await getAllQuestionService(req.query);
+// get all Puzzle
+export const getAllPuzzles = catchAsync(async (req: Request, res: Response) => {
+  const result = await getAllPuzzleService(req.query);
 
-//     sendResponse(res, {
-//       success: true,
-//       statusCode: StatusCodes.OK,
-//       message: "Puzzles fetched successfully",
-//       pagination: result.meta,
-//       data: result.data,
-//     });
-//   },
-// );
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "all Puzzles fetched successfully",
+    pagination: result.meta,
+    data: result.data,
+  });
+});

@@ -1,5 +1,28 @@
 import { z } from "zod";
 
+export const puzzleSubmitZodSchema = z.object({
+  body: z.object({
+    puzzles: z
+      .array(
+        z.object({
+          puzzleId: z
+            .number()
+            .int()
+            .positive("Puzzle ID must be a positive integer"),
+          currect: z
+            .number()
+            .int()
+            .nonnegative("Correct count must be non-negative"),
+          worng: z
+            .number()
+            .int()
+            .nonnegative("Wrong count must be non-negative"),
+        }),
+      )
+      .min(1, "At least one puzzle is required"),
+  }),
+});
+
 export const gameScheduleZodSchema = z.object({
   body: z
     .object({

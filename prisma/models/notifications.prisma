@@ -1,0 +1,22 @@
+model Notification {
+    id         Int      @id @default(autoincrement())
+    title      String
+    messsage   String?
+    isRead     Boolean  @default(false)
+    type       String?
+    typeId     Int?
+    userType   UserType
+    userId     Int?
+    clientId   Int?
+    adminId    Int?
+    rigAdminId Int?
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+}
+
+enum UserType {
+    USER
+    ADMIN
+    CLIENT
+    RIGADMIN
+}

@@ -20,4 +20,5 @@ model Rig {
     activity        Activity[]
     typeOfDevrief   TypeOfDevrief[]
     dailyDebriefs   DailyDebrief[]
+    heatmap         Heatmap[]
 }

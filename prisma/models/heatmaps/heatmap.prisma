@@ -1,0 +1,41 @@
+model Heatmap {
+    id Int @id @default(autoincrement())
+
+    company   Company? @relation(fields: [companyId], references: [id])
+    companyId Int?
+
+    rig   Rig? @relation(fields: [rigId], references: [id])
+    rigId Int?
+
+    image String?
+
+    areas HeatmapArea[]
+
+    isApproved Boolean @default(false)
+
+    status    HeatmapStatus @default(PENDING)
+    createdAt DateTime      @default(now())
+    updatedAt DateTime      @updatedAt
+}
+
+enum HeatmapStatus {
+    COMPLETE
+    PENDING
+    CANCEL
+    REJECTED
+}
+
+model HeatmapArea {
+    id Int @id @default(autoincrement())
+
+    heatmap   Heatmap @relation(fields: [heatmapId], references: [id])
+    heatmapId Int
+
+    area   Area? @relation(fields: [areaId], references: [id])
+    areaId Int?
+
+    points Json?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}

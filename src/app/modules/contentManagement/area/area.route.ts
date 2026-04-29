@@ -6,7 +6,12 @@ import {
   rigAdminAuth,
   userAuth,
 } from "../../../middlewares/auth";
-import { createNewArea, getAllUserArea, getArea } from "./area.controller";
+import {
+  createNewArea,
+  getAllUserArea,
+  getArea,
+  getAreaByRig,
+} from "./area.controller";
 import { createAreaZodSchema } from "./area.validation";
 
 const router = express.Router();
@@ -19,7 +24,8 @@ const router = express.Router();
 //   createNewRigType,
 // );
 
-// router.get("/admin", adminAuth(), getRigTypes);
+router.get("/admin", adminAuth(), getArea);
+router.get("/admin/singlerig", adminAuth(), getAreaByRig);
 
 // router.put(
 //   "/admin/update",
@@ -46,6 +52,7 @@ router.post(
 );
 
 router.get("/client", clientAuth(), getArea);
+router.get("/client/:id", clientAuth(), getAreaByRig);
 
 // router.put(
 //   "/client/update",

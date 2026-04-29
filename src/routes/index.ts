@@ -22,6 +22,7 @@ import { QuestionRoutes } from "../app/modules/games/questionAnwser/questionAnws
 import { PuzzleRoutes } from "../app/modules/games/puzzle/puzzle.route";
 import { GameScheduleRoutes } from "../app/modules/games/gameSchedule/gameSchedule.route";
 import { NotificationRoutes } from "../app/modules/notification/notification.route";
+import { HeatmapsRoutes } from "../app/modules/heatmaps/heatmaps.route";
 
 const router = express.Router();
 
@@ -120,6 +121,12 @@ const apiRoutes = [
   {
     path: "/notification",
     route: NotificationRoutes,
+  },
+
+  // heatmap
+  {
+    path: "/heatmap",
+    route: HeatmapsRoutes,
   },
 ];
 

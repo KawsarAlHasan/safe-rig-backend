@@ -158,10 +158,35 @@ export const getHazardService = async (query: any, companyId: any) => {
     throw new ApiError(StatusCodes.NOT_FOUND, "No Hazards found!");
   }
 
-  return result;
+  const allRigIds = result.flatMap((ct) => ct.rigIds);
+  const uniqueRigIds = [...new Set(allRigIds)];
+
+  let rigsMap = new Map();
+
+  if (uniqueRigIds.length > 0) {
+    const rigs = await dbClient.rig.findMany({
+      where: {
+        id: { in: uniqueRigIds },
+        status: "ACTIVE",
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+
+    rigsMap = new Map(rigs.map((rig) => [rig.id, rig]));
+  }
+
+  const resultData = result.map((mainData) => ({
+    ...mainData,
+    rigDetails: mainData.rigIds
+      .map((rigId) => rigsMap.get(rigId))
+      .filter((rig) => rig !== undefined),
+  }));
+
+  return resultData;
 };
-
-
 
 // get user all Hazard
 export const getAllUserHazardService = async (companyId: any, rigId: any) => {
@@ -192,7 +217,6 @@ export const getAllUserHazardService = async (companyId: any, rigId: any) => {
 
   return result;
 };
-
 
 // Update an existing Hazard
 export const updateHazardService = async (payload: any, companyId: any) => {

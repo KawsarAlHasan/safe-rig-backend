@@ -6,6 +6,7 @@ import resolveCompanyId from "../../../../helpers/resolveCompanyId";
 import {
   areaCreateService,
   getAllUserAreaService,
+  getAreaByRigService,
   getAreaService,
 } from "./area.service";
 
@@ -32,6 +33,21 @@ export const getArea = catchAsync(async (req: Request, res: Response) => {
     success: true,
     statusCode: StatusCodes.OK,
     message: "Areas fetched successfully",
+    data: result,
+  });
+});
+
+// get Area by rig
+export const getAreaByRig = catchAsync(async (req: Request, res: Response) => {
+  const companyId = resolveCompanyId(req);
+
+
+  const result = await getAreaByRigService(req.query);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "Area fetched by rig successfully",
     data: result,
   });
 });

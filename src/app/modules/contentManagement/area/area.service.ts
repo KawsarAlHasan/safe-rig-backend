@@ -238,9 +238,70 @@ export const getAreaService = async (query: any, companyId: any) => {
     throw new ApiError(StatusCodes.NOT_FOUND, "No Areas found!");
   }
 
-  return result;
+  const allRigIds = result.flatMap((ct) => ct.rigIds);
+  const uniqueRigIds = [...new Set(allRigIds)];
+
+  let rigsMap = new Map();
+
+  if (uniqueRigIds.length > 0) {
+    const rigs = await dbClient.rig.findMany({
+      where: {
+        id: { in: uniqueRigIds },
+        status: "ACTIVE",
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+
+    rigsMap = new Map(rigs.map((rig) => [rig.id, rig]));
+  }
+
+  const resultData = result.map((mainData) => ({
+    ...mainData,
+    rigDetails: mainData.rigIds
+      .map((rigId) => rigsMap.get(rigId))
+      .filter((rig) => rig !== undefined),
+  }));
+
+  return resultData;
 };
 
+// get area by rigId
+export const getAreaByRigService = async (query: any) => {
+  const { rigId, companyId } = query;
+
+  console.log("rigId", rigId);
+  console.log("companyId", companyId);
+
+  const result = await dbClient.area.findMany({
+    where: {
+      companyId: companyId,
+      status: "ACTIVE",
+      OR: [
+        {
+          rigIds: {
+            has: Number(rigId),
+          },
+        },
+        {
+          isAllRigs: true,
+        },
+      ],
+    },
+    orderBy: {
+      id: "desc",
+    },
+  });
+
+  // check video creation
+  if (!result) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to fetch Area!");
+  }
+
+  return result;
+};
 
 // get user all area
 export const getAllUserAreaService = async (companyId: any, rigId: any) => {

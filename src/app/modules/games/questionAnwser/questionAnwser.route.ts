@@ -1,7 +1,7 @@
 import express from "express";
 import validateRequest from "../../../middlewares/validateRequest";
 import { adminAuth, rigAdminAuth, userAuth } from "../../../middlewares/auth";
-import { createNewQuestion, getAllQuestion } from "./questionAnwser.controller";
+import { createNewQuestion, getAllQuestion, permanentDeleteQuestion } from "./questionAnwser.controller";
 import { createQuestionZodSchema } from "./questionAnwser.validation";
 import fileUploadHandler from "../../../middlewares/fileUploadHandler";
 
@@ -32,7 +32,7 @@ router.get("/all", getAllQuestion);
 //   rigTypeStatusChange,
 // );
 
-// router.delete("/client/:id", adminAuth(), permanentDeleteRigType);
+router.delete("/delete/:id", adminAuth(), permanentDeleteQuestion);
 
 // // ───── RigAdmin Routes ─────
 // router.get("/client", rigAdminAuth(), getRigTypes);

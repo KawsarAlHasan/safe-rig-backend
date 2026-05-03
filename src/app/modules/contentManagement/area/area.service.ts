@@ -14,6 +14,7 @@ export const areaCreateService = async (payloadData: any, companyId: any) => {
       name: name,
       companyId: companyId,
       isAllRigs: true,
+      isDefault: false,
     },
   });
 
@@ -147,6 +148,109 @@ export const areaCreateService = async (payloadData: any, companyId: any) => {
   // check role creation
   if (!result) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to create Hazard!");
+  }
+
+  return result;
+};
+
+// create new Area
+export const areaCreateServiceByAdmin = async (payloadData: any) => {
+  const { name } = payloadData;
+
+  // check Area name
+  const isExistInAllArea = await dbClient.area.findFirst({
+    where: {
+      name: name,
+      isDefault: true,
+    },
+  });
+
+  if (isExistInAllArea) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Area already exists!");
+  }
+
+  const primaryColorCodes = [
+    "#FF0000",
+    "#0000FF",
+    "#008000",
+    "#000000",
+    "#FFFF00",
+    "#FFA500",
+    "#800080",
+    "#FF00FF",
+    "#00FFFF",
+    "#FFC0CB",
+    "#FF7F50",
+    "#808000",
+    "#FFFFFF",
+  ];
+
+  const secondaryColorCodes = [
+    "#A52A2A",
+    "#808080",
+    "#4B0082",
+    "#008080",
+    "#000080",
+    "#FFF44F",
+    "#40E0D0",
+    "#2E8B57",
+    "#DC143C",
+    "#1E90FF",
+    "#FF1493",
+    "#7FFF00",
+    "#B22222",
+    "#5F9EA0",
+    "#DAA520",
+    "#ADFF2F",
+    "#FF4500",
+    "#6A5ACD",
+    "#20B2AA",
+    "#FF6347",
+    "#4682B4",
+    "#D2691E",
+    "#9ACD32",
+    "#C71585",
+    "#00FA9A",
+    "#B0C4DE",
+    "#F4A460",
+  ];
+
+  const allAreas = await dbClient.area.findMany({
+    where: { isDefault: true },
+    select: { color: true },
+  });
+
+  const usedColors = allAreas.map((a) => a.color);
+
+  let selectedColor: string | undefined;
+
+  selectedColor = primaryColorCodes.find(
+    (c) => !usedColors.includes(c)
+  );
+
+  if (!selectedColor) {
+    selectedColor = secondaryColorCodes.find(
+      (c) => !usedColors.includes(c)
+    );
+  }
+
+  if (!selectedColor) {
+    selectedColor = primaryColorCodes[0];
+  }
+
+  // create new Area
+  const result = await dbClient.area.create({
+    data: {
+      name: name,
+      color: selectedColor,
+      isDefault: true,
+      isAllRigs: false,
+      rigIds: [],
+    },
+  });
+
+  if (!result) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to create Area!");
   }
 
   return result;

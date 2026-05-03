@@ -4,6 +4,7 @@ import ApiError from "../../../../errors/ApiError";
 import { dbClient } from "../../../../lib/prisma";
 import { statusName } from "../../../../shared/statusName";
 import { IQuery } from "../../../../types/company";
+import unlinkFile from "../../../../shared/unlinkFile";
 
 // create new Puzzle
 export const puzzleCreateService = async (payloadData: any) => {
@@ -88,5 +89,32 @@ export const getAllPuzzleService = async (query: IQuery) => {
   };
 };
 
+// delete Puzzle
+export const deletePuzzleService = async (id: any) => {
+  const idNumber = parseInt(id);
 
+  // check
+  const isExistInData = await dbClient.puzzle.findFirst({
+    where: {
+      id: idNumber,
+    },
+  });
 
+  if (!isExistInData) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Puzzle doesn't exist!");
+  }
+
+  if (isExistInData.image) {
+    unlinkFile(isExistInData.image);
+  }
+
+  const result = await dbClient.puzzle.delete({
+    where: { id: idNumber },
+  });
+
+  if (!result) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to delete Puzzle!");
+  }
+
+  return result;
+};

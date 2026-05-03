@@ -8,45 +8,68 @@ import { statusName } from "../../../../shared/statusName";
 export const cardTypeCreateService = async (roleData: any, companyId: any) => {
   const { name, isDefault, isAllRigs, rigIds } = roleData;
 
-  // check card type name
-  const isExistInAllCardType = await dbClient.cardType.findFirst({
-    where: {
-      name: name,
-      companyId: companyId,
-      isAllRigs: true,
-    },
-  });
-
-  if (isExistInAllCardType) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Card type already exists!");
-  }
-
-  if (isAllRigs) {
-    const isExistAny = await dbClient.cardType.findFirst({
+  if (isDefault) {
+    // check rig type name
+    const isExistInAllRigs = await dbClient.cardType.findFirst({
       where: {
         name: name,
-        companyId: companyId,
+        isDefault: true,
       },
     });
 
-    if (isExistAny) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, `Card type already exists!`);
+    if (isExistInAllRigs) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Rig type already exists!");
     }
-  }
-
-  if (!isAllRigs && rigIds?.length > 0) {
-    const isExistInCardType = await dbClient.cardType.findFirst({
+  } else {
+    // check card type name
+    const isExistInAllCardType = await dbClient.cardType.findFirst({
       where: {
         name: name,
         companyId: companyId,
-        rigIds: {
-          hasSome: rigIds,
-        },
+        isAllRigs: true,
+        isDefault: false,
       },
     });
 
-    if (isExistInCardType) {
+    if (isExistInAllCardType) {
       throw new ApiError(StatusCodes.BAD_REQUEST, "Card type already exists!");
+    }
+
+    if (isAllRigs) {
+      const isExistAny = await dbClient.cardType.findFirst({
+        where: {
+          name: name,
+          companyId: companyId,
+          isAllRigs: false,
+          isDefault: false,
+        },
+      });
+
+      if (isExistAny) {
+        throw new ApiError(
+          StatusCodes.BAD_REQUEST,
+          `Card type already exists!`,
+        );
+      }
+    }
+
+    if (!isAllRigs && rigIds?.length > 0) {
+      const isExistInCardType = await dbClient.cardType.findFirst({
+        where: {
+          name: name,
+          companyId: companyId,
+          rigIds: {
+            hasSome: rigIds,
+          },
+        },
+      });
+
+      if (isExistInCardType) {
+        throw new ApiError(
+          StatusCodes.BAD_REQUEST,
+          "Card type already exists!",
+        );
+      }
     }
   }
 

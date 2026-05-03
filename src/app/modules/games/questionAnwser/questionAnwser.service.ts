@@ -4,6 +4,7 @@ import ApiError from "../../../../errors/ApiError";
 import { dbClient } from "../../../../lib/prisma";
 import { statusName } from "../../../../shared/statusName";
 import { IQuery } from "../../../../types/company";
+import unlinkFile from "../../../../shared/unlinkFile";
 
 // create new Question and Anwsar
 export const questionCreateService = async (payloadData: any) => {
@@ -114,6 +115,42 @@ export const getAllQuestionService = async (query: IQuery) => {
     },
     data: result,
   };
+};
+
+// delete Question and Anwsar
+export const deleteQuestionService = async (id: any) => {
+  const idNumber = parseInt(id);
+
+  // check
+  const isExistInQuestion = await dbClient.questionAnwser.findFirst({
+    where: {
+      id: idNumber,
+    },
+  });
+
+  if (!isExistInQuestion) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      "Question and Anwsar doesn't exist!",
+    );
+  }
+
+  if (isExistInQuestion.image) {
+    unlinkFile(isExistInQuestion.image);
+  }
+
+  const result = await dbClient.questionAnwser.delete({
+    where: { id: idNumber },
+  });
+
+  if (!result) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      "Failed to delete Question and Anwsar!",
+    );
+  }
+
+  return result;
 };
 
 // // get Question and Anwsar

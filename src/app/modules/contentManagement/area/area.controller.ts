@@ -5,6 +5,7 @@ import sendResponse from "../../../../shared/sendResponse";
 import resolveCompanyId from "../../../../helpers/resolveCompanyId";
 import {
   areaCreateService,
+  areaCreateServiceByAdmin,
   getAllUserAreaService,
   getAreaByRigService,
   getAreaService,
@@ -15,6 +16,19 @@ export const createNewArea = catchAsync(async (req: Request, res: Response) => {
   const companyId = resolveCompanyId(req);
 
   await areaCreateService(req.body, companyId);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "Area created successfully",
+  });
+});
+
+// create new Area by admin
+export const createNewAreaByAdmin = catchAsync(async (req: Request, res: Response) => {
+  const companyId = resolveCompanyId(req);
+
+  await areaCreateServiceByAdmin(req.body);
 
   sendResponse(res, {
     success: true,

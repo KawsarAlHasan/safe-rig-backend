@@ -3,7 +3,11 @@ import { StatusCodes } from "http-status-codes";
 import catchAsync from "../../../../shared/catchAsync";
 import sendResponse from "../../../../shared/sendResponse";
 import resolveCompanyId from "../../../../helpers/resolveCompanyId";
-import { getAllPuzzleService, puzzleCreateService } from "./puzzle.service";
+import {
+  deletePuzzleService,
+  getAllPuzzleService,
+  puzzleCreateService,
+} from "./puzzle.service";
 
 // create new Puzzle
 export const createNewPuzzle = catchAsync(
@@ -44,3 +48,19 @@ export const getAllPuzzles = catchAsync(async (req: Request, res: Response) => {
     data: result.data,
   });
 });
+
+// Delete permanent Puzzle
+export const permanentDeletePuzzle = catchAsync(
+  async (req: Request, res: Response) => {
+    // const companyId = resolveCompanyId(req);
+    const id = req.params.id;
+
+    await deletePuzzleService(id);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Puzzle deleted successfully",
+    });
+  },
+);

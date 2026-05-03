@@ -4,6 +4,7 @@ import catchAsync from "../../../../shared/catchAsync";
 import sendResponse from "../../../../shared/sendResponse";
 import resolveCompanyId from "../../../../helpers/resolveCompanyId";
 import {
+  deleteQuestionService,
   getAllQuestionService,
   questionCreateService,
 } from "./questionAnwser.service";
@@ -77,18 +78,18 @@ export const getAllQuestion = catchAsync(
 //   },
 // );
 
-// // Delete permanent RigType
-// export const permanentDeleteRigType = catchAsync(
-//   async (req: Request, res: Response) => {
-//     const companyId = resolveCompanyId(req);
-//     const id = req.params.id;
+// Delete permanent Question and Anwsar
+export const permanentDeleteQuestion = catchAsync(
+  async (req: Request, res: Response) => {
+    // const companyId = resolveCompanyId(req);
+    const id = req.params.id;
 
-//     await deleteRigTypeService(id, companyId);
+    await deleteQuestionService(id);
 
-//     sendResponse(res, {
-//       success: true,
-//       statusCode: StatusCodes.OK,
-//       message: "Question and Anwsar deleted successfully",
-//     });
-//   },
-// );
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Question and Anwsar deleted successfully",
+    });
+  },
+);

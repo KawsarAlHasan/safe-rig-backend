@@ -8,6 +8,7 @@ import {
 } from "../../../middlewares/auth";
 import {
   createNewArea,
+  createNewAreaByAdmin,
   getAllUserArea,
   getArea,
   getAreaByRig,
@@ -16,13 +17,8 @@ import { createAreaZodSchema } from "./area.validation";
 
 const router = express.Router();
 
-// // ───── Admin Routes ─────
-// router.post(
-//   "/admin/create",
-//   adminAuth(),
-//   validateRequest(createRigTypeZodSchema),
-//   createNewRigType,
-// );
+// ───── Admin Routes ─────
+router.post("/admin/create", adminAuth(), createNewAreaByAdmin);
 
 router.get("/admin", adminAuth(), getArea);
 router.get("/admin/singlerig", adminAuth(), getAreaByRig);

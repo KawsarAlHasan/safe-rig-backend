@@ -40,6 +40,31 @@ export const saveGameScheduleService = async (payload: any) => {
     );
   }
 
+  // Puzzle and QuestionAnwser are change isUsed to true
+  if (gameType === "PUZZLE") {
+    await dbClient.puzzle.updateMany({
+      where: {
+        id: {
+          in: puzzles,
+        },
+      },
+      data: {
+        isUsed: true,
+      },
+    });
+  } else {
+    await dbClient.questionAnwser.updateMany({
+      where: {
+        id: {
+          in: questions,
+        },
+      },
+      data: {
+        isUsed: true,
+      },
+    });
+  }
+
   return result;
 };
 
@@ -153,6 +178,7 @@ export const getGameScheduleService = async (user: any) => {
     const puzzlesWithParsedMarks = result.map((puzzle: any) => ({
       ...puzzle,
       marks: JSON.parse(puzzle.marks), // Convert string to array
+      marksLength: JSON.parse(puzzle.marks).length,
     }));
 
     puzzles = puzzlesWithParsedMarks;
@@ -340,19 +366,19 @@ export const puzzleSubmitService = async (payload: {
   const today = new Date();
   const dateOnly = today.toISOString().split("T")[0];
 
-  // check game result
-  const gameResult = await dbClient.gameResult.findFirst({
-    where: {
-      userId: user.id,
-      date: dateOnly,
-    },
-  });
+  // // check game result
+  // const gameResult = await dbClient.gameResult.findFirst({
+  //   where: {
+  //     userId: user.id,
+  //     date: dateOnly,
+  //   },
+  // });
 
-  if (gameResult) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "This Game already played!");
-  }
+  // if (gameResult) {
+  //   throw new ApiError(StatusCodes.BAD_REQUEST, "This Game already played!");
+  // }
 
-  // get game schedule
+  // get today's game
   const todaysGame = await dbClient.game.findFirst({
     where: { scheduledFor: dateOnly, gameType: "PUZZLE" },
   });
@@ -361,7 +387,7 @@ export const puzzleSubmitService = async (payload: {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Game schedule doesn't exist!");
   }
 
-  // Get all puzzles for today's game
+  // get puzzles from DB
   const dbPuzzles = await dbClient.puzzle.findMany({
     where: {
       id: { in: todaysGame.puzzleIds },
@@ -370,88 +396,56 @@ export const puzzleSubmitService = async (payload: {
 
   let totalScore = 0;
   let totalCorrect = 0;
-  let totalWrong = 0;
-  let totalMissed = 0;
+
   const puzzleDetails: any[] = [];
 
   for (const submitted of puzzles) {
-    // find puzzle from db
     const dbPuzzle = dbPuzzles.find((p: any) => p.id === submitted.puzzleId);
 
     if (!dbPuzzle) continue;
 
-    // marks parse
-    const marks = JSON.parse(dbPuzzle.marks as string);
-    const totalMarksCount = marks.length;
-
     const correct = submitted.currect ?? 0;
-    const wrong = submitted.worng ?? 0;
 
-    const attempted = correct + wrong;
-    const missed = Math.max(0, totalMarksCount - attempted);
-
-    const earnedScore = correct * 10;
-    const wrongPenalty = wrong * 5;
-    const missedPenalty = missed * 5;
-
-    // don't go below 0
-    const puzzleScore = Math.max(0, earnedScore - wrongPenalty - missedPenalty);
+    // ONLY logic: correct * 10
+    const puzzleScore = correct * 10;
 
     totalScore += puzzleScore;
     totalCorrect += correct;
-    totalWrong += wrong;
-    totalMissed += missed;
 
     puzzleDetails.push({
       puzzleId: submitted.puzzleId,
-      totalMarks: totalMarksCount,
       correct,
-      wrong,
-      missed,
-      earnedScore,
-      wrongPenalty,
-      missedPenalty,
       puzzleScore,
     });
   }
 
-  // Total possible score
+  // total possible score (optional)
   const totalPossibleScore = dbPuzzles.reduce((sum: number, p: any) => {
     const marks = JSON.parse(p.marks as string);
     return sum + marks.length * 10;
   }, 0);
 
-  // don't go below 0
-  const finalScore = Math.max(0, totalScore);
-
-  const percentage =
-    totalPossibleScore > 0
-      ? parseFloat(((finalScore / totalPossibleScore) * 100).toFixed(2))
-      : 0;
-
-  // result save to database
+  // save result
   await dbClient.gameResult.create({
     data: {
       userId: user.id,
       date: dateOnly,
       gameType: "PUZZLE",
       puzzleIds: todaysGame.puzzleIds,
-      score: parseFloat(finalScore.toFixed(2)),
-      totalScore: parseFloat(totalPossibleScore.toFixed(2)),
+      score: totalScore,
+      totalScore: totalPossibleScore,
     },
   });
 
   return {
-    percentage,
     totalPuzzles: dbPuzzles.length,
     totalCorrect,
-    totalWrong,
-    totalMissed,
-    score: finalScore,
+    score: totalScore,
     totalPossibleScore,
     puzzleDetails,
   };
 };
+
 // leaderboard service
 export const leaderboardService = async (user: any) => {
   // Calculate date range (last Monday to Sunday)
@@ -546,7 +540,9 @@ export const leaderboardService = async (user: any) => {
     currentUser:
       user && user.id
         ? {
-            userId: user.id,
+            id: user.id,
+            name: user.name,
+            email: user.email,
             totalScore: userTotalScore || 0,
             rank: userRank || null,
             message: userRank

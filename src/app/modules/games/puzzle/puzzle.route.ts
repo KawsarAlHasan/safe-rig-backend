@@ -2,7 +2,7 @@ import express from "express";
 import validateRequest from "../../../middlewares/validateRequest";
 import { adminAuth, rigAdminAuth, userAuth } from "../../../middlewares/auth";
 import fileUploadHandler from "../../../middlewares/fileUploadHandler";
-import { createNewPuzzle, getAllPuzzles } from "./puzzle.controller";
+import { createNewPuzzle, getAllPuzzles, permanentDeletePuzzle } from "./puzzle.controller";
 
 const router = express.Router();
 
@@ -31,7 +31,7 @@ router.get("/all", getAllPuzzles);
 //   rigTypeStatusChange,
 // );
 
-// router.delete("/client/:id", adminAuth(), permanentDeleteRigType);
+router.delete("/delete/:id", adminAuth(), permanentDeletePuzzle);
 
 // // ───── RigAdmin Routes ─────
 // router.get("/client", rigAdminAuth(), getRigTypes);

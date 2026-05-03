@@ -1,0 +1,24 @@
+model Coupon {
+    id         Int       @id @default(autoincrement())
+    code       String    @unique
+    isAmount   Boolean   @default(false)
+    amount     Float?
+    percentage Float?
+    dateType   DateType
+    startDate  DateTime?
+    endDate    DateTime?
+    singleDate DateTime?
+
+    status AllStatus @default(ACTIVE)
+
+    plans      Plan[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+enum DateType {
+    Single
+    Range
+    Unlimited
+}

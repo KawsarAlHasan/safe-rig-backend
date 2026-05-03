@@ -23,6 +23,8 @@ import { PuzzleRoutes } from "../app/modules/games/puzzle/puzzle.route";
 import { GameScheduleRoutes } from "../app/modules/games/gameSchedule/gameSchedule.route";
 import { NotificationRoutes } from "../app/modules/notification/notification.route";
 import { HeatmapsRoutes } from "../app/modules/heatmaps/heatmaps.route";
+import { PlanRoutes } from "../app/modules/subscriptions/plan/plan.route";
+import { CouponRoutes } from "../app/modules/subscriptions/coupon/coupon.route";
 
 const router = express.Router();
 
@@ -127,6 +129,16 @@ const apiRoutes = [
   {
     path: "/heatmap",
     route: HeatmapsRoutes,
+  },
+
+  // Subscription
+  {
+    path: "/plan",
+    route: PlanRoutes,
+  },
+  {
+    path: "/coupon",
+    route: CouponRoutes,
   },
 ];
 

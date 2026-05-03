@@ -2,6 +2,7 @@ import express from "express";
 import validateRequest from "../../middlewares/validateRequest";
 import { userAuth } from "../../middlewares/auth";
 import {
+  checkCardSubmission,
   createNewCardSubmission,
   getAllUserTypeAreaHazard,
 } from "./cardSubmission.controller";
@@ -14,10 +15,10 @@ router.post(
   "/create",
   userAuth(),
   imageOrVideoUploadHandler(),
-  //   validateRequest(createCardSubmissionZodSchema),
   createNewCardSubmission,
-
-  router.get("/type-hazard-area", userAuth(), getAllUserTypeAreaHazard),
 );
+
+router.get("/type-hazard-area", userAuth(), getAllUserTypeAreaHazard);
+router.get("/check", userAuth(), checkCardSubmission);
 
 export const CardSubmissionRoutes = router;

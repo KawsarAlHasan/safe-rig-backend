@@ -8,48 +8,63 @@ import { statusName } from "../../../../shared/statusName";
 export const rigTypeCreateService = async (roleData: any, companyId: any) => {
   const { name, isDefault, isAllRigs, rigIds } = roleData;
 
-  // check rig type name
-  const isExistInAllRigs = await dbClient.rigType.findFirst({
-    where: {
-      name: name,
-      companyId: companyId,
-      isAllRigs: true,
-    },
-  });
-
-  if (isExistInAllRigs) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Rig type already exists!");
-  }
-
-  if (isAllRigs) {
-    const isExistAny = await dbClient.rigType.findFirst({
+  if (isDefault) {
+    // check rig type name
+    const isExistInAllRigs = await dbClient.rigType.findFirst({
       where: {
         name: name,
-        companyId: companyId,
+        isDefault: true,
       },
     });
 
-    if (isExistAny) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, `Rig type already exists!`);
+    if (isExistInAllRigs) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Rig type already exists!");
     }
-  }
-
-  if (!isAllRigs && rigIds?.length > 0) {
-    const isExistInRigIds = await dbClient.rigType.findFirst({
+  } else {
+    // check rig type name
+    const isExistInAllRigs = await dbClient.rigType.findFirst({
       where: {
         name: name,
         companyId: companyId,
-        rigIds: {
-          hasSome: rigIds,
-        },
+        isAllRigs: true,
+        isDefault: false,
       },
     });
 
-    if (isExistInRigIds) {
-      throw new ApiError(
-        StatusCodes.BAD_REQUEST,
-        "Rig type already exists for one or more selected rigs!",
-      );
+    if (isExistInAllRigs) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Rig type already exists!");
+    }
+
+    if (isAllRigs) {
+      const isExistAny = await dbClient.rigType.findFirst({
+        where: {
+          name: name,
+          companyId: companyId,
+        },
+      });
+
+      if (isExistAny) {
+        throw new ApiError(StatusCodes.BAD_REQUEST, `Rig type already exists!`);
+      }
+    }
+
+    if (!isAllRigs && rigIds?.length > 0) {
+      const isExistInRigIds = await dbClient.rigType.findFirst({
+        where: {
+          name: name,
+          companyId: companyId,
+          rigIds: {
+            hasSome: rigIds,
+          },
+        },
+      });
+
+      if (isExistInRigIds) {
+        throw new ApiError(
+          StatusCodes.BAD_REQUEST,
+          "Rig type already exists for one or more selected rigs!",
+        );
+      }
     }
   }
 

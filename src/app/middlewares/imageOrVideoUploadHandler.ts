@@ -3,23 +3,45 @@ import path from "path";
 import { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
 import ApiError from "../../errors/ApiError";
-
+import fs from "fs";
 
 // ✅ Allowed MIME types
-const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-const ALLOWED_VIDEO_TYPES = ["video/mp4", "video/mpeg", "video/quicktime", "video/webm"];
+const ALLOWED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+];
+const ALLOWED_VIDEO_TYPES = [
+  "video/mp4",
+  "video/mpeg",
+  "video/quicktime",
+  "video/webm",
+];
 
-const MAX_IMAGE_SIZE = 20 * 1024 * 1024;  // 2MB
+const MAX_IMAGE_SIZE = 20 * 1024 * 1024; // 20MB
 const MAX_VIDEO_SIZE = 1000 * 1024 * 1024; // 1000MB
+
+// ✅ Ensure directories exist
+const ensureDirectoryExists = (dirPath: string) => {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+};
 
 // ✅ Storage config (disk storage)
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const isVideo = ALLOWED_VIDEO_TYPES.includes(file.mimetype);
     const folder = isVideo ? "uploads/videos" : "uploads/images";
+
+    // Ensure directory exists
+    ensureDirectoryExists(folder);
+
     cb(null, folder);
   },
   filename: (req, file, cb) => {
+    // Generate unique filename
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
     const ext = path.extname(file.originalname);
     cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
@@ -27,11 +49,14 @@ const storage = multer.diskStorage({
 });
 
 // ✅ File filter
-const fileFilter = (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
-  const isAllowed = [
-    ...ALLOWED_IMAGE_TYPES,
-    ...ALLOWED_VIDEO_TYPES,
-  ].includes(file.mimetype);
+const fileFilter = (
+  req: Request,
+  file: Express.Multer.File,
+  cb: FileFilterCallback,
+) => {
+  const isAllowed = [...ALLOWED_IMAGE_TYPES, ...ALLOWED_VIDEO_TYPES].includes(
+    file.mimetype,
+  );
 
   if (isAllowed) {
     cb(null, true);
@@ -50,14 +75,13 @@ const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: MAX_VIDEO_SIZE, // set max to video size; image check below
+    fileSize: MAX_VIDEO_SIZE,
   },
 });
 
-// ✅ Main middleware
+// ✅ Main middleware with file type and URL
 export const imageOrVideoUploadHandler = () => {
   return (req: Request, res: Response, next: NextFunction) => {
-    // Accept single file under field name "media"
     const uploadSingle = upload.single("media");
 
     uploadSingle(req, res, (err) => {
@@ -81,6 +105,12 @@ export const imageOrVideoUploadHandler = () => {
       if (req.file) {
         const isImage = ALLOWED_IMAGE_TYPES.includes(req.file.mimetype);
         if (isImage && req.file.size > MAX_IMAGE_SIZE) {
+          // Delete the uploaded file if it exceeds size limit
+          fs.unlink(req.file.path, (unlinkErr) => {
+            if (unlinkErr)
+              console.error("Error deleting oversized file:", unlinkErr);
+          });
+
           return next(
             new ApiError(
               StatusCodes.BAD_REQUEST,
@@ -88,6 +118,20 @@ export const imageOrVideoUploadHandler = () => {
             ),
           );
         }
+
+        // Attach file info to request for controller use
+        const baseUrl = `${req.protocol}://${req.get("host")}`;
+        const isVideo = ALLOWED_VIDEO_TYPES.includes(req.file.mimetype);
+        const folder = isVideo ? "videos" : "images";
+
+        (req as any).uploadedFile = {
+          url: `${baseUrl}/${folder}/${req.file.filename}`,
+          type: isVideo ? "video" : "image",
+          filename: req.file.filename,
+          originalName: req.file.originalname,
+          size: req.file.size,
+          mimetype: req.file.mimetype,
+        };
       }
 
       next();

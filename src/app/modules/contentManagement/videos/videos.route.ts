@@ -6,7 +6,14 @@ import {
   rigAdminAuth,
   userAuth,
 } from "../../../middlewares/auth";
-import { createNewVideo, getAllUserVideos, getSingleVideos } from "./videos.controller";
+import {
+  createNewVideo,
+  deleteVideo,
+  getAllUserVideos,
+  getAllVideos,
+  getSingleVideos,
+  updateVideo,
+} from "./videos.controller";
 import { createVideoZodSchema } from "./videos.validation";
 import { uploadVideoWithThumbnail } from "../../../middlewares/fileUploader";
 
@@ -21,23 +28,15 @@ router.post(
   createNewVideo,
 );
 
-// router.get("/admin", adminAuth(), getRigTypes);
+router.put(
+  "/admin/update/:id",
+  adminAuth(),
+  uploadVideoWithThumbnail,
+  updateVideo,
+);
 
-// router.put(
-//   "/admin/update",
-//   adminAuth(),
-//   validateRequest(updateRigTypeZodSchema),
-//   updateRigType,
-// );
-
-// router.patch(
-//   "/admin/update-status",
-//   adminAuth(),
-//   validateRequest(changeStatusZodSchema),
-//   rigTypeStatusChange,
-// );
-
-// router.delete("/admin/:id", adminAuth(), permanentDeleteRigType);
+router.get("/admin", adminAuth(), getAllVideos);
+router.delete("/admin/:id", adminAuth(), deleteVideo);
 
 // ───── Client Routes ─────
 router.post(
@@ -47,27 +46,13 @@ router.post(
   validateRequest(createVideoZodSchema),
   createNewVideo,
 );
-
-// router.get("/client", clientAuth(), getRigTypes);
-
-// router.put(
-//   "/client/update",
-//   clientAuth(),
-//   validateRequest(updateRigTypeZodSchema),
-//   updateRigType,
-// );
-
-// router.patch(
-//   "/client/update-status",
-//   clientAuth(),
-//   validateRequest(changeStatusZodSchema),
-//   rigTypeStatusChange,
-// );
-
-// router.delete("/client/:id", clientAuth(), permanentDeleteRigType);
-
-// // ───── RigAdmin Routes ─────
-// router.get("/client", rigAdminAuth(), getRigTypes);
+router.put(
+  "/client/update/:id",
+  clientAuth(),
+  uploadVideoWithThumbnail,
+  updateVideo,
+);
+router.delete("/client/:id", clientAuth(), deleteVideo);
 
 // // ───── User Routes ─────
 router.get("/single/:id", getSingleVideos);

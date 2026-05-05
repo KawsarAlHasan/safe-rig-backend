@@ -370,7 +370,7 @@ export const getAreaService = async (query: any, companyId: any) => {
   }));
 
   return resultData;
-};
+}; 
 
 // get area by rigId
 export const getAreaByRigService = async (query: any) => {

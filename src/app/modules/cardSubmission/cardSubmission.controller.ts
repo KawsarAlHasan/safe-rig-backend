@@ -7,7 +7,10 @@ import resolveCompanyId from "../../../helpers/resolveCompanyId";
 import {
   checkCardSubmissionService,
   getAllUserAreaTypeHazardService,
+  getCardSubmissionService,
+  getRigAreaTypeHazardService,
   submitCardService,
+  updateCardSubmissionService,
 } from "./cardSubmission.service";
 
 // Interface for uploaded file info
@@ -90,6 +93,68 @@ export const checkCardSubmission = catchAsync(
       success: true,
       statusCode: StatusCodes.OK,
       message: "You can submit a new card",
+    });
+  },
+);
+
+// get rig, area, type, hazard
+export const getRigAreaTypeHazard = catchAsync(
+  async (req: Request, res: Response) => {
+    const companyId = resolveCompanyId(req);
+
+    const result = await getRigAreaTypeHazardService(companyId);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Rig, Area, Card Type, Hazard fetched successfully",
+      data: result,
+    });
+  },
+);
+
+// get all CardSubmission
+export const getAllCardSubmission = catchAsync(
+  async (req: Request, res: Response) => {
+    const companyId = resolveCompanyId(req);
+
+    const result = await getCardSubmissionService(req.query, companyId);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Card Submission fetched successfully",
+      pagination: result.meta,
+      data: result.data,
+    });
+  },
+);
+
+// updateCardSubmissionService
+export const updateCardSubmission = catchAsync(
+  async (req: Request, res: Response) => {
+    const id = req.params.id;
+
+    let image;
+    if (req.files && "image" in req.files && req.files.image[0]) {
+      // Build base URL for uploaded file access
+      const baseUrl = `${req.protocol}://${req.get("host")}`;
+
+      image = `${baseUrl}/images/${req.files.image[0].filename}`;
+    }
+
+    const payload = {
+      ...req.body,
+      evidence: image,
+    };
+
+    const result = await updateCardSubmissionService(id, payload);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Card Submission updated successfully",
+      data: result,
     });
   },
 );

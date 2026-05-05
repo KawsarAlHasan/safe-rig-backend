@@ -6,7 +6,12 @@ import {
   rigAdminAuth,
   userAuth,
 } from "../../../middlewares/auth";
-import { createNewAlert } from "./alert.controller";
+import {
+  createNewAlert,
+  deleteAlert,
+  getAllAlerts,
+  updateAlert,
+} from "./alert.controller";
 import { createAlertZodSchema } from "./alert.validation";
 import fileUploadHandler from "../../../middlewares/fileUploadHandler";
 
@@ -20,24 +25,11 @@ router.post(
   validateRequest(createAlertZodSchema),
   createNewAlert,
 );
+router.get("/admin", adminAuth(), getAllAlerts);
 
-// router.get("/admin", adminAuth(), getRigTypes);
+router.put("/admin/update/:id", adminAuth(), fileUploadHandler(), updateAlert);
 
-// router.put(
-//   "/admin/update",
-//   adminAuth(),
-//   validateRequest(updateRigTypeZodSchema),
-//   updateRigType,
-// );
-
-// router.patch(
-//   "/admin/update-status",
-//   adminAuth(),
-//   validateRequest(changeStatusZodSchema),
-//   rigTypeStatusChange,
-// );
-
-// router.delete("/admin/:id", adminAuth(), permanentDeleteRigType);
+router.delete("/admin/:id", adminAuth(), deleteAlert);
 
 // ───── Client Routes ─────
 router.post(
@@ -47,29 +39,10 @@ router.post(
   validateRequest(createAlertZodSchema),
   createNewAlert,
 );
+router.get("/client", clientAuth(), getAllAlerts);
 
-// router.get("/client", clientAuth(), getRigTypes);
+router.put("/client/update/:id", adminAuth(), fileUploadHandler(), updateAlert);
 
-// router.put(
-//   "/client/update",
-//   clientAuth(),
-//   validateRequest(updateRigTypeZodSchema),
-//   updateRigType,
-// );
-
-// router.patch(
-//   "/client/update-status",
-//   clientAuth(),
-//   validateRequest(changeStatusZodSchema),
-//   rigTypeStatusChange,
-// );
-
-// router.delete("/client/:id", clientAuth(), permanentDeleteRigType);
-
-// // ───── RigAdmin Routes ─────
-// router.get("/client", rigAdminAuth(), getRigTypes);
-
-// // ───── User Routes ─────
-// router.get("/", userAuth(), getRigTypes);
+router.delete("/client/:id", clientAuth(), deleteAlert);
 
 export const AlertRoutes = router;

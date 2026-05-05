@@ -25,6 +25,7 @@ import { NotificationRoutes } from "../app/modules/notification/notification.rou
 import { HeatmapsRoutes } from "../app/modules/heatmaps/heatmaps.route";
 import { PlanRoutes } from "../app/modules/subscriptions/plan/plan.route";
 import { CouponRoutes } from "../app/modules/subscriptions/coupon/coupon.route";
+import { GlobalRoutes } from "../app/modules/globals/global.route";
 
 const router = express.Router();
 
@@ -65,6 +66,15 @@ const apiRoutes = [
     path: "/rig",
     route: RigRoutes,
   },
+
+  //--------------- Card Submission start -------------
+   {
+    path: "/card-submission",
+    route: CardSubmissionRoutes,
+  },
+  //--------------- Card Submission end ---------------
+
+  // Content Management
   {
     path: "/video",
     route: VideosRoutes,
@@ -90,10 +100,7 @@ const apiRoutes = [
     path: "/hazard",
     route: HazardRoutes,
   },
-  {
-    path: "/card-submission",
-    route: CardSubmissionRoutes,
-  },
+ 
   {
     path: "/activity",
     route: ActivityRoutes,
@@ -139,6 +146,12 @@ const apiRoutes = [
   {
     path: "/coupon",
     route: CouponRoutes,
+  },
+
+  // global
+  {
+    path: "/global",
+    route: GlobalRoutes,
   },
 ];
 

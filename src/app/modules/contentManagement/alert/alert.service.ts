@@ -3,6 +3,7 @@ import { Prisma } from "../../../../../generated/prisma/client";
 import ApiError from "../../../../errors/ApiError";
 import { dbClient } from "../../../../lib/prisma";
 import { statusName } from "../../../../shared/statusName";
+import unlinkFile from "../../../../shared/unlinkFile";
 
 // create new alert
 export const alertCreateService = async (roleData: any, companyId: any) => {
@@ -15,8 +16,9 @@ export const alertCreateService = async (roleData: any, companyId: any) => {
       description: description,
       file: file,
       companyId: companyId,
+      isDefault: !companyId,
       isAllRigs: isAllRigs,
-      rigIds:  rigIds,
+      rigIds: rigIds,
     },
   });
 
@@ -28,14 +30,61 @@ export const alertCreateService = async (roleData: any, companyId: any) => {
   return result;
 };
 
-// get alert
-export const getRigTypeService = async (query: any, companyId: any) => {
-  const andConditions: Prisma.RigTypeWhereInput[] = [];
+// update alert service
+export const updateAlertService = async (payloadid: any, payloadData: any) => {
+  const id = parseInt(payloadid);
+
+  const {
+    title,
+    description,
+    file,
+    isAllRigs,
+    rigIds,
+  } = payloadData;
+
+  // check if Alert exists
+  const isExistAlert = await dbClient.alert.findUnique({
+    where: { id },
+  });
+
+  if (!isExistAlert) {
+    throw new ApiError(StatusCodes.NOT_FOUND, "Alert not found!");
+  }
+
+  // delete old file if new one is provided
+  if (file && isExistAlert.file) {
+    unlinkFile(isExistAlert.file);
+  }
+
+  const isAllRigsCheck =
+    isAllRigs !== undefined ? isAllRigs == "true" : isExistAlert.isAllRigs;
+
+  const result = await dbClient.alert.update({
+    where: { id },
+    data: {
+      title: title ?? isExistAlert.title,
+      description: description ?? isExistAlert.description,
+      file: file ?? isExistAlert.file,
+      isAllRigs: isAllRigsCheck,
+      rigIds: rigIds ?? isExistAlert.rigIds,
+    },
+  });
+
+  if (!result) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to update alert!");
+  }
+
+  return result;
+};
+
+// get Alert
+export const getAllAlertService = async (query: any, companyId: any) => {
+  const andConditions: Prisma.AlertWhereInput[] = [];
 
   // Search by name
   if (query.search) {
     andConditions.push({
-      name: {
+      title: {
         contains: query.search,
         mode: "insensitive",
       },
@@ -96,10 +145,10 @@ export const getRigTypeService = async (query: any, companyId: any) => {
     });
   }
 
-  const whereCondition: Prisma.RigTypeWhereInput =
+  const whereCondition: Prisma.AlertWhereInput =
     andConditions.length > 0 ? { AND: andConditions } : {};
 
-  const result = await dbClient.rigType.findMany({
+  const result = await dbClient.alert.findMany({
     where: whereCondition, // FIXED (important)
     orderBy: {
       id: "desc",
@@ -111,129 +160,64 @@ export const getRigTypeService = async (query: any, companyId: any) => {
   }
 
   if (result.length === 0) {
-    throw new ApiError(StatusCodes.NOT_FOUND, "No alerts found!");
+    throw new ApiError(StatusCodes.NOT_FOUND, "No alert found!");
   }
 
-  return result;
-};
+  const allRigIds = result.flatMap((ct) => ct.rigIds);
+  const uniqueRigIds = [...new Set(allRigIds)];
 
-// Update an existing alert
-export const updateRigTypeService = async (payload: any, companyId: any) => {
-  const { id, name, isDefault, isAllRigs, rigIds } = payload;
+  let rigsMap = new Map();
 
-  // check alert exist
-  const isExistRigType = await dbClient.rigType.findUnique({
-    where: { id: id },
-  });
-
-  if (!isExistRigType) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "alert doesn't exist!");
-  }
-
-  // check duplicate name
-  if (name && name !== isExistRigType.name) {
-    const isDuplicateName = await dbClient.rigType.findFirst({
-      where: { companyId: companyId, name: name },
+  if (uniqueRigIds.length > 0) {
+    const rigs = await dbClient.rig.findMany({
+      where: {
+        id: { in: uniqueRigIds },
+        status: "ACTIVE",
+      },
+      select: {
+        id: true,
+        name: true,
+      },
     });
 
-    if (isDuplicateName) {
-      throw new ApiError(
-        StatusCodes.BAD_REQUEST,
-        `alert with name ${name} already exists!`,
-      );
-    }
+    rigsMap = new Map(rigs.map((rig) => [rig.id, rig]));
   }
 
-  // update alert
-  const result = await dbClient.rigType.update({
-    where: { id: id },
-    data: {
-      name: name || isExistRigType.name,
-      isDefault: isDefault || isExistRigType.isDefault,
-      companyId: companyId || isExistRigType.companyId,
-      isAllRigs: isAllRigs || isExistRigType.isAllRigs,
-      rigIds: rigIds || isExistRigType.rigIds,
-    },
-  });
+  const resultData = result.map((mainData) => ({
+    ...mainData,
+    rigDetails: mainData.rigIds
+      .map((rigId) => rigsMap.get(rigId))
+      .filter((rig) => rig !== undefined),
+  }));
 
-  if (!result) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to update alert!");
-  }
-
-  return result;
+  return resultData;
 };
 
-// status change
-export const changeRigTypeStatusService = async (
-  payload: any,
-  companyId: any,
-) => {
-  const { id, status } = payload;
+// delete alert
+export const deleteAlertService = async (id: any) => {
+  const idNumber = parseInt(id);
 
-  if (!statusName.includes(status)) {
-    throw new ApiError(
-      StatusCodes.BAD_REQUEST,
-      `Invalid status! You can only change status to ${statusName}`,
-    );
-  }
-
-  // build where condition
-  const whereCondition: any = { id };
-
-  if (companyId) {
-    whereCondition.companyId = companyId;
-  }
-
-  // check RigType exist
-  const isExistRigType = await dbClient.rigType.findUnique({
-    where: whereCondition,
-  });
-  if (!isExistRigType) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "alert doesn't exist!");
-  }
-
-  // status change
-  const result = await dbClient.rigType.update({
-    where: { id: id },
-    data: {
-      status: status,
+  // check Alert exist
+  const isExistAlert = await dbClient.alert.findUnique({
+    where: {
+      id: idNumber,
     },
   });
-
-  if (!result) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to status change!");
+  if (!isExistAlert) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Alert doesn't exist!");
   }
 
-  return result;
-};
-
-// permanent alert delete
-export const deleteRigTypeService = async (paramsId: any, companyId: any) => {
-  const id = parseInt(paramsId);
-
-  // build where condition
-  const whereCondition: any = { id };
-
-  if (companyId) {
-    whereCondition.companyId = companyId;
+  // delete image
+  if (isExistAlert.file) {
+    unlinkFile(isExistAlert.file);
   }
 
-  // check alert exist
-  const isExistRigType = await dbClient.rigType.findUnique({
-    where: whereCondition,
+  // delete Alert
+  const result = await dbClient.alert.delete({
+    where: {
+      id: idNumber,
+    },
   });
-  if (!isExistRigType) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "alert doesn't exist!");
-  }
-
-  // delete alert
-  const result = await dbClient.rigType.delete({
-    where: { id: id },
-  });
-
-  if (!result) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to delete alert!");
-  }
 
   return result;
 };

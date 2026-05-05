@@ -4,24 +4,28 @@ import { dbClient } from "../../../../lib/prisma";
 
 // create initial plan data with duration features
 export const planCreateService = async () => {
+
+
+// await dbClient.plan.deleteMany({});
+
   const plansData = [
-    {
-      name: "Free",
-      monthlyPrice: 0,
-      quarterPrice: 0,
-      sixMonthPrice: 0,
-      yearlyPrice: 0,
-      features: [
-        "Monitor up to 5 rigs",
-        "Basic performance metrics",
-        "Daily status reports",
-        "Email support",
-        "7-day data retention",
-        "Standard API access",
-        "Real-time alerts",
-        "Custom integrations",
-      ],
-    },
+    // {
+    //   name: "Free",
+    //   monthlyPrice: 0,
+    //   quarterPrice: 0,
+    //   sixMonthPrice: 0,
+    //   yearlyPrice: 0,
+    //   features: [
+    //     "Monitor up to 5 rigs",
+    //     "Basic performance metrics",
+    //     "Daily status reports",
+    //     "Email support",
+    //     "7-day data retention",
+    //     "Standard API access",
+    //     "Real-time alerts",
+    //     "Custom integrations",
+    //   ],
+    // },
     {
       name: "Basic",
       monthlyPrice: 9.99,

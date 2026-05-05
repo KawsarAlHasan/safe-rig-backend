@@ -7,12 +7,12 @@ model CardSubmission {
   rigId             Int
   user              User         @relation(fields: [userId], references: [id])
   userId            Int
-  cardType          CardType     @relation(fields: [cardTypeId], references: [id])
-  cardTypeId        Int
-  area              Area         @relation(fields: [areaId], references: [id])
-  areaId            Int
-  hazard            Hazard       @relation(fields: [hazardId], references: [id])
-  hazardId          Int
+  cardType          CardType?    @relation(fields: [cardTypeId], references: [id], onDelete: SetNull)
+  cardTypeId        Int?
+  area              Area?        @relation(fields: [areaId], references: [id], onDelete: SetNull)
+  areaId            Int?
+  hazard            Hazard?      @relation(fields: [hazardId], references: [id], onDelete: SetNull)
+  hazardId          Int?
   description       String
   riskSeverity      RiskSeverity
   file              String?

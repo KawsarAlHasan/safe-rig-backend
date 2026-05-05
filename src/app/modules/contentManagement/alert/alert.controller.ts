@@ -3,7 +3,12 @@ import { StatusCodes } from "http-status-codes";
 import catchAsync from "../../../../shared/catchAsync";
 import sendResponse from "../../../../shared/sendResponse";
 import resolveCompanyId from "../../../../helpers/resolveCompanyId";
-import { alertCreateService } from "./alert.service";
+import {
+  alertCreateService,
+  deleteAlertService,
+  getAllAlertService,
+  updateAlertService,
+} from "./alert.service";
 
 // create new Alert
 export const createNewAlert = catchAsync(
@@ -34,77 +39,55 @@ export const createNewAlert = catchAsync(
   },
 );
 
-// const alerts = await prisma.alert.findMany({
-//   where: {
-//     companyId: 1,
-//     status: "ACTIVE",
-//     OR: [
-//       {
-//         rigIds: {
-//           has: 3,
-//         },
-//       },
-//       {
-//         isAllRigs: true,
-//       },
-//     ],
-//   },
-// });
+// get AllAlerts
+export const getAllAlerts = catchAsync(async (req: Request, res: Response) => {
+  const companyId = resolveCompanyId(req);
 
-// // get Alert
-// export const getRigTypes = catchAsync(async (req: Request, res: Response) => {
-//   const companyId = resolveCompanyId(req);
+  const result = await getAllAlertService(req.query, companyId);
 
-//   const result = await getRigTypeService(req.query, companyId);
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "All Alerts fetched successfully",
+    data: result,
+  });
+});
 
-//   sendResponse(res, {
-//     success: true,
-//     statusCode: StatusCodes.OK,
-//     message: "Alerts fetched successfully",
-//     data: result,
-//   });
-// });
+// update Alert
+export const updateAlert = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
 
-// // update Alert
-// export const updateRigType = catchAsync(async (req: Request, res: Response) => {
-//   const companyId = resolveCompanyId(req);
+  let image;
+  if (req.files && "image" in req.files && req.files.image[0]) {
+    // Build base URL for uploaded file access
+    const baseUrl = `${req.protocol}://${req.get("host")}`;
 
-//   await updateRigTypeService(req.body, companyId);
+    image = `${baseUrl}/images/${req.files.image[0].filename}`;
+  }
 
-//   sendResponse(res, {
-//     success: true,
-//     statusCode: StatusCodes.OK,
-//     message: "Alert updated successfully",
-//   });
-// });
+  const payloadData = {
+    ...req.body,
+    file: image,
+  };
 
-// // status change
-// export const rigTypeStatusChange = catchAsync(
-//   async (req: Request, res: Response) => {
-//     const companyId = resolveCompanyId(req);
+  const result = await updateAlertService(id, payloadData);
 
-//     await changeRigTypeStatusService(req.body, companyId);
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "Alert updated successfully",
+    data: result,
+  });
+});
 
-//     sendResponse(res, {
-//       success: true,
-//       statusCode: StatusCodes.OK,
-//       message: "Alert status changed successfully",
-//     });
-//   },
-// );
+// delete Alert
+export const deleteAlert = catchAsync(async (req: Request, res: Response) => {
+  const result = await deleteAlertService(req.params.id);
 
-// // Delete permanent RigType
-// export const permanentDeleteRigType = catchAsync(
-//   async (req: Request, res: Response) => {
-//     const companyId = resolveCompanyId(req);
-//     const id = req.params.id;
-
-//     await deleteRigTypeService(id, companyId);
-
-//     sendResponse(res, {
-//       success: true,
-//       statusCode: StatusCodes.OK,
-//       message: "Alert deleted successfully",
-//     });
-//   },
-// );
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "Alert deleted successfully",
+    data: result,
+  });
+});

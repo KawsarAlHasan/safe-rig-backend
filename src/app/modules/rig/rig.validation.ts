@@ -20,6 +20,7 @@ export const updateRigZodSchema = z.object({
     longitude: z.string().optional(),
     rigTypeId: z.number().optional(),
     companyId: z.number().optional(),
+    status: z.string().optional(),
   }),
 });
 

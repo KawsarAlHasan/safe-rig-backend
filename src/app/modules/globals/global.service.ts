@@ -102,3 +102,107 @@ export const globalStatusService = async (payload: StatusUpdatePayload) => {
 
   return result;
 };
+
+// get rig, area, type, hazard
+export const getRigAreaTypeHazardService = async (
+  companyId: any,
+  query: any,
+) => {
+  let area: any = [];
+  let hazard: any = [];
+  let cardType: any = [];
+  let rig: any = [];
+  let rigType: any = [];
+
+  if (query.area) {
+    const result = await dbClient.area.findMany({
+      where: {
+        companyId: companyId,
+        status: "ACTIVE",
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+      orderBy: {
+        id: "desc",
+      },
+    });
+
+    area = result;
+  }
+
+  if (query.hazard) {
+    const result = await dbClient.hazard.findMany({
+      where: {
+        companyId: companyId,
+        status: "ACTIVE",
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+      orderBy: {
+        id: "desc",
+      },
+    });
+
+    hazard = result;
+  }
+
+  if (query.cardType) {
+    const result = await dbClient.cardType.findMany({
+      where: {
+        companyId: companyId,
+        status: "ACTIVE",
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+      orderBy: {
+        id: "desc",
+      },
+    });
+
+    cardType = result;
+  }
+
+  if (query.rig) {
+    const result = await dbClient.rig.findMany({
+      where: {
+        companyId: companyId,
+        status: "ACTIVE",
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+      orderBy: {
+        id: "desc",
+      },
+    });
+
+    rig = result;
+  }
+
+  if (query.rigType) {
+    const result = await dbClient.rigType.findMany({
+      where: {
+        companyId: companyId,
+        status: "ACTIVE",
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+      orderBy: {
+        id: "desc",
+      },
+    });
+
+    rigType = result;
+  }
+
+  return { area, hazard, cardType, rig, rigType };
+};

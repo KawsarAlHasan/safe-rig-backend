@@ -1,0 +1,30 @@
+model Subscription {
+    id            Int                @id @default(autoincrement())
+    plan          Plan?              @relation(fields: [planId], references: [id])
+    planId        Int?
+    company       Company?           @relation(fields: [companyId], references: [id])
+    companyId     Int?
+    startDate     String?
+    endDate       String?
+    price         Float?
+    coupon        String?
+    paymentMethod String?
+    durationType  DurationType       @default(MONTHLY)
+    status        SubscriptionStatus @default(PEANDING)
+    createdAt     DateTime           @default(now())
+    updatedAt     DateTime           @updatedAt
+}
+
+enum DurationType {
+    MONTHLY
+    QUARTELY
+    SIXMONTH
+    YEARLY
+}
+
+enum SubscriptionStatus {
+    ACTIVE
+    EXPIRED
+    HOLD
+    PEANDING
+}

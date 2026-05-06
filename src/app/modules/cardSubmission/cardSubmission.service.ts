@@ -156,75 +156,9 @@ export const checkCardSubmissionService = async (
     },
   });
 
-  if (isExistCardSubmission) {
-    throw new ApiError(
-      StatusCodes.BAD_REQUEST,
-      "Today, Card is already submitted!, You can tomorrow submit card",
-    );
-  }
+  const result = isExistCardSubmission ? false : true;
 
-  return;
-};
-
-// get rig, area, type, hazard
-export const getRigAreaTypeHazardService = async (companyId: any) => {
-  const area = await dbClient.area.findMany({
-    where: {
-      companyId: companyId,
-      status: "ACTIVE",
-    },
-    select: {
-      id: true,
-      name: true,
-    },
-    orderBy: {
-      id: "desc",
-    },
-  });
-
-  const hazard = await dbClient.hazard.findMany({
-    where: {
-      companyId: companyId,
-      status: "ACTIVE",
-    },
-    select: {
-      id: true,
-      name: true,
-    },
-    orderBy: {
-      id: "desc",
-    },
-  });
-
-  const cardType = await dbClient.cardType.findMany({
-    where: {
-      companyId: companyId,
-      status: "ACTIVE",
-    },
-    select: {
-      id: true,
-      name: true,
-    },
-    orderBy: {
-      id: "desc",
-    },
-  });
-
-  const rig = await dbClient.rig.findMany({
-    where: {
-      companyId: companyId,
-      status: "ACTIVE",
-    },
-    select: {
-      id: true,
-      name: true,
-    },
-    orderBy: {
-      id: "desc",
-    },
-  });
-
-  return { area, cardType, hazard, rig };
+  return result;
 };
 
 // get card submission with search, filter and pagination

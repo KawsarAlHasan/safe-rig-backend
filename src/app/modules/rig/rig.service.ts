@@ -35,6 +35,8 @@ export const rigCreateService = async (payload: any, companyId: any) => {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to create rig!");
   }
 
+  console.log(result, "result");
+
   return result;
 };
 
@@ -84,6 +86,22 @@ export const getRigService = async (query: any, companyId: any) => {
 
   const result = await dbClient.rig.findMany({
     where: whereCondition,
+    include: {
+      _count: {
+        select: {
+          users: true, // Total Users
+          cardSubmissions: true, // Total Card Submissions
+        },
+      },
+      cardSubmissions: {
+        where: {
+          isOpened: true,
+        },
+        select: {
+          id: true,
+        },
+      },
+    },
     orderBy: {
       id: "desc",
     },
@@ -97,13 +115,20 @@ export const getRigService = async (query: any, companyId: any) => {
     throw new ApiError(StatusCodes.NOT_FOUND, "No rig found!");
   }
 
-  return result;
-};
+  const formattedResult = result.map((rig: any) => ({
+    ...rig,
+    totalUsers: rig?._count?.users,
+    totalCardSubmissions: rig?._count?.cardSubmissions,
+    totalOpenedCards: rig?.cardSubmissions?.length,
+  }));
 
+  return formattedResult;
+};
 
 // Update an existing Rig
 export const updateRigService = async (payload: any, companyId: any) => {
-  const { id, name, location, latitude, longitude, rigTypeId } = payload;
+  const { id, name, location, latitude, longitude, rigTypeId, status } =
+    payload;
 
   // check rig  exist
   const isExistRig = await dbClient.rig.findUnique({
@@ -138,6 +163,7 @@ export const updateRigService = async (payload: any, companyId: any) => {
       latitude: latitude || isExistRig.latitude,
       longitude: longitude || isExistRig.longitude,
       rigTypeId: rigTypeId || isExistRig.rigTypeId,
+      status: status || isExistRig.status,
     },
   });
 

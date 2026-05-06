@@ -3,7 +3,10 @@ import { StatusCodes } from "http-status-codes";
 import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
 import resolveCompanyId from "../../../helpers/resolveCompanyId";
-import { globalStatusService } from "./global.service";
+import {
+  getRigAreaTypeHazardService,
+  globalStatusService,
+} from "./global.service";
 
 // status update global
 export const globalStatus = catchAsync(async (req: Request, res: Response) => {
@@ -15,3 +18,19 @@ export const globalStatus = catchAsync(async (req: Request, res: Response) => {
     message: "Status updated successfully",
   });
 });
+
+// get rig, area, type, hazard
+export const getRigAreaTypeHazard = catchAsync(
+  async (req: Request, res: Response) => {
+    const companyId = resolveCompanyId(req);
+
+    const result = await getRigAreaTypeHazardService(companyId, req.query);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Rig, Area, Card Type, Hazard fetched successfully",
+      data: result,
+    });
+  },
+);

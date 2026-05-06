@@ -6,11 +6,11 @@ import {
   createNewCardSubmission,
   getAllCardSubmission,
   getAllUserTypeAreaHazard,
-  getRigAreaTypeHazard,
   updateCardSubmission,
 } from "./cardSubmission.controller";
 import { createCardSubmissionZodSchema } from "./cardSubmission.validation";
 import { imageOrVideoUploadHandler } from "../../middlewares/imageOrVideoUploadHandler";
+import fileUploadHandler from "../../middlewares/fileUploadHandler";
 
 const router = express.Router();
 
@@ -23,8 +23,12 @@ router.post(
 
 router.get("/type-hazard-area", userAuth(), getAllUserTypeAreaHazard);
 router.get("/check", userAuth(), checkCardSubmission);
-router.get("/rig-area-hazard-type", clientAuth(), getRigAreaTypeHazard);
 router.get("/all", clientAuth(), getAllCardSubmission);
-router.patch("/close-card/:id", clientAuth(), updateCardSubmission);
+router.patch(
+  "/close-card/:id",
+  fileUploadHandler(),
+  clientAuth(),
+  updateCardSubmission,
+);
 
 export const CardSubmissionRoutes = router;

@@ -1,6 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import ApiError from "../../../../errors/ApiError";
 import { dbClient } from "../../../../lib/prisma";
+import { checkCouponDateValidity } from "../../../../helpers/checkCouponDateValidity";
 
 // create new coupon
 export const couponCreateService = async (payloadData: any) => {
@@ -88,4 +89,28 @@ export const deleteCouponService = async (couponId: any) => {
   });
 
   return result;
+};
+
+// check coupon
+export const checkCouponService = async (couponCode: any) => {
+  // check coupon exist
+  const isExistCoupon = await dbClient.coupon.findUnique({
+    where: { code: couponCode },
+  });
+  if (!isExistCoupon) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Coupon doesn't exist!");
+  }
+
+  const currentDate = new Date();
+  const isDateValid = checkCouponDateValidity(isExistCoupon, currentDate);
+
+  if (!isDateValid) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Coupon is expired!");
+  }
+
+  return {
+    isAmount: isExistCoupon?.isAmount || false,
+    amount: isExistCoupon?.amount || 0,
+    percentage: isExistCoupon?.percentage || 0,
+  };
 };

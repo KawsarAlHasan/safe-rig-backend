@@ -3,6 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import catchAsync from "../../../../shared/catchAsync";
 import sendResponse from "../../../../shared/sendResponse";
 import {
+  checkCouponService,
   couponCreateService,
   deleteCouponService,
   getAllCouponService,
@@ -37,6 +38,18 @@ export const deleteCoupon = catchAsync(async (req: Request, res: Response) => {
     success: true,
     statusCode: StatusCodes.OK,
     message: "Coupon deleted successfully",
+    data: result,
+  });
+});
+
+// check coupon
+export const checkCoupon = catchAsync(async (req: Request, res: Response) => {
+
+  const result = await checkCouponService(req.body.code);
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "Coupon checked successfully",
     data: result,
   });
 });

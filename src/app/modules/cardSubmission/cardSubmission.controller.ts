@@ -8,7 +8,6 @@ import {
   checkCardSubmissionService,
   getAllUserAreaTypeHazardService,
   getCardSubmissionService,
-  getRigAreaTypeHazardService,
   submitCardService,
   updateCardSubmissionService,
 } from "./cardSubmission.service";
@@ -87,28 +86,12 @@ export const checkCardSubmission = catchAsync(
   async (req: Request, res: Response) => {
     const user = (req as any).decodedUser;
 
-    await checkCardSubmissionService(user.id, user.companyId);
+    const result = await checkCardSubmissionService(user.id, user.companyId);
 
     sendResponse(res, {
-      success: true,
+      success: result,
       statusCode: StatusCodes.OK,
       message: "You can submit a new card",
-    });
-  },
-);
-
-// get rig, area, type, hazard
-export const getRigAreaTypeHazard = catchAsync(
-  async (req: Request, res: Response) => {
-    const companyId = resolveCompanyId(req);
-
-    const result = await getRigAreaTypeHazardService(companyId);
-
-    sendResponse(res, {
-      success: true,
-      statusCode: StatusCodes.OK,
-      message: "Rig, Area, Card Type, Hazard fetched successfully",
-      data: result,
     });
   },
 );

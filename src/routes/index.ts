@@ -26,6 +26,7 @@ import { HeatmapsRoutes } from "../app/modules/heatmaps/heatmaps.route";
 import { PlanRoutes } from "../app/modules/subscriptions/plan/plan.route";
 import { CouponRoutes } from "../app/modules/subscriptions/coupon/coupon.route";
 import { GlobalRoutes } from "../app/modules/globals/global.route";
+import { SubscriptionRoutes } from "../app/modules/subscriptions/subscription/subscription.route";
 
 const router = express.Router();
 
@@ -68,11 +69,26 @@ const apiRoutes = [
   },
 
   //--------------- Card Submission start -------------
-   {
+  {
     path: "/card-submission",
     route: CardSubmissionRoutes,
   },
   //--------------- Card Submission end ---------------
+
+  //--------------- Daily Debrief Submission start -------------
+  {
+    path: "/activity",
+    route: ActivityRoutes,
+  },
+  {
+    path: "/type-of-devrief",
+    route: TypeOfDevriefRoutes,
+  },
+  {
+    path: "/daily-debrief",
+    route: DailyDebriefRoutes,
+  },
+  //--------------- Daily Debrief Submission end -------------
 
   // Content Management
   {
@@ -100,19 +116,6 @@ const apiRoutes = [
     path: "/hazard",
     route: HazardRoutes,
   },
- 
-  {
-    path: "/activity",
-    route: ActivityRoutes,
-  },
-  {
-    path: "/type-of-devrief",
-    route: TypeOfDevriefRoutes,
-  },
-  {
-    path: "/daily-debrief",
-    route: DailyDebriefRoutes,
-  },
 
   // game routes
   {
@@ -138,7 +141,7 @@ const apiRoutes = [
     route: HeatmapsRoutes,
   },
 
-  // Subscription
+  //--------------- Subscription start -------------
   {
     path: "/plan",
     route: PlanRoutes,
@@ -147,6 +150,11 @@ const apiRoutes = [
     path: "/coupon",
     route: CouponRoutes,
   },
+  {
+    path: "/subscription",
+    route: SubscriptionRoutes,
+  },
+  //--------------- Subscription end -------------
 
   // global
   {

@@ -28,4 +28,5 @@ model Company {
     cardSubmissions CardSubmission[]
     dailyDebriefs   DailyDebrief[]
     heatmap         Heatmap[]
+    subscriptions   Subscription[]
 }

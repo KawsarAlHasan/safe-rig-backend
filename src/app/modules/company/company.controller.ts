@@ -6,10 +6,12 @@ import {
   companyCreateService,
   deleteCompanyService,
   getAllCompanyService,
+  getCompanyDataService,
   getCompanyWithRigsService,
   updateCompanyService,
   updateCompanyStatusService,
 } from "./company.service";
+import resolveCompanyId from "../../../helpers/resolveCompanyId";
 
 // create new Company
 export const createNewCompany = catchAsync(
@@ -106,6 +108,22 @@ export const permanentDeleteCompany = catchAsync(
       success: true,
       statusCode: StatusCodes.OK,
       message: "Company deleted successfully",
+      data: result,
+    });
+  },
+);
+
+// getCompanyDataService
+export const getCompanyData = catchAsync(
+  async (req: Request, res: Response) => {
+    const companyId = resolveCompanyId(req);
+
+    const result = await getCompanyDataService(companyId);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Company data fetched successfully",
       data: result,
     });
   },

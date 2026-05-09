@@ -32,7 +32,7 @@ router.put(
   userUpdateProfile,
 );
 
-router.put("/request-accept", requestClientAndRigAccept);
+router.patch("/request-accept", clientAuth(), requestClientAndRigAccept);
 
 router.get("/admin", adminAuth(), getAllUsers);
 router.get("/client", clientAuth(), getAllUsers);

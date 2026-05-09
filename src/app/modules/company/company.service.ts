@@ -366,3 +366,50 @@ export const deleteCompanyService = async (companyId: any) => {
 
   return result;
 };
+
+// total rigs, total cards, total opens and total users
+export const getCompanyDataService = async (companyId: any) => {
+  const id = parseInt(companyId);
+
+  // check Company exist
+  const isExistCompany = await dbClient.company.findUnique({
+    where: { id },
+  });
+
+  if (!isExistCompany) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Company doesn't exist!");
+  }
+
+  // dashboard counts
+  const result = await dbClient.company.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      name: true,
+
+      _count: {
+        select: {
+          rigs: true,
+          users: true,
+          cardSubmissions: true,
+        },
+      },
+    },
+  });
+
+  // total opens count
+  const totalOpens = await dbClient.cardSubmission.count({
+    where: {
+      companyId: id,
+      isOpened: true,
+    },
+  });
+
+  // custom response
+  return {
+    totalRigs: result?._count.rigs || 0,
+    totalUsers: result?._count.users || 0,
+    totalCards: result?._count.cardSubmissions || 0,
+    totalOpens: totalOpens || 0,
+  };
+};

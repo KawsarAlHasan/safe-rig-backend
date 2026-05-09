@@ -569,21 +569,23 @@ export const getAllLeaderboardService = async (query: any, companyId: any) => {
 
   const andConditions: Prisma.GameResultWhereInput[] = [];
 
+  // Default previous week range
   if (!startDate && !endDate) {
     const now = new Date();
-    const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    const currentDay = now.getDay();
 
-    // Calculate last Monday
+    // Last Monday
     let daysToLastMonday = currentDay === 0 ? 6 : currentDay - 1;
+
     if (daysToLastMonday === 0 && currentDay === 1) {
-      daysToLastMonday = 7; // Get previous Monday if today is Monday
+      daysToLastMonday = 7;
     }
 
     const lastMonday = new Date(now);
     lastMonday.setDate(now.getDate() - daysToLastMonday);
     lastMonday.setHours(0, 0, 0, 0);
 
-    // Calculate last Sunday
+    // Last Sunday
     const lastSunday = new Date(lastMonday);
     lastSunday.setDate(lastMonday.getDate() + 6);
     lastSunday.setHours(23, 59, 59, 999);
@@ -592,13 +594,14 @@ export const getAllLeaderboardService = async (query: any, companyId: any) => {
     endDate = lastSunday;
   }
 
-  // Date range filter apply if dates exist
+  // Date filter
   if (startDate || endDate) {
     const dateFilter: Prisma.DateTimeFilter = {};
 
     if (startDate) {
       dateFilter.gte = startDate;
     }
+
     if (endDate) {
       dateFilter.lte = endDate;
     }
@@ -608,7 +611,7 @@ export const getAllLeaderboardService = async (query: any, companyId: any) => {
     });
   }
 
-  // companyId
+  // Company filter
   if (companyId) {
     andConditions.push({
       companyId: Number(companyId),
@@ -619,6 +622,14 @@ export const getAllLeaderboardService = async (query: any, companyId: any) => {
     });
   }
 
+  // Rig filter
+  if (query.rigId) {
+    andConditions.push({
+      rigId: Number(query.rigId),
+    });
+  }
+
+  // Game type filter
   if (query.gameType) {
     andConditions.push({
       gameType: query.gameType,
@@ -626,9 +637,13 @@ export const getAllLeaderboardService = async (query: any, companyId: any) => {
   }
 
   const whereCondition: Prisma.GameResultWhereInput =
-    andConditions.length > 0 ? { AND: andConditions } : {};
+    andConditions.length > 0
+      ? {
+          AND: andConditions,
+        }
+      : {};
 
-  // Aggregate scores by user
+  // Fetch all game results
   const allResults = await dbClient.gameResult.findMany({
     where: whereCondition,
     select: {
@@ -662,7 +677,7 @@ export const getAllLeaderboardService = async (query: any, companyId: any) => {
     throw new ApiError(StatusCodes.NOT_FOUND, "No leaderboards found!");
   }
 
-  // Aggregate scores by user
+  // Aggregate score by user
   const userScoresMap = new Map<
     number,
     {
@@ -675,6 +690,7 @@ export const getAllLeaderboardService = async (query: any, companyId: any) => {
 
   for (const result of allResults) {
     const existingData = userScoresMap.get(result.userId);
+
     if (existingData) {
       existingData.totalScore += result.score;
     } else {
@@ -687,19 +703,26 @@ export const getAllLeaderboardService = async (query: any, companyId: any) => {
     }
   }
 
-  // Convert to array and sort by totalScore (descending)
+  // Convert map to array and sort
   let leaderboard = Array.from(userScoresMap.entries())
     .map(([userId, data]) => ({
       userId,
-      totalScore: data.totalScore,
+      totalScore: Number(data.totalScore.toFixed(2)),
       user: data.user,
       company: data.company,
       rig: data.rig,
     }))
     .sort((a, b) => b.totalScore - a.totalScore);
 
-  // Apply pagination on aggregated leaderboard
+  // Add rank
+  leaderboard = leaderboard.map((item, index) => ({
+    rank: index + 1,
+    ...item,
+  }));
+
+  // Paginated leaderboard
   const paginatedLeaderboard = leaderboard.slice(skip, skip + limit);
+
   const total = leaderboard.length;
 
   return {
@@ -709,6 +732,7 @@ export const getAllLeaderboardService = async (query: any, companyId: any) => {
       total,
       totalPage: Math.ceil(total / limit),
     },
+
     data: {
       weekRange:
         !query.startDate && !query.endDate
@@ -717,6 +741,7 @@ export const getAllLeaderboardService = async (query: any, companyId: any) => {
               to: endDate,
             }
           : null,
+
       leaderboard: paginatedLeaderboard,
     },
   };

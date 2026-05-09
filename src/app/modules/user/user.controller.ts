@@ -28,9 +28,11 @@ export const requestClientAndRig = catchAsync(
 // request client and rig
 export const requestClientAndRigAccept = catchAsync(
   async (req: Request, res: Response) => {
-    // const userId = (req as any).decodedUser.id;
+    const companyId = resolveCompanyId(req);
 
-    await requestAcceptService(req.body.id);
+    const payload = { ...req.body, companyId };
+
+    await requestAcceptService(payload);
 
     sendResponse(res, {
       success: true,

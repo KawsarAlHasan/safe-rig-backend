@@ -66,10 +66,12 @@ export const updateProfileService = async (payload: any, user: any) => {
   return;
 };
 
-export const requestAcceptService = async (id: number) => {
+export const requestAcceptService = async (payload: any) => {
+  const { id, companyId, approveStatus } = payload;
+
   // check user
   const isExistUser = await dbClient.user.findUnique({
-    where: { id },
+    where: { id: id, companyId: companyId },
   });
   if (!isExistUser) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
@@ -79,7 +81,7 @@ export const requestAcceptService = async (id: number) => {
   await dbClient.user.update({
     where: { id },
     data: {
-      approveStatus: "ACTIVE",
+      approveStatus: approveStatus,
     },
   });
 
@@ -127,11 +129,11 @@ export const getAllUserService = async (query: any, companyId: any) => {
       approveStatus: query.approveStatus as any,
     });
   } else {
-    andConditions.push({
-      NOT: {
-        approveStatus: "DELETED",
-      },
-    });
+    // andConditions.push({
+    //   NOT: {
+    //     approveStatus: "DELETED",
+    //   },
+    // });
   }
 
   if (query.isVerified) {

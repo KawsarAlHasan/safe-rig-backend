@@ -21,4 +21,6 @@ model Rig {
     typeOfDevrief   TypeOfDevrief[]
     dailyDebriefs   DailyDebrief[]
     heatmap         Heatmap[]
+    rigAdmins       RigAdmin[]
+    gameResults     GameResult[]
 }

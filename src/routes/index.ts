@@ -27,6 +27,7 @@ import { PlanRoutes } from "../app/modules/subscriptions/plan/plan.route";
 import { CouponRoutes } from "../app/modules/subscriptions/coupon/coupon.route";
 import { GlobalRoutes } from "../app/modules/globals/global.route";
 import { SubscriptionRoutes } from "../app/modules/subscriptions/subscription/subscription.route";
+import { RigAdminRoutes } from "../app/modules/rigAdmin/rigAdmin.route";
 
 const router = express.Router();
 
@@ -66,6 +67,10 @@ const apiRoutes = [
   {
     path: "/rig",
     route: RigRoutes,
+  },
+  {
+    path: "/rig-admin",
+    route: RigAdminRoutes,
   },
 
   //--------------- Card Submission start -------------

@@ -6,49 +6,19 @@
     "auditLog": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\success\\.a0bdd55ad76963115e585e99c13f8b0e6835444a-audit.json",
     "files": [
         {
-            "date": 1777980026596,
-            "name": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\success\\05-05-2026-17-success.log",
-            "hash": "9c48518dfae4d51fd4a52762bae4ed45f97d52172d635cd034a453c03623f0d6"
+            "date": 1778293806636,
+            "name": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\success\\09-05-2026-08-success.log",
+            "hash": "a007f10d9c3bdaf2bc512c875c27aee978fc78de2db8f2b1c2945bbe74a311bf"
         },
         {
-            "date": 1778037658047,
-            "name": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\success\\06-05-2026-09-success.log",
-            "hash": "aee6cdcbc5862d2168fb8191b58c6c3f6730bd9d84d23dd1dbe893372aa6fa59"
+            "date": 1778295852989,
+            "name": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\success\\09-05-2026-09-success.log",
+            "hash": "cdb2926e9af905e470b822b580821814bc5360f5bcf85713cbe9cfb8cc1275a9"
         },
         {
-            "date": 1778040255412,
-            "name": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\success\\06-05-2026-10-success.log",
-            "hash": "d579c911ba4bcac794ad832f833d739bbc678a38c88a796a7fd791a7efe5de10"
-        },
-        {
-            "date": 1778044158973,
-            "name": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\success\\06-05-2026-11-success.log",
-            "hash": "5daeaffd2f6776fbc7ab156c537af0e70725bcfd22670342c5fda2d0c9b6d7a2"
-        },
-        {
-            "date": 1778047465742,
-            "name": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\success\\06-05-2026-12-success.log",
-            "hash": "1e4ace26e72190a549f0cb5b9e7d61fc39d997b172ea8044a1a3c50233cb4937"
-        },
-        {
-            "date": 1778056138144,
-            "name": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\success\\06-05-2026-14-success.log",
-            "hash": "32abb46a321ff9a6c4637cba84aa49c76b13cc684a1bc41e7b6e4cdc64beca46"
-        },
-        {
-            "date": 1778058524230,
-            "name": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\success\\06-05-2026-15-success.log",
-            "hash": "8eb9791cecf4d9cf2c63cf33423c78c2d81509e27349e3f0ccd76bba7928ef24"
-        },
-        {
-            "date": 1778061604598,
-            "name": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\success\\06-05-2026-16-success.log",
-            "hash": "c9656eda952e4f0492f47d2dcf46930e8e81ff12d1fd15aeceaba7570e68987e"
-        },
-        {
-            "date": 1778066063521,
-            "name": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\success\\06-05-2026-17-success.log",
-            "hash": "11274cdcd6dcc26e2f3a3c96030b2dbba5d5638af122a82ed1e3e7d654fc613b"
+            "date": 1778301371852,
+            "name": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\success\\09-05-2026-10-success.log",
+            "hash": "fc6c2d2871cb201f94fc2aa8526700158f7c9bb38236f737e880aa153565518e"
         }
     ],
     "hashType": "sha256"

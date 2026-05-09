@@ -8,7 +8,7 @@ model User {
     phone         String?
     password      String
     isVerified    Boolean   @default(false)
-    approveStatus AllStatus @default(PENDING) // NOT_SUBMITTED
+    approveStatus AllStatus @default(NOT_SUBMITTED)
     status        AllStatus @default(PENDING)
     createdAt     DateTime  @default(now())
     updatedAt     DateTime  @updatedAt

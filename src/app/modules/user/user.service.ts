@@ -2,6 +2,8 @@ import { StatusCodes } from "http-status-codes";
 import bcrypt from "bcrypt";
 import ApiError from "../../../errors/ApiError";
 import { dbClient } from "../../../lib/prisma";
+import { Prisma } from "../../../../generated/prisma/client";
+
 import config from "../../../config";
 import { statusName } from "../../../shared/statusName";
 import generateOTP from "../../../util/generateOTP";
@@ -82,4 +84,112 @@ export const requestAcceptService = async (id: number) => {
   });
 
   return;
+};
+
+// get all user with filter by companyId, rigId, status, approveStatus, isVerified and search by name and email and pagination
+export const getAllUserService = async (query: any, companyId: any) => {
+  const page = Number(query.page) || 1;
+  const limit = Number(query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const andConditions: Prisma.UserWhereInput[] = [];
+
+  if (companyId) {
+    andConditions.push({
+      companyId: Number(companyId),
+    });
+  } else if (query.companyId) {
+    andConditions.push({
+      companyId: Number(query.companyId),
+    });
+  }
+
+  if (query.status) {
+    andConditions.push({
+      status: query.status as any,
+    });
+  } else {
+    andConditions.push({
+      NOT: {
+        status: "DELETED",
+      },
+    });
+  }
+
+  if (query.rigId) {
+    andConditions.push({
+      rigId: Number(query.rigId),
+    });
+  }
+
+  if (query.approveStatus) {
+    andConditions.push({
+      approveStatus: query.approveStatus as any,
+    });
+  } else {
+    andConditions.push({
+      NOT: {
+        approveStatus: "DELETED",
+      },
+    });
+  }
+
+  if (query.isVerified) {
+    andConditions.push({
+      isVerified: query.isVerified as any,
+    });
+  }
+
+  if (query.search) {
+    andConditions.push({
+      OR: [
+        {
+          name: {
+            contains: query.search,
+            mode: "insensitive",
+          },
+        },
+        {
+          email: {
+            contains: query.search,
+            mode: "insensitive",
+          },
+        },
+      ],
+    });
+  }
+
+  const whereConditions: Prisma.UserWhereInput =
+    andConditions.length > 0 ? { AND: andConditions } : {};
+
+  const result = await dbClient.user.findMany({
+    where: whereConditions,
+    include: {
+      rig: true,
+      company: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    skip,
+    take: limit,
+  });
+
+  const total = await dbClient.user.count({
+    where: whereConditions,
+  });
+
+  if (!result.length) {
+    throw new ApiError(StatusCodes.NOT_FOUND, "No user found!");
+  }
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+      totalPage: Math.ceil(total / limit),
+    },
+    data: result,
+  };
 };

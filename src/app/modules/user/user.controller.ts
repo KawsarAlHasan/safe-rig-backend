@@ -3,10 +3,12 @@ import { StatusCodes } from "http-status-codes";
 import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
 import {
+  getAllUserService,
   requestAcceptService,
   requestClientAndRigService,
   updateProfileService,
 } from "./user.service";
+import resolveCompanyId from "../../../helpers/resolveCompanyId";
 
 // request client and rig
 export const requestClientAndRig = catchAsync(
@@ -77,3 +79,18 @@ export const userUpdateProfile = catchAsync(
     });
   },
 );
+
+// get all users
+export const getAllUsers = catchAsync(async (req: Request, res: Response) => {
+  const companyId = resolveCompanyId(req);
+
+  const result = await getAllUserService(req.query, companyId);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "User fetched successfully",
+    pagination: result.meta,
+    data: result.data,
+  });
+});

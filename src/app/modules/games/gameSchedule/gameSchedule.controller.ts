@@ -3,6 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import catchAsync from "../../../../shared/catchAsync";
 import sendResponse from "../../../../shared/sendResponse";
 import {
+  getAllLeaderboardService,
   getGameScheduleForAdminService,
   getGameScheduleService,
   leaderboardService,
@@ -10,6 +11,7 @@ import {
   questionSubmitService,
   saveGameScheduleService,
 } from "./gameSchedule.service";
+import resolveCompanyId from "../../../../helpers/resolveCompanyId";
 
 // save game schedule
 export const saveGameSchedule = catchAsync(
@@ -106,6 +108,23 @@ export const getLeaderboard = catchAsync(
       statusCode: StatusCodes.OK,
       message: "Leaderboard fetched successfully",
       data: result,
+    });
+  },
+);
+
+// get leaderboards for client and admin
+export const getLeaderboardForClientAndAdmin = catchAsync(
+  async (req: Request, res: Response) => {
+    const companyId = resolveCompanyId(req);
+
+    const result = await getAllLeaderboardService(req.query, companyId);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Leaderboard fetched successfully",
+      pagination: result.meta,
+      data: result.data,
     });
   },
 );

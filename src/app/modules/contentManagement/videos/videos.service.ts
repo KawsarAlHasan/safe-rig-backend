@@ -29,7 +29,7 @@ export const videoCreateService = async (payloadData: any, companyId: any) => {
       thumbnail: thumbnail,
       companyId: companyId,
       isDefault: !companyId,
-      isAllRigs: isAllRigsCheck,
+      isAllRigs: true, // isAllRigsCheck,
       rigIds: rigIds,
     },
   });

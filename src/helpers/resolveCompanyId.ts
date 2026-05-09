@@ -15,7 +15,7 @@ const resolveCompanyId = (req: Request): string => {
     return decodedUser.companyId;
   }
 
-  return decodedClient.id;
+  return decodedClient.companyId;
 };
 
 export default resolveCompanyId;

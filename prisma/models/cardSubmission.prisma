@@ -1,12 +1,12 @@
 model CardSubmission {
   id Int @id @default(autoincrement())
 
-  company           Company      @relation(fields: [companyId], references: [id])
-  companyId         Int
-  rig               Rig          @relation(fields: [rigId], references: [id])
-  rigId             Int
-  user              User         @relation(fields: [userId], references: [id])
-  userId            Int
+  company           Company?      @relation(fields: [companyId], references: [id])
+  companyId         Int?
+  rig               Rig?          @relation(fields: [rigId], references: [id])
+  rigId             Int?
+  user              User?         @relation(fields: [userId], references: [id])
+  userId            Int?
   cardType          CardType?    @relation(fields: [cardTypeId], references: [id], onDelete: SetNull)
   cardTypeId        Int?
   area              Area?        @relation(fields: [areaId], references: [id], onDelete: SetNull)

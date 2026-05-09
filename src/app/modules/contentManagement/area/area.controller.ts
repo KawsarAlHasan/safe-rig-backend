@@ -13,8 +13,8 @@ import {
 
 // create new Area
 export const createNewArea = catchAsync(async (req: Request, res: Response) => {
-  const companyId = resolveCompanyId(req);
 
+  const companyId = resolveCompanyId(req);
   await areaCreateService(req.body, companyId);
 
   sendResponse(res, {

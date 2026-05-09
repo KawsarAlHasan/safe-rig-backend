@@ -6,6 +6,7 @@ import { z } from "zod"; // optional but recommended
 // Type-safe model map
 const modelMap = {
   user: dbClient.user,
+  rigAdmin: dbClient.rigAdmin,
   rig: dbClient.rig,
   company: dbClient.company,
   client: dbClient.client,
@@ -44,6 +45,7 @@ const StatusUpdateSchema = z.object({
   ]),
   table: z.enum([
     "user",
+    "rigAdmin",
     "rig",
     "company",
     "client",

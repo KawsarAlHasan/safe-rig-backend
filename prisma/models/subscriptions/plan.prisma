@@ -11,5 +11,5 @@ model Plan {
     createdAt     DateTime  @default(now())
     updatedAt     DateTime  @updatedAt
 
-    subscriptions Subscription[]
+    subscriptions Subscriptions[]
 }

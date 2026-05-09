@@ -52,6 +52,7 @@ router.put(
   uploadVideoWithThumbnail,
   updateVideo,
 );
+router.get("/client", clientAuth(), getAllVideos);
 router.delete("/client/:id", clientAuth(), deleteVideo);
 
 // // ───── User Routes ─────

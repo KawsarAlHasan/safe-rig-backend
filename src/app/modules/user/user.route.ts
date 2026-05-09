@@ -5,12 +5,13 @@ import {
   profileUpdateCodeZodSchema,
 } from "./user.validation";
 import {
+  getAllUsers,
   requestClientAndRig,
   requestClientAndRigAccept,
   userProfile,
   userUpdateProfile,
 } from "./user.controller";
-import { userAuth } from "../../middlewares/auth";
+import { adminAuth, clientAuth, userAuth } from "../../middlewares/auth";
 import fileUploadHandler from "../../middlewares/fileUploadHandler";
 const router = express.Router();
 
@@ -32,5 +33,8 @@ router.put(
 );
 
 router.put("/request-accept", requestClientAndRigAccept);
+
+router.get("/admin", adminAuth(), getAllUsers);
+router.get("/client", clientAuth(), getAllUsers);
 
 export const UserRoutes = router;

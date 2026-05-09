@@ -27,7 +27,7 @@ export const getHomeService = async (rigId: any, companyId: any) => {
     where: {
       companyId: companyId,
       status: "ACTIVE",
-      position: "Homepage",
+      position: "homepage",
       OR: [
         {
           rigIds: {

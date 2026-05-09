@@ -1,7 +1,11 @@
 model GameResult {
     id          Int      @id @default(autoincrement())
-    user        User     @relation(fields: [userId], references: [id])
+    user        User    @relation(fields: [userId], references: [id])
     userId      Int
+    company     Company? @relation(fields: [companyId], references: [id])
+    companyId   Int?
+    rig         Rig?      @relation(fields: [rigId], references: [id])
+    rigId       Int?
     date        String?
     gameType    GameType
     puzzleIds   Int[]

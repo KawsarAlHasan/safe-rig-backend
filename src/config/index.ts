@@ -12,6 +12,7 @@ export default {
   PUBLISHABLE_KEY: process.env.PUBLISHABLE_KEY,
   STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
   STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+  FRONTEND_BASE_URL: process.env.FRONTEND_BASE_URL,
 
   jwt: {
     user_jwt_secret: process.env.USER_JWT_SECRET,

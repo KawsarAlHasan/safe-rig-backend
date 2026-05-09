@@ -338,6 +338,8 @@ export const questionSubmitService = async (payload: {
   await dbClient.gameResult.create({
     data: {
       userId: user.id,
+      companyId: user.companyId,
+      rigId: user.rigId,
       date: dateOnly,
       gameType: "QUESTION",
       questionIds: todaysGame.questionIds,
@@ -429,6 +431,8 @@ export const puzzleSubmitService = async (payload: {
   await dbClient.gameResult.create({
     data: {
       userId: user.id,
+      companyId: user.companyId,
+      rigId: user.rigId,
       date: dateOnly,
       gameType: "PUZZLE",
       puzzleIds: todaysGame.puzzleIds,
@@ -551,5 +555,169 @@ export const leaderboardService = async (user: any) => {
           }
         : null,
     leaderboard: finalLeaderboard,
+  };
+};
+
+// get all leaderboards
+export const getAllLeaderboardService = async (query: any, companyId: any) => {
+  const page = Number(query.page) || 1;
+  const limit = Number(query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  let startDate = query.startDate ? new Date(query.startDate) : null;
+  let endDate = query.endDate ? new Date(query.endDate) : null;
+
+  const andConditions: Prisma.GameResultWhereInput[] = [];
+
+  if (!startDate && !endDate) {
+    const now = new Date();
+    const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+
+    // Calculate last Monday
+    let daysToLastMonday = currentDay === 0 ? 6 : currentDay - 1;
+    if (daysToLastMonday === 0 && currentDay === 1) {
+      daysToLastMonday = 7; // Get previous Monday if today is Monday
+    }
+
+    const lastMonday = new Date(now);
+    lastMonday.setDate(now.getDate() - daysToLastMonday);
+    lastMonday.setHours(0, 0, 0, 0);
+
+    // Calculate last Sunday
+    const lastSunday = new Date(lastMonday);
+    lastSunday.setDate(lastMonday.getDate() + 6);
+    lastSunday.setHours(23, 59, 59, 999);
+
+    startDate = lastMonday;
+    endDate = lastSunday;
+  }
+
+  // Date range filter apply if dates exist
+  if (startDate || endDate) {
+    const dateFilter: Prisma.DateTimeFilter = {};
+
+    if (startDate) {
+      dateFilter.gte = startDate;
+    }
+    if (endDate) {
+      dateFilter.lte = endDate;
+    }
+
+    andConditions.push({
+      createdAt: dateFilter,
+    });
+  }
+
+  // companyId
+  if (companyId) {
+    andConditions.push({
+      companyId: Number(companyId),
+    });
+  } else if (query.companyId) {
+    andConditions.push({
+      companyId: Number(query.companyId),
+    });
+  }
+
+  if (query.gameType) {
+    andConditions.push({
+      gameType: query.gameType,
+    });
+  }
+
+  const whereCondition: Prisma.GameResultWhereInput =
+    andConditions.length > 0 ? { AND: andConditions } : {};
+
+  // Aggregate scores by user
+  const allResults = await dbClient.gameResult.findMany({
+    where: whereCondition,
+    select: {
+      userId: true,
+      score: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+        },
+      },
+      company: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      rig: {
+        select: {
+          id: true,
+          name: true,
+          location: true,
+        },
+      },
+    },
+  });
+
+  if (!allResults.length) {
+    throw new ApiError(StatusCodes.NOT_FOUND, "No leaderboards found!");
+  }
+
+  // Aggregate scores by user
+  const userScoresMap = new Map<
+    number,
+    {
+      totalScore: number;
+      user: any;
+      company: any;
+      rig: any;
+    }
+  >();
+
+  for (const result of allResults) {
+    const existingData = userScoresMap.get(result.userId);
+    if (existingData) {
+      existingData.totalScore += result.score;
+    } else {
+      userScoresMap.set(result.userId, {
+        totalScore: result.score,
+        user: result.user,
+        company: result.company,
+        rig: result.rig,
+      });
+    }
+  }
+
+  // Convert to array and sort by totalScore (descending)
+  let leaderboard = Array.from(userScoresMap.entries())
+    .map(([userId, data]) => ({
+      userId,
+      totalScore: data.totalScore,
+      user: data.user,
+      company: data.company,
+      rig: data.rig,
+    }))
+    .sort((a, b) => b.totalScore - a.totalScore);
+
+  // Apply pagination on aggregated leaderboard
+  const paginatedLeaderboard = leaderboard.slice(skip, skip + limit);
+  const total = leaderboard.length;
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+      totalPage: Math.ceil(total / limit),
+    },
+    data: {
+      weekRange:
+        !query.startDate && !query.endDate
+          ? {
+              from: startDate,
+              to: endDate,
+            }
+          : null,
+      leaderboard: paginatedLeaderboard,
+    },
   };
 };

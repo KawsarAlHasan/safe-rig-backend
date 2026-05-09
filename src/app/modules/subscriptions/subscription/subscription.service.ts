@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import ApiError from "../../../../errors/ApiError";
 import { dbClient } from "../../../../lib/prisma";
 import { stripe } from "../../../../config/stripe";
+import config from "../../../../config/index";
 
 export const buySubscription = async (payload: any, companyId: any) => {
   const { planId, coupon, price, paymentMethod, durationType, email, baseUrl } =
@@ -53,7 +54,7 @@ export const buySubscription = async (payload: any, companyId: any) => {
     endDate: formattedEndDate,
   };
 
-  const result = await dbClient.subscription.create({
+  const result = await dbClient.subscriptions.create({
     data: subData,
   });
 
@@ -81,8 +82,8 @@ export const buySubscription = async (payload: any, companyId: any) => {
       planId: String(planId),
       subscriptionId: String(result.id),
     },
-    success_url: `${baseUrl}/api/v1/credit/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${baseUrl}/api/v1/credit/fail`,
+    success_url: `${config.FRONTEND_BASE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${config.FRONTEND_BASE_URL}/fail`,
   });
 
   return session.url;

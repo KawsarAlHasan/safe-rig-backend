@@ -4,6 +4,7 @@ import {
   getGameSchedule,
   getGameScheduleForAdmin,
   getLeaderboard,
+  getLeaderboardForClientAndAdmin,
   puzzleSubmit,
   questionSubmit,
   saveGameSchedule,
@@ -12,11 +13,17 @@ import {
   gameScheduleZodSchema,
   puzzleSubmitZodSchema,
 } from "./gameSchedule.validation";
-import { userAuth } from "../../../middlewares/auth";
+import { adminAuth, clientAuth, userAuth } from "../../../middlewares/auth";
 const router = express.Router();
 
 router.post("/save", saveGameSchedule);
 router.get("/leaderboard", userAuth(), getLeaderboard);
+router.get(
+  "/leaderboard/client",
+  clientAuth(),
+  getLeaderboardForClientAndAdmin,
+);
+router.get("/leaderboard/admin", adminAuth(), getLeaderboardForClientAndAdmin);
 router.post("/question-submit", userAuth(), questionSubmit);
 router.post(
   "/puzzle-submit",

@@ -88,3 +88,28 @@ export const buySubscription = async (payload: any, companyId: any) => {
 
   return session.url;
 };
+
+// get my subscription
+export const getMySubscriptionService = async (companyId: any) => {
+  const currentSubscription = await dbClient.subscriptions.findFirst({
+    where: { companyId, status: "ACTIVE" },
+    include: {
+      plan: true,
+    },
+  });
+
+  const pastSubscriptions = await dbClient.subscriptions.findMany({
+    where: { companyId, status: "EXPIRED" },
+    include: {
+      plan: true,
+    },
+    orderBy: {
+      endDate: "desc",
+    },
+  });
+
+  return {
+    currentSubscription: currentSubscription || {},
+    pastSubscriptions: pastSubscriptions || [],
+  };
+};

@@ -1,7 +1,10 @@
 import { Request, Response } from "express";
 import catchAsync from "../../../../shared/catchAsync";
 import resolveCompanyId from "../../../../helpers/resolveCompanyId";
-import { buySubscription } from "./subscription.service";
+import {
+  buySubscription,
+  getMySubscriptionService,
+} from "./subscription.service";
 import sendResponse from "../../../../shared/sendResponse";
 import { StatusCodes } from "http-status-codes";
 
@@ -23,6 +26,22 @@ export const subscriptionBuy = catchAsync(
       success: true,
       statusCode: StatusCodes.OK,
       message: "Subscription created successfully",
+      data: result,
+    });
+  },
+);
+
+// get getMySubscriptionService
+export const getMySubscription = catchAsync(
+  async (req: Request, res: Response) => {
+    const companyId = resolveCompanyId(req);
+
+    const result = await getMySubscriptionService(companyId);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Subscription fetched successfully",
       data: result,
     });
   },

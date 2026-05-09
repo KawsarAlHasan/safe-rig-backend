@@ -22,7 +22,7 @@ export const submitCardService = async (payload: any) => {
     submitAnonymously,
     submitDay,
   } = payload;
-
+ 
   const today = new Date();
   const dateOnly = today.toISOString().split("T")[0];
 

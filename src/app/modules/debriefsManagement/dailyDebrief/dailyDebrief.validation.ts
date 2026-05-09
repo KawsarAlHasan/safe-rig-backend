@@ -10,5 +10,6 @@ export const createDailyDebriefZodSchema = z.object({
     whatImproved: z.string().optional(),
 
     submitAnonymously: z.boolean().optional().default(false),
+    submitDay: z.string().optional(),
   }),
 });

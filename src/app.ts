@@ -1,14 +1,25 @@
 import cors from "cors";
 import express, { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
+import bodyParser from "body-parser";
 import path from "path";
-import globalErrorHandler from './app/middlewares/globalErrorHandler';
-import router from './routes';
+import globalErrorHandler from "./app/middlewares/globalErrorHandler";
+import router from "./routes";
 import { dbClient } from "./lib/prisma";
 const app = express();
 
-//body parser
-app.use(cors());
+// CORS configuration
+const corsOptions = {
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
+
+// Body parser for other routes (after webhook)
+app.use(bodyParser.json());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -16,13 +27,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static("uploads"));
 
 //router
-app.use('/api/v1', router);
+app.use("/api/v1", router);
 
 //live response
 app.get("/", (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, "../uploads", "index.html"));
 });
-
 
 //global error handle
 app.use(globalErrorHandler);

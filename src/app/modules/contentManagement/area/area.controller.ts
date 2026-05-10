@@ -10,6 +10,7 @@ import {
   getAllUserAreaService,
   getAreaByRigService,
   getAreaService,
+  updateAreaService,
 } from "./area.service";
 
 // create new Area
@@ -83,18 +84,18 @@ export const getAllUserArea = catchAsync(
   },
 );
 
-// // update Area
-// export const updateRigType = catchAsync(async (req: Request, res: Response) => {
-//   const companyId = resolveCompanyId(req);
+// update Area
+export const updateArea = catchAsync(async (req: Request, res: Response) => {
+  const companyId = resolveCompanyId(req);
 
-//   await updateRigTypeService(req.body, companyId);
+  await updateAreaService(req.body, companyId);
 
-//   sendResponse(res, {
-//     success: true,
-//     statusCode: StatusCodes.OK,
-//     message: "Area updated successfully",
-//   });
-// });
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "Area updated successfully",
+  });
+});
 
 // Delete permanent Area
 export const permanentDeleteArea = catchAsync(

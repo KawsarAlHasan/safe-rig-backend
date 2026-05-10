@@ -17,14 +17,30 @@ const storage = multer.diskStorage({
 
 const fileFilter = (req: any, file: Express.Multer.File, cb: any) => {
   if (file.fieldname === "video") {
-    const allowed = ["video/mp4", "video/mkv", "video/webm", "video/avi"];
+    const allowed = [
+      "video/mp4",
+      "video/webm",
+      "video/x-matroska", // .mkv
+      "video/x-msvideo", // .avi
+      "video/quicktime", // .mov
+      "video/x-ms-wmv", // .wmv
+      "video/mpeg", // .mpeg
+      "video/3gpp", // .3gp
+    ];
     if (allowed.includes(file.mimetype)) {
       cb(null, true);
     } else {
       cb(new Error("Only video files allowed!"), false);
     }
   } else if (file.fieldname === "thumbnail") {
-    const allowed = ["image/jpeg", "image/png", "image/webp"];
+    const allowed = [
+      "image/jpeg", // .jpg .jpeg
+      "image/png", // .png
+      "image/webp", // .webp
+      "image/gif", // .gif
+      "image/svg+xml", // .svg
+      "image/avif", // .avif
+    ];
     if (allowed.includes(file.mimetype)) {
       cb(null, true);
     } else {

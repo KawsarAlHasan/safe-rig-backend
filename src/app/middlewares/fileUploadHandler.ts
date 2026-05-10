@@ -56,25 +56,40 @@ const fileUploadHandler = () => {
   //file filter
   const filterFilter = (req: Request, file: any, cb: FileFilterCallback) => {
     if (file.fieldname === "image") {
-      if (
-        file.mimetype === "image/jpeg" ||
-        file.mimetype === "image/png" ||
-        file.mimetype === "image/jpg"
-      ) {
+      const allowedImages = [
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+        "image/gif",
+        "image/avif",
+        "image/svg+xml",
+      ];
+
+      if (allowedImages.includes(file.mimetype)) {
         cb(null, true);
       } else {
         throw new ApiError(
           StatusCodes.BAD_REQUEST,
-          "Only .jpeg, .png, .jpg file supported",
+          "Only .jpeg, .png, .webp, .gif, .avif, .svg files are supported",
         );
       }
     } else if (file.fieldname === "media") {
-      if (file.mimetype === "video/mp4" || file.mimetype === "audio/mpeg") {
+      const allowedMedia = [
+        "video/mp4",
+        "video/webm",
+        "video/x-matroska", // mkv
+        "video/quicktime", // mov
+        "audio/mpeg", // mp3
+        "audio/wav",
+        "audio/ogg",
+      ];
+
+      if (allowedMedia.includes(file.mimetype)) {
         cb(null, true);
       } else {
         throw new ApiError(
           StatusCodes.BAD_REQUEST,
-          "Only .mp4, .mp3, file supported",
+          "Only mp4, webm, mkv, mov, mp3, wav, ogg files are supported",
         );
       }
     } else if (file.fieldname === "doc") {

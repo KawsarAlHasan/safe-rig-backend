@@ -5,31 +5,37 @@ import { StatusCodes } from "http-status-codes";
 import ApiError from "../../errors/ApiError";
 import fs from "fs";
 
-// ✅ Allowed MIME types
+// Allowed MIME types
 const ALLOWED_IMAGE_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/gif",
+  "image/jpeg", // .jpg .jpeg
+  "image/png", // .png
+  "image/webp", // .webp
+  "image/gif", // .gif
+  "image/svg+xml", // .svg
+  "image/avif", // .avif
 ];
 const ALLOWED_VIDEO_TYPES = [
   "video/mp4",
-  "video/mpeg",
-  "video/quicktime",
   "video/webm",
+  "video/x-matroska", // .mkv
+  "video/x-msvideo", // .avi
+  "video/quicktime", // .mov
+  "video/x-ms-wmv", // .wmv
+  "video/mpeg", // .mpeg
+  "video/3gpp", // .3gp
 ];
 
 const MAX_IMAGE_SIZE = 20 * 1024 * 1024; // 20MB
 const MAX_VIDEO_SIZE = 1000 * 1024 * 1024; // 1000MB
 
-// ✅ Ensure directories exist
+// Ensure directories exist
 const ensureDirectoryExists = (dirPath: string) => {
   if (!fs.existsSync(dirPath)) {
     fs.mkdirSync(dirPath, { recursive: true });
   }
 };
 
-// ✅ Storage config (disk storage)
+// Storage config (disk storage)
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const isVideo = ALLOWED_VIDEO_TYPES.includes(file.mimetype);
@@ -48,7 +54,7 @@ const storage = multer.diskStorage({
   },
 });
 
-// ✅ File filter
+// File filter
 const fileFilter = (
   req: Request,
   file: Express.Multer.File,
@@ -70,7 +76,7 @@ const fileFilter = (
   }
 };
 
-// ✅ Multer instance
+// Multer instance
 const upload = multer({
   storage,
   fileFilter,
@@ -79,7 +85,7 @@ const upload = multer({
   },
 });
 
-// ✅ Main middleware with file type and URL
+// Main middleware with file type and URL
 export const imageOrVideoUploadHandler = () => {
   return (req: Request, res: Response, next: NextFunction) => {
     const uploadSingle = upload.single("media");
@@ -101,7 +107,7 @@ export const imageOrVideoUploadHandler = () => {
         return next(err);
       }
 
-      // ✅ Extra check: enforce image-specific size limit
+      // Extra check: enforce image-specific size limit
       if (req.file) {
         const isImage = ALLOWED_IMAGE_TYPES.includes(req.file.mimetype);
         if (isImage && req.file.size > MAX_IMAGE_SIZE) {

@@ -2,7 +2,6 @@ import { StatusCodes } from "http-status-codes";
 import { Prisma } from "../../../../../generated/prisma/client";
 import ApiError from "../../../../errors/ApiError";
 import { dbClient } from "../../../../lib/prisma";
-import { statusName } from "../../../../shared/statusName";
 
 // create new Area
 export const areaCreateService = async (payloadData: any, companyId: any) => {
@@ -434,20 +433,20 @@ export const getAllUserAreaService = async (companyId: any, rigId: any) => {
 };
 
 // Update an existing Area
-export const updateRigTypeService = async (payload: any, companyId: any) => {
+export const updateAreaService = async (payload: any, companyId: any) => {
   const { id, name, isDefault, isAllRigs, rigIds } = payload;
 
   // check Area exist
-  const isExistRigType = await dbClient.area.findUnique({
+  const isExistArea = await dbClient.area.findUnique({
     where: { id: id },
   });
 
-  if (!isExistRigType) {
+  if (!isExistArea) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Area doesn't exist!");
   }
 
   // check duplicate name
-  if (name && name !== isExistRigType.name) {
+  if (name && name !== isExistArea.name) {
     const isDuplicateName = await dbClient.area.findFirst({
       where: { companyId: companyId, name: name },
     });
@@ -464,11 +463,11 @@ export const updateRigTypeService = async (payload: any, companyId: any) => {
   const result = await dbClient.area.update({
     where: { id: id },
     data: {
-      name: name || isExistRigType.name,
-      isDefault: isDefault || isExistRigType.isDefault,
-      companyId: companyId || isExistRigType.companyId,
-      isAllRigs: isAllRigs || isExistRigType.isAllRigs,
-      rigIds: rigIds || isExistRigType.rigIds,
+      name: name || isExistArea.name,
+      isDefault: isDefault,
+      companyId: companyId || isExistArea.companyId,
+      isAllRigs: isAllRigs,
+      rigIds: rigIds || isExistArea.rigIds,
     },
   });
 

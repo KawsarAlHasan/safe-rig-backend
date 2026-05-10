@@ -41,7 +41,7 @@ router.post(
 );
 router.get("/client", clientAuth(), getAllAlerts);
 
-router.put("/client/update/:id", adminAuth(), fileUploadHandler(), updateAlert);
+router.put("/client/update/:id", clientAuth(), fileUploadHandler(), updateAlert);
 
 router.delete("/client/:id", clientAuth(), deleteAlert);
 

@@ -13,8 +13,9 @@ import {
   getArea,
   getAreaByRig,
   permanentDeleteArea,
+  updateArea,
 } from "./area.controller";
-import { createAreaZodSchema } from "./area.validation";
+import { createAreaZodSchema, updateAreaZodSchema } from "./area.validation";
 
 const router = express.Router();
 
@@ -24,12 +25,12 @@ router.post("/admin/create", adminAuth(), createNewAreaByAdmin);
 router.get("/admin", adminAuth(), getArea);
 router.get("/admin/singlerig", adminAuth(), getAreaByRig);
 
-// router.put(
-//   "/admin/update",
-//   adminAuth(),
-//   validateRequest(updateRigTypeZodSchema),
-//   updateRigType,
-// );
+router.put(
+  "/admin/update",
+  adminAuth(),
+  validateRequest(updateAreaZodSchema),
+  updateArea,
+);
 
 router.delete("/admin/:id", adminAuth(), permanentDeleteArea);
 
@@ -44,12 +45,12 @@ router.post(
 router.get("/client", clientAuth(), getArea);
 router.get("/client/:id", clientAuth(), getAreaByRig);
 
-// router.put(
-//   "/client/update",
-//   clientAuth(),
-//   validateRequest(updateRigTypeZodSchema),
-//   updateRigType,
-// );
+router.put(
+  "/client/update",
+  clientAuth(),
+  validateRequest(updateAreaZodSchema),
+  updateArea,
+);
 
 router.delete("/client/:id", clientAuth(), permanentDeleteArea);
 

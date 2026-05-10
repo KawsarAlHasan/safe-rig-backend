@@ -28,6 +28,7 @@ import { CouponRoutes } from "../app/modules/subscriptions/coupon/coupon.route";
 import { GlobalRoutes } from "../app/modules/globals/global.route";
 import { SubscriptionRoutes } from "../app/modules/subscriptions/subscription/subscription.route";
 import { RigAdminRoutes } from "../app/modules/rigAdmin/rigAdmin.route";
+import { MessageRoutes } from "../app/modules/contentManagement/messages/messages.route";
 
 const router = express.Router();
 
@@ -95,12 +96,15 @@ const apiRoutes = [
   },
   //--------------- Daily Debrief Submission end -------------
 
-  // Content Management
+  //--------------- Content Management start -------------
   {
     path: "/video",
     route: VideosRoutes,
   },
-  // message
+  {
+    path: "/message",
+    route: MessageRoutes,
+  },
   {
     path: "/alert",
     route: AlertRoutes,
@@ -121,6 +125,7 @@ const apiRoutes = [
     path: "/hazard",
     route: HazardRoutes,
   },
+  //--------------- Content Management end -------------
 
   // game routes
   {
@@ -161,7 +166,7 @@ const apiRoutes = [
   },
   //--------------- Subscription end -------------
 
-  // global
+  //--------------- Global start -------------
   {
     path: "/global",
     route: GlobalRoutes,

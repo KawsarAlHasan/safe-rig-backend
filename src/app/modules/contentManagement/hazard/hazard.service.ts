@@ -250,9 +250,9 @@ export const updateHazardService = async (payload: any, companyId: any) => {
     where: { id: id },
     data: {
       name: name || isExistHazard.name,
-      isDefault: isDefault || isExistHazard.isDefault,
+      isDefault: isDefault,
       companyId: companyId || isExistHazard.companyId,
-      isAllRigs: isAllRigs || isExistHazard.isAllRigs,
+      isAllRigs: isAllRigs,
       rigIds: rigIds || isExistHazard.rigIds,
     },
   });

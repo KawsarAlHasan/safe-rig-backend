@@ -2,7 +2,6 @@ import { StatusCodes } from "http-status-codes";
 import { Prisma } from "../../../../../generated/prisma/client";
 import ApiError from "../../../../errors/ApiError";
 import { dbClient } from "../../../../lib/prisma";
-import { statusName } from "../../../../shared/statusName";
 
 // create new Card type
 export const cardTypeCreateService = async (roleData: any, companyId: any) => {
@@ -270,9 +269,9 @@ export const updateCardTypeService = async (payload: any, companyId: any) => {
     where: { id: id },
     data: {
       name: name || isExistCardType.name,
-      isDefault: isDefault || isExistCardType.isDefault,
+      isDefault: isDefault,
       companyId: companyId || isExistCardType.companyId,
-      isAllRigs: isAllRigs || isExistCardType.isAllRigs,
+      isAllRigs: isAllRigs,
       rigIds: rigIds || isExistCardType.rigIds,
     },
   });

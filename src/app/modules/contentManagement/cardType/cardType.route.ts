@@ -7,7 +7,6 @@ import {
   userAuth,
 } from "../../../middlewares/auth";
 import {
-  cardTypeStatusChange,
   createNewCardType,
   getAllUserCardType,
   getCardType,
@@ -15,7 +14,6 @@ import {
   updateCardType,
 } from "./cardType.controller";
 import {
-  changeStatusZodSchema,
   createCardTypeZodSchema,
   updateCardTypeZodSchema,
 } from "./cardType.validation";
@@ -39,13 +37,6 @@ router.put(
   updateCardType,
 );
 
-router.patch(
-  "/admin/update-status",
-  adminAuth(),
-  validateRequest(changeStatusZodSchema),
-  cardTypeStatusChange,
-);
-
 router.delete("/admin/:id", adminAuth(), permanentDeleteCardType);
 
 // ───── Client Routes ─────
@@ -63,13 +54,6 @@ router.put(
   clientAuth(),
   validateRequest(updateCardTypeZodSchema),
   updateCardType,
-);
-
-router.patch(
-  "/client/update-status",
-  clientAuth(),
-  validateRequest(changeStatusZodSchema),
-  cardTypeStatusChange,
 );
 
 router.delete("/client/:id", clientAuth(), permanentDeleteCardType);

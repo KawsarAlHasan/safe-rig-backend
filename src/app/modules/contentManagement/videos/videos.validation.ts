@@ -23,10 +23,3 @@ export const updateRigTypeZodSchema = z.object({
     rigIds: z.array(z.number()).optional(),
   }),
 });
-
-export const changeStatusZodSchema = z.object({
-  body: z.object({
-    id: z.number().min(1, "Id is required"),
-    status: z.string().min(1, "Status is required"),
-  }),
-});

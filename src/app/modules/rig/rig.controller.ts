@@ -4,8 +4,8 @@ import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
 import resolveCompanyId from "../../../helpers/resolveCompanyId";
 import {
-  changeRigStatusService,
   deleteRigService,
+  fleetComparisonService,
   getRigService,
   rigCreateService,
   updateRigService,
@@ -51,21 +51,6 @@ export const updateRig = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-// status change
-export const rigStatusChange = catchAsync(
-  async (req: Request, res: Response) => {
-    const companyId = resolveCompanyId(req);
-
-    await changeRigStatusService(req.body, companyId);
-
-    sendResponse(res, {
-      success: true,
-      statusCode: StatusCodes.OK,
-      message: "Rig  status changed successfully",
-    });
-  },
-);
-
 // Delete permanent Rig
 export const permanentDeleteRig = catchAsync(
   async (req: Request, res: Response) => {
@@ -78,6 +63,27 @@ export const permanentDeleteRig = catchAsync(
       success: true,
       statusCode: StatusCodes.OK,
       message: "Rig  deleted successfully",
+    });
+  },
+);
+
+// fleetComparisonService
+export const fleetComparison = catchAsync(
+  async (req: Request, res: Response) => {
+    const companyId = resolveCompanyId(req);
+
+    const payload = {
+      ...req.body,
+      companyId,
+    };
+
+    const result = await fleetComparisonService(payload);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Fleet comparison successfully",
+      data: result,
     });
   },
 );

@@ -224,14 +224,10 @@ export const areaCreateServiceByAdmin = async (payloadData: any) => {
 
   let selectedColor: string | undefined;
 
-  selectedColor = primaryColorCodes.find(
-    (c) => !usedColors.includes(c)
-  );
+  selectedColor = primaryColorCodes.find((c) => !usedColors.includes(c));
 
   if (!selectedColor) {
-    selectedColor = secondaryColorCodes.find(
-      (c) => !usedColors.includes(c)
-    );
+    selectedColor = secondaryColorCodes.find((c) => !usedColors.includes(c));
   }
 
   if (!selectedColor) {
@@ -370,7 +366,7 @@ export const getAreaService = async (query: any, companyId: any) => {
   }));
 
   return resultData;
-}; 
+};
 
 // get area by rigId
 export const getAreaByRigService = async (query: any) => {
@@ -483,52 +479,8 @@ export const updateRigTypeService = async (payload: any, companyId: any) => {
   return result;
 };
 
-// status change
-export const changeRigTypeStatusService = async (
-  payload: any,
-  companyId: any,
-) => {
-  const { id, status } = payload;
-
-  if (!statusName.includes(status)) {
-    throw new ApiError(
-      StatusCodes.BAD_REQUEST,
-      `Invalid status! You can only change status to ${statusName}`,
-    );
-  }
-
-  // build where condition
-  const whereCondition: any = { id };
-
-  if (companyId) {
-    whereCondition.companyId = companyId;
-  }
-
-  // check RigType exist
-  const isExistRigType = await dbClient.area.findUnique({
-    where: whereCondition,
-  });
-  if (!isExistRigType) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Area doesn't exist!");
-  }
-
-  // status change
-  const result = await dbClient.area.update({
-    where: { id: id },
-    data: {
-      status: status,
-    },
-  });
-
-  if (!result) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to status change!");
-  }
-
-  return result;
-};
-
 // permanent Area delete
-export const deleteRigTypeService = async (paramsId: any, companyId: any) => {
+export const deleteAreaService = async (paramsId: any, companyId: any) => {
   const id = parseInt(paramsId);
 
   // build where condition
@@ -542,6 +494,7 @@ export const deleteRigTypeService = async (paramsId: any, companyId: any) => {
   const isExistRigType = await dbClient.area.findUnique({
     where: whereCondition,
   });
+
   if (!isExistRigType) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Area doesn't exist!");
   }

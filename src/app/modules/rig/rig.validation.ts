@@ -23,13 +23,3 @@ export const updateRigZodSchema = z.object({
     status: z.string().optional(),
   }),
 });
-
-
-export const changeStatusZodSchema = z.object({
-  body: z.object({
-    id: z.number().min(1, "Id is required"),
-    status: z.string().min(1, "Status is required"),
-  }),
-});
-
-

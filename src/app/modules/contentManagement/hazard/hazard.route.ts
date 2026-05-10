@@ -10,12 +10,10 @@ import {
   createNewHazard,
   getAllUserHazard,
   getHazards,
-  hazardStatusChange,
   permanentDeleteHazard,
   updateHazard,
 } from "./hazard.controller";
 import {
-  changeStatusZodSchema,
   createHazardZodSchema,
   updateHazardZodSchema,
 } from "./hazard.validation";
@@ -39,13 +37,6 @@ router.put(
   updateHazard,
 );
 
-router.patch(
-  "/admin/update-status",
-  adminAuth(),
-  validateRequest(changeStatusZodSchema),
-  hazardStatusChange,
-);
-
 router.delete("/admin/:id", adminAuth(), permanentDeleteHazard);
 
 // ───── Client Routes ─────
@@ -61,15 +52,8 @@ router.get("/client", clientAuth(), getHazards);
 router.put(
   "/client/update",
   clientAuth(),
-  validateRequest(updateHazardZodSchema),
+  // validateRequest(updateHazardZodSchema),
   updateHazard,
-);
-
-router.patch(
-  "/client/update-status",
-  clientAuth(),
-  validateRequest(changeStatusZodSchema),
-  hazardStatusChange,
 );
 
 router.delete("/client/:id", clientAuth(), permanentDeleteHazard);

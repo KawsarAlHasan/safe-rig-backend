@@ -222,50 +222,6 @@ export const updateRigTypeService = async (payload: any, companyId: any) => {
   return result;
 };
 
-// status change
-export const changeRigTypeStatusService = async (
-  payload: any,
-  companyId: any,
-) => {
-  const { id, status } = payload;
-
-  if (!statusName.includes(status)) {
-    throw new ApiError(
-      StatusCodes.BAD_REQUEST,
-      `Invalid status! You can only change status to ${statusName}`,
-    );
-  }
-
-  // build where condition
-  const whereCondition: any = { id };
-
-  if (companyId) {
-    whereCondition.companyId = companyId;
-  }
-
-  // check RigType exist
-  const isExistRigType = await dbClient.rigType.findUnique({
-    where: whereCondition,
-  });
-  if (!isExistRigType) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Rig Type doesn't exist!");
-  }
-
-  // status change
-  const result = await dbClient.rigType.update({
-    where: { id: id },
-    data: {
-      status: status,
-    },
-  });
-
-  if (!result) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to status change!");
-  }
-
-  return result;
-};
-
 // permanent rig type delete
 export const deleteRigTypeService = async (paramsId: any, companyId: any) => {
   const id = parseInt(paramsId);

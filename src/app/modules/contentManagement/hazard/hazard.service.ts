@@ -264,50 +264,6 @@ export const updateHazardService = async (payload: any, companyId: any) => {
   return result;
 };
 
-// status change
-export const changeHazardStatusService = async (
-  payload: any,
-  companyId: any,
-) => {
-  const { id, status } = payload;
-
-  if (!statusName.includes(status)) {
-    throw new ApiError(
-      StatusCodes.BAD_REQUEST,
-      `Invalid status! You can only change status to ${statusName}`,
-    );
-  }
-
-  // build where condition
-  const whereCondition: any = { id };
-
-  if (companyId) {
-    whereCondition.companyId = companyId;
-  }
-
-  // check Hazard exist
-  const isExistHazard = await dbClient.hazard.findUnique({
-    where: whereCondition,
-  });
-  if (!isExistHazard) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Hazard doesn't exist!");
-  }
-
-  // status change
-  const result = await dbClient.hazard.update({
-    where: { id: id },
-    data: {
-      status: status,
-    },
-  });
-
-  if (!result) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to status change!");
-  }
-
-  return result;
-};
-
 // permanent Hazard delete
 export const deleteHazardService = async (paramsId: any, companyId: any) => {
   const id = parseInt(paramsId);

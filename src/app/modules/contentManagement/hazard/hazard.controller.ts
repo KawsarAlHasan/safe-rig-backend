@@ -5,7 +5,6 @@ import sendResponse from "../../../../shared/sendResponse";
 
 import resolveCompanyId from "../../../../helpers/resolveCompanyId";
 import {
-  changeHazardStatusService,
   deleteHazardService,
   getAllUserHazardService,
   getHazardService,
@@ -71,20 +70,6 @@ export const updateHazard = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-// status change
-export const hazardStatusChange = catchAsync(
-  async (req: Request, res: Response) => {
-    const companyId = resolveCompanyId(req);
-
-    await changeHazardStatusService(req.body, companyId);
-
-    sendResponse(res, {
-      success: true,
-      statusCode: StatusCodes.OK,
-      message: "Hazard status changed successfully",
-    });
-  },
-);
 
 // Delete permanent Hazard
 export const permanentDeleteHazard = catchAsync(

@@ -7,7 +7,6 @@ import {
   userAuth,
 } from "../../../middlewares/auth";
 import {
-  changeStatusZodSchema,
   createRigTypeZodSchema,
   updateRigTypeZodSchema,
 } from "./rigType.validation";
@@ -15,7 +14,6 @@ import {
   createNewRigType,
   getRigTypes,
   permanentDeleteRigType,
-  rigTypeStatusChange,
   updateRigType,
 } from "./rigType.controller";
 
@@ -38,13 +36,6 @@ router.put(
   updateRigType,
 );
 
-router.patch(
-  "/admin/update-status",
-  adminAuth(),
-  validateRequest(changeStatusZodSchema),
-  rigTypeStatusChange,
-);
-
 router.delete("/admin/:id", adminAuth(), permanentDeleteRigType);
 
 // ───── Client Routes ─────
@@ -62,13 +53,6 @@ router.put(
   clientAuth(),
   validateRequest(updateRigTypeZodSchema),
   updateRigType,
-);
-
-router.patch(
-  "/client/update-status",
-  clientAuth(),
-  validateRequest(changeStatusZodSchema),
-  rigTypeStatusChange,
 );
 
 router.delete("/client/:id", clientAuth(), permanentDeleteRigType);

@@ -6,6 +6,7 @@ import resolveCompanyId from "../../../../helpers/resolveCompanyId";
 import {
   areaCreateService,
   areaCreateServiceByAdmin,
+  deleteAreaService,
   getAllUserAreaService,
   getAreaByRigService,
   getAreaService,
@@ -13,7 +14,6 @@ import {
 
 // create new Area
 export const createNewArea = catchAsync(async (req: Request, res: Response) => {
-
   const companyId = resolveCompanyId(req);
   await areaCreateService(req.body, companyId);
 
@@ -25,17 +25,19 @@ export const createNewArea = catchAsync(async (req: Request, res: Response) => {
 });
 
 // create new Area by admin
-export const createNewAreaByAdmin = catchAsync(async (req: Request, res: Response) => {
-  const companyId = resolveCompanyId(req);
+export const createNewAreaByAdmin = catchAsync(
+  async (req: Request, res: Response) => {
+    const companyId = resolveCompanyId(req);
 
-  await areaCreateServiceByAdmin(req.body);
+    await areaCreateServiceByAdmin(req.body);
 
-  sendResponse(res, {
-    success: true,
-    statusCode: StatusCodes.OK,
-    message: "Area created successfully",
-  });
-});
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Area created successfully",
+    });
+  },
+);
 
 // get Area
 export const getArea = catchAsync(async (req: Request, res: Response) => {
@@ -54,7 +56,6 @@ export const getArea = catchAsync(async (req: Request, res: Response) => {
 // get Area by rig
 export const getAreaByRig = catchAsync(async (req: Request, res: Response) => {
   const companyId = resolveCompanyId(req);
-
 
   const result = await getAreaByRigService(req.query);
 
@@ -95,33 +96,18 @@ export const getAllUserArea = catchAsync(
 //   });
 // });
 
-// // status change
-// export const rigTypeStatusChange = catchAsync(
-//   async (req: Request, res: Response) => {
-//     const companyId = resolveCompanyId(req);
+// Delete permanent Area
+export const permanentDeleteArea = catchAsync(
+  async (req: Request, res: Response) => {
+    const companyId = resolveCompanyId(req);
+    const id = req.params.id;
 
-//     await changeRigTypeStatusService(req.body, companyId);
+    await deleteAreaService(id, companyId);
 
-//     sendResponse(res, {
-//       success: true,
-//       statusCode: StatusCodes.OK,
-//       message: "Area status changed successfully",
-//     });
-//   },
-// );
-
-// // Delete permanent RigType
-// export const permanentDeleteRigType = catchAsync(
-//   async (req: Request, res: Response) => {
-//     const companyId = resolveCompanyId(req);
-//     const id = req.params.id;
-
-//     await deleteRigTypeService(id, companyId);
-
-//     sendResponse(res, {
-//       success: true,
-//       statusCode: StatusCodes.OK,
-//       message: "Area deleted successfully",
-//     });
-//   },
-// );
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Area deleted successfully",
+    });
+  },
+);

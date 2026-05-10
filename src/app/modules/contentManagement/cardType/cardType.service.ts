@@ -284,50 +284,6 @@ export const updateCardTypeService = async (payload: any, companyId: any) => {
   return result;
 };
 
-// status change
-export const changeCardTypeStatusService = async (
-  payload: any,
-  companyId: any,
-) => {
-  const { id, status } = payload;
-
-  if (!statusName.includes(status)) {
-    throw new ApiError(
-      StatusCodes.BAD_REQUEST,
-      `Invalid status! You can only change status to ${statusName}`,
-    );
-  }
-
-  // build where condition
-  const whereCondition: any = { id };
-
-  if (companyId) {
-    whereCondition.companyId = companyId;
-  }
-
-  // check CardType exist
-  const isExistCardType = await dbClient.cardType.findUnique({
-    where: whereCondition,
-  });
-  if (!isExistCardType) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Card Type doesn't exist!");
-  }
-
-  // status change
-  const result = await dbClient.cardType.update({
-    where: { id: id },
-    data: {
-      status: status,
-    },
-  });
-
-  if (!result) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to status change!");
-  }
-
-  return result;
-};
-
 // permanent CardType delete
 export const deleteCardTypeService = async (paramsId: any, companyId: any) => {
   const id = parseInt(paramsId);

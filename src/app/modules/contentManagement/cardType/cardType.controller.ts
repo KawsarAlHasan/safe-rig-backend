@@ -6,7 +6,6 @@ import sendResponse from "../../../../shared/sendResponse";
 import resolveCompanyId from "../../../../helpers/resolveCompanyId";
 import {
   cardTypeCreateService,
-  changeCardTypeStatusService,
   deleteCardTypeService,
   getAllUserCardTypeService,
   getCardTypeService,
@@ -69,21 +68,6 @@ export const updateCardType = catchAsync(
       success: true,
       statusCode: StatusCodes.OK,
       message: "Card Type updated successfully",
-    });
-  },
-);
-
-// status change
-export const cardTypeStatusChange = catchAsync(
-  async (req: Request, res: Response) => {
-    const companyId = resolveCompanyId(req);
-
-    await changeCardTypeStatusService(req.body, companyId);
-
-    sendResponse(res, {
-      success: true,
-      statusCode: StatusCodes.OK,
-      message: "Card Type status changed successfully",
     });
   },
 );

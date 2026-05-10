@@ -6,8 +6,14 @@ import {
   rigAdminAuth,
   userAuth,
 } from "../../middlewares/auth";
-import { changeStatusZodSchema, createRigZodSchema, updateRigZodSchema } from "./rig.validation";
-import { createNewRig, getRigs, permanentDeleteRig, rigStatusChange, updateRig } from "./rig.controller";
+import { createRigZodSchema, updateRigZodSchema } from "./rig.validation";
+import {
+  createNewRig,
+  fleetComparison,
+  getRigs,
+  permanentDeleteRig,
+  updateRig,
+} from "./rig.controller";
 
 const router = express.Router();
 
@@ -28,13 +34,6 @@ router.put(
   updateRig,
 );
 
-router.patch(
-  "/admin/update-status",
-  adminAuth(),
-  validateRequest(changeStatusZodSchema),
-  rigStatusChange,
-);
-
 router.delete("/admin/:id", adminAuth(), permanentDeleteRig);
 
 // ───── Client Routes ─────
@@ -45,6 +44,8 @@ router.post(
   createNewRig,
 );
 
+router.post("/fleet-comparison", clientAuth(), fleetComparison);
+
 router.get("/client", clientAuth(), getRigs);
 
 router.put(
@@ -52,13 +53,6 @@ router.put(
   clientAuth(),
   validateRequest(updateRigZodSchema),
   updateRig,
-);
-
-router.patch(
-  "/client/update-status",
-  clientAuth(),
-  validateRequest(changeStatusZodSchema),
-  rigStatusChange,
 );
 
 router.delete("/client/:id", clientAuth(), permanentDeleteRig);

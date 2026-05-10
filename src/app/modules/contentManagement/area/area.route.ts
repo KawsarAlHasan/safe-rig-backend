@@ -12,6 +12,7 @@ import {
   getAllUserArea,
   getArea,
   getAreaByRig,
+  permanentDeleteArea,
 } from "./area.controller";
 import { createAreaZodSchema } from "./area.validation";
 
@@ -30,14 +31,7 @@ router.get("/admin/singlerig", adminAuth(), getAreaByRig);
 //   updateRigType,
 // );
 
-// router.patch(
-//   "/admin/update-status",
-//   adminAuth(),
-//   validateRequest(changeStatusZodSchema),
-//   rigTypeStatusChange,
-// );
-
-// router.delete("/admin/:id", adminAuth(), permanentDeleteRigType);
+router.delete("/admin/:id", adminAuth(), permanentDeleteArea);
 
 // ───── Client Routes ─────
 router.post(
@@ -57,14 +51,7 @@ router.get("/client/:id", clientAuth(), getAreaByRig);
 //   updateRigType,
 // );
 
-// router.patch(
-//   "/client/update-status",
-//   clientAuth(),
-//   validateRequest(changeStatusZodSchema),
-//   rigTypeStatusChange,
-// );
-
-// router.delete("/client/:id", clientAuth(), permanentDeleteRigType);
+router.delete("/client/:id", clientAuth(), permanentDeleteArea);
 
 // // ───── RigAdmin Routes ─────
 // router.get("/client", rigAdminAuth(), getRigTypes);

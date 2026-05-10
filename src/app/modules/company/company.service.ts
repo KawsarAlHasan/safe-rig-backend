@@ -146,6 +146,7 @@ export const getAllCompanyService = async (query: IQuery) => {
     orderBy: {
       id: "desc",
     },
+
     include: {
       clients: {
         where: {
@@ -158,14 +159,74 @@ export const getAllCompanyService = async (query: IQuery) => {
           phone: true,
         },
       },
+
+      // subscription include
+      subscriptions: {
+        where: {
+          OR: [
+            {
+              status: "ACTIVE",
+            },
+            {
+              status: "EXPIRED",
+            },
+          ],
+        },
+
+        orderBy: [
+          // ACTIVE first priority
+          {
+            status: "asc",
+          },
+          // latest subscription
+          {
+            createdAt: "desc",
+          },
+        ],
+
+        take: 1,
+
+        select: {
+          id: true,
+          status: true,
+          startDate: true,
+          endDate: true,
+          durationType: true,
+          price: true,
+          paymentMethod: true,
+
+          plan: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
+
+      _count: {
+        select: {
+          rigs: true,
+          users: true,
+          cardSubmissions: true,
+        },
+      },
     },
   });
+
+  // format subscription data
+  const formattedResult = result.map((company) => ({
+    ...company,
+
+    subscriptions:
+      company.subscriptions.length > 0 ? company.subscriptions[0] : null,
+  }));
 
   const total = await dbClient.company.count({
     where: whereCondition,
   });
 
-  if (!result.length) {
+  if (!formattedResult.length) {
     throw new ApiError(StatusCodes.NOT_FOUND, "No company found!");
   }
 
@@ -176,7 +237,8 @@ export const getAllCompanyService = async (query: IQuery) => {
       total,
       totalPage: Math.ceil(total / limit),
     },
-    data: result,
+
+    data: formattedResult,
   };
 };
 

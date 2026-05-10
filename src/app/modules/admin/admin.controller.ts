@@ -7,7 +7,6 @@ import {
   deleteAdminService,
   getAllAdminService,
   updateAdminService,
-  updateAdminStatusService,
 } from "./admin.service";
 
 // create new Admin
@@ -64,22 +63,6 @@ export const updateAdmin = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-// status change
-export const adminStatusChange = catchAsync(
-  async (req: Request, res: Response) => {
-    const { ...adminData } = req.body;
-
-    const result = await updateAdminStatusService(adminData);
-
-    sendResponse(res, {
-      success: true,
-      statusCode: StatusCodes.OK,
-      message: "Admin status changed successfully",
-      data: result,
-    });
-  },
-);
-
 // Delete an existing Admin
 export const deleteAdmin = catchAsync(async (req: Request, res: Response) => {
   const adminId = req.params.id;
@@ -93,14 +76,3 @@ export const deleteAdmin = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
-
-
-
-
-
-
-
-
-
-
-

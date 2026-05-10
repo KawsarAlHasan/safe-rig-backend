@@ -25,13 +25,13 @@ export const adminAuth = () => {
         where: {
           id: decoded.id,
         },
-        include: {
-          role: {
-            include: {
-              permissions: true,
-            },
-          },
-        },
+        // include: {
+        //   role: {
+        //     include: {
+        //       permissions: true,
+        //     },
+        //   },
+        // },
       });
 
       if (!admin) {

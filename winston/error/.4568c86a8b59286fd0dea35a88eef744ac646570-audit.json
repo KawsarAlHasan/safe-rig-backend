@@ -6,21 +6,6 @@
     "auditLog": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\error\\.4568c86a8b59286fd0dea35a88eef744ac646570-audit.json",
     "files": [
         {
-            "date": 1778324640468,
-            "name": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\error\\09-05-2026-17-error.log",
-            "hash": "791c14e206764ce3f13f5a453f4909ad33c3978b8c62eb49ee68898173eeb305"
-        },
-        {
-            "date": 1778330054141,
-            "name": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\error\\09-05-2026-18-error.log",
-            "hash": "84133845153d4c92ea53911d2dd170d7bfad2e59efe9aa518fcaca2cfcf564f0"
-        },
-        {
-            "date": 1778331640066,
-            "name": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\error\\09-05-2026-19-error.log",
-            "hash": "9cf0aed196f18525ad7c72158970774660f937b120cbf450b56fd6450914251d"
-        },
-        {
             "date": 1778379731512,
             "name": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\error\\10-05-2026-08-error.log",
             "hash": "a47fe16bf5896063d951372dbfcbdaca750624a8ac7b37d9834ba924bb6bf0cc"
@@ -59,6 +44,21 @@
             "date": 1778410994540,
             "name": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\error\\10-05-2026-17-error.log",
             "hash": "6b5d981dc0488dc4228944d6842eb9af599baa304b375e8813c7eb49aa1d7980"
+        },
+        {
+            "date": 1778415436862,
+            "name": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\error\\10-05-2026-18-error.log",
+            "hash": "b59c51133cd9f5c95e206bb8f68ce4e77f2913ee0f92202954cc80ba9ae3228d"
+        },
+        {
+            "date": 1778418769611,
+            "name": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\error\\10-05-2026-19-error.log",
+            "hash": "97beda9c7d43f065ef984ad3a467f916dda3428abccbde4a203fe711c542348e"
+        },
+        {
+            "date": 1778423003746,
+            "name": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\error\\10-05-2026-20-error.log",
+            "hash": "942a970badcaf29de4c0fdcea4066844968691a6156098319270928795268a54"
         }
     ],
     "hashType": "sha256"

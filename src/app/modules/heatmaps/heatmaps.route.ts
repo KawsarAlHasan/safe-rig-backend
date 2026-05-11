@@ -34,4 +34,6 @@ router.post(
   createNewHeatmap,
 );
 
+router.get("/client/all", clientAuth(), getAllHeatmaps);
+
 export const HeatmapsRoutes = router;

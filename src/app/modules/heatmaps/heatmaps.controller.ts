@@ -8,6 +8,7 @@ import {
   heatmapCreateService,
   heatmapGetService,
   updateHeatmapService,
+  updateHeatmapStatusService,
 } from "./heatmaps.service";
 
 // create heatmap
@@ -30,8 +31,6 @@ export const createNewHeatmap = catchAsync(
     };
 
     const result = await heatmapCreateService(payload);
-
-    console.log(result);
 
     sendResponse(res, {
       success: true,
@@ -92,20 +91,20 @@ export const areaDefineHeatmap = catchAsync(
   },
 );
 
-// // status change
-// export const rigStatusChange = catchAsync(
-//   async (req: Request, res: Response) => {
-//     const companyId = resolveCompanyId(req);
+// status change
+export const heatmapStatusChange = catchAsync(
+  async (req: Request, res: Response) => {
+    const companyId = resolveCompanyId(req);
 
-//     await changeRigStatusService(req.body, companyId);
+    await updateHeatmapStatusService(req.body);
 
-//     sendResponse(res, {
-//       success: true,
-//       statusCode: StatusCodes.OK,
-//       message: "Rig  status changed successfully",
-//     });
-//   },
-// );
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Heatmap status changed successfully",
+    });
+  },
+);
 
 // // Delete permanent Rig
 // export const permanentDeleteRig = catchAsync(

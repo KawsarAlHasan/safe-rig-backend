@@ -1,21 +1,12 @@
 import express from "express";
-import validateRequest from "../../middlewares/validateRequest";
-import {
-  adminAuth,
-  clientAuth,
-  rigAdminAuth,
-  userAuth,
-} from "../../middlewares/auth";
-import {
-  changeStatusZodSchema,
-  createRigZodSchema,
-  updateRigZodSchema,
-} from "./heatmaps.validation";
+import { adminAuth, clientAuth } from "../../middlewares/auth";
+
 import {
   areaDefineHeatmap,
   createNewHeatmap,
   getAllHeatmaps,
   getSingleHeatmap,
+  heatmapStatusChange,
 } from "./heatmaps.controller";
 import fileUploadHandler from "../../middlewares/fileUploadHandler";
 
@@ -25,12 +16,12 @@ const router = express.Router();
 router.post(
   "/admin/create",
   adminAuth(),
-  // validateRequest(createRigZodSchema),
   fileUploadHandler(),
   createNewHeatmap,
 );
 
 router.patch("/area-define", adminAuth(), areaDefineHeatmap);
+router.patch("/admin/status-change", adminAuth(), heatmapStatusChange);
 
 router.get("/admin/all", adminAuth(), getAllHeatmaps);
 router.get("/single/:id", getSingleHeatmap);
@@ -39,7 +30,6 @@ router.get("/single/:id", getSingleHeatmap);
 router.post(
   "/client/create",
   clientAuth(),
-  // validateRequest(createRigZodSchema),
   fileUploadHandler(),
   createNewHeatmap,
 );

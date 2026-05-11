@@ -40,8 +40,6 @@ export const getGameScheduleForAdmin = catchAsync(
 
     const result = await getGameScheduleForAdminService(payload);
 
-    console.log(result, "result");
-
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,

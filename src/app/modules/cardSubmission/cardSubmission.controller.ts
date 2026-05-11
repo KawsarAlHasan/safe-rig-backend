@@ -11,6 +11,7 @@ import {
   submitCardService,
   updateCardSubmissionService,
 } from "./cardSubmission.service";
+import { dbClient } from "../../../lib/prisma";
 
 // Interface for uploaded file info
 interface UploadedFileInfo {
@@ -86,12 +87,19 @@ export const checkCardSubmission = catchAsync(
   async (req: Request, res: Response) => {
     const user = (req as any).decodedUser;
 
+    const getRig = await dbClient.rig.findFirst({
+      where: {
+        id: user.rigId,
+      },
+    });
+
     const result = await checkCardSubmissionService(user.id, user.companyId);
 
     sendResponse(res, {
       success: result,
       statusCode: StatusCodes.OK,
       message: "You can submit a new card",
+      data: getRig,
     });
   },
 );

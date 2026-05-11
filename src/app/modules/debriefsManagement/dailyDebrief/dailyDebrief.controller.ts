@@ -9,6 +9,7 @@ import {
   createDebriefService,
   getAllActiveDebriefService,
 } from "./dailyDebrief.service";
+import { dbClient } from "../../../../lib/prisma";
 
 // create new Daily debrief
 export const createNewDailyDebrief = catchAsync(
@@ -53,6 +54,12 @@ export const checkDebriefSubmission = catchAsync(
   async (req: Request, res: Response) => {
     const user = (req as any).decodedUser;
 
+    const getRig = await dbClient.rig.findFirst({
+      where: {
+        id: user.rigId,
+      },
+    });
+
     const result = await checkDebriefService(user.id, user.companyId);
 
     sendResponse(res, {
@@ -61,6 +68,7 @@ export const checkDebriefSubmission = catchAsync(
       message: result
         ? "You can submit a debrief"
         : "You can't submit a debrief",
+      data: getRig,
     });
   },
 );

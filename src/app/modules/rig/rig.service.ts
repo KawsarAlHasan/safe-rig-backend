@@ -34,8 +34,6 @@ export const rigCreateService = async (payload: any, companyId: any) => {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to create rig!");
   }
 
-  console.log(result, "result");
-
   return result;
 };
 

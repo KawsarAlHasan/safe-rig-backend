@@ -19,6 +19,7 @@ model Heatmap {
 }
 
 enum HeatmapStatus {
+    APPROVED
     COMPLETE
     PENDING
     CANCEL

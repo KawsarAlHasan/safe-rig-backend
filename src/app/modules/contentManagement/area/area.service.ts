@@ -371,9 +371,6 @@ export const getAreaService = async (query: any, companyId: any) => {
 export const getAreaByRigService = async (query: any) => {
   const { rigId, companyId } = query;
 
-  console.log("rigId", rigId);
-  console.log("companyId", companyId);
-
   const result = await dbClient.area.findMany({
     where: {
       companyId: companyId,

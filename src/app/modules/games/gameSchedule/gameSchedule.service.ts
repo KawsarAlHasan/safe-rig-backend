@@ -1,38 +1,69 @@
 import { StatusCodes } from "http-status-codes";
 import { Prisma } from "../../../../../generated/prisma/client";
-import bcrypt from "bcrypt";
 import ApiError from "../../../../errors/ApiError";
 import { dbClient } from "../../../../lib/prisma";
-import config from "../../../../config";
-import { statusName } from "../../../../shared/statusName";
-import { IQuery } from "../../../../types/company";
-
-// await dbClient.gameSchedule.deleteMany({});
-// await dbClient.gameSchedulePuzzle.deleteMany({});
-// await dbClient.gameScheduleQuestion.deleteMany({});
 
 // save game schedule
 export const saveGameScheduleService = async (payload: any) => {
-  const { scheduledFor, gameType, questions, puzzles } = payload;
+  const {
+    scheduledFor,
+    gameType,
+    questions,
+    puzzles,
+    isDefault,
+    companyId,
+    isAllRigs,
+    rigIds,
+  } = payload;
 
-  // delete game schedule
-  await dbClient.game.deleteMany({
-    where: {
-      scheduledFor,
-    },
-  });
+  // Correct boolean conversion
+  const toBoolean = (val: any): boolean => {
+    if (typeof val === "boolean") return val;
+    if (typeof val === "string") return val === "true";
+    return Boolean(val);
+  };
 
-  // save game schedule
+  const isDefaultBool = toBoolean(isDefault);
+  const isAllRigsBool = toBoolean(isAllRigs);
+  const numCompanyId = companyId ? Number(companyId) : null;
+  const numRigIds = (rigIds || []).map(Number).filter((id: any) => !isNaN(id));
+
+  // ─── delete old schedule ───
+  // Matching conditions must be exact
+  const deleteWhere: any = {
+    scheduledFor,
+    isDefault: isDefaultBool,
+  };
+
+  if (!isDefaultBool && numCompanyId) {
+    deleteWhere.companyId = numCompanyId;
+    deleteWhere.isAllRigs = isAllRigsBool;
+    if (!isAllRigsBool && numRigIds.length > 0) {
+      deleteWhere.rigIds = { equals: numRigIds };
+    } else if (!isAllRigsBool && numRigIds.length === 0) {
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        "Rig IDs required when isAllRigs is false",
+      );
+    }
+  }
+
+  await dbClient.game.deleteMany({ where: deleteWhere });
+
+  // ─── create new ───
   const result = await dbClient.game.create({
     data: {
       scheduledFor,
       gameType,
-      questionIds: questions,
-      puzzleIds: puzzles,
+      questionIds: questions || [],
+      puzzleIds: puzzles || [],
+      isDefault: isDefaultBool,
+      companyId: numCompanyId,
+      isAllRigs: isAllRigsBool,
+      rigIds: numRigIds,
     },
   });
 
-  // check company creation
   if (!result) {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
@@ -40,90 +71,133 @@ export const saveGameScheduleService = async (payload: any) => {
     );
   }
 
-  // Puzzle and QuestionAnwser are change isUsed to true
+  // ─── update used status ───
   if (gameType === "PUZZLE") {
     await dbClient.puzzle.updateMany({
-      where: {
-        id: {
-          in: puzzles,
-        },
-      },
-      data: {
-        isUsed: true,
-      },
+      where: { id: { in: puzzles || [] } },
+      data: { isUsed: true },
     });
   } else {
     await dbClient.questionAnwser.updateMany({
-      where: {
-        id: {
-          in: questions,
-        },
-      },
-      data: {
-        isUsed: true,
-      },
+      where: { id: { in: questions || [] } },
+      data: { isUsed: true },
     });
   }
 
   return result;
 };
 
-// get game schedule by scheduledFor
-export const getGameScheduleForAdminService = async (dateQuery: any) => {
-  const today = new Date();
-  let dateOnly: any;
+// get game schedule by scheduledFor for admin
+export const getGameScheduleForAdminService = async (payload: any) => {
+  let { isDefault, companyId, isAllRigs, rigIds, dateQuery } = payload;
 
-  if (dateQuery) {
-    dateOnly = dateQuery;
-  } else {
-    dateOnly = today.toISOString().split("T")[0];
+  // ──────────── Date ────────────
+  const dateOnly = dateQuery
+    ? String(dateQuery)
+    : new Date().toISOString().split("T")[0];
+
+  const whereClause: any = { scheduledFor: dateOnly };
+
+  // ──────────── Helper: string to boolean ────────────
+  const toBoolean = (val: any): boolean | undefined => {
+    if (val === undefined || val === null) return undefined;
+    if (typeof val === "boolean") return val;
+    if (typeof val === "string") return val === "true";
+    return Boolean(val);
+  };
+
+  // ──────────── 1. isDefault (1st condition) ────────────
+  const isDefaultBool = toBoolean(isDefault);
+  if (isDefaultBool !== undefined) {
+    whereClause.isDefault = isDefaultBool;
   }
 
-  // get game schedule
+  // ──────────── 2. isDefault = false → companyId  ────────────
+  if (isDefaultBool === false) {
+    if (
+      !companyId ||
+      companyId === "" ||
+      companyId === undefined ||
+      companyId === null
+    ) {
+      return null;
+    }
+    const numCompanyId = Number(companyId);
+    if (isNaN(numCompanyId)) return null;
+    whereClause.companyId = numCompanyId;
+  } else {
+    if (isDefaultBool === true) {
+    }
+  }
+
+  if (isDefaultBool === false && whereClause.companyId) {
+    const isAllRigsBool = toBoolean(isAllRigs);
+
+    if (isAllRigsBool === true) {
+      whereClause.isAllRigs = true;
+    } else if (isAllRigsBool === false) {
+      whereClause.isAllRigs = false;
+
+      // check rigIds
+      let formattedRigIds: number[] = [];
+
+      if (rigIds) {
+        if (Array.isArray(rigIds)) {
+          formattedRigIds = rigIds.map((id: any) => Number(id));
+        } else if (typeof rigIds === "string") {
+          if (rigIds.includes(",")) {
+            formattedRigIds = rigIds.split(",").map(Number);
+          } else {
+            formattedRigIds = [Number(rigIds)];
+          }
+        } else if (typeof rigIds === "number") {
+          formattedRigIds = [rigIds];
+        }
+
+        formattedRigIds = formattedRigIds.filter((id) => !isNaN(id));
+      }
+
+      if (formattedRigIds.length > 0) {
+        whereClause.rigIds = { hasSome: formattedRigIds };
+      } else {
+        return null;
+      }
+    }
+  }
+
   const todaysGame = await dbClient.game.findFirst({
-    where: { scheduledFor: dateOnly },
+    where: whereClause,
+    orderBy: { createdAt: "desc" },
   });
 
-  if (!todaysGame) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Game schedule doesn't exist!");
+  if (!todaysGame) return null;
+
+  let questions: any[] = [];
+  let puzzles: any[] = [];
+
+  if (todaysGame.gameType === "QUESTION") {
+    questions = await dbClient.questionAnwser.findMany({
+      where: { id: { in: todaysGame.questionIds } },
+    });
+  } else if (todaysGame.gameType === "PUZZLE") {
+    puzzles = await dbClient.puzzle.findMany({
+      where: { id: { in: todaysGame.puzzleIds } },
+    });
   }
 
-  let questions: any = [];
-  let puzzles: any = [];
-
-  if (todaysGame?.gameType === "QUESTION") {
-    const result = await dbClient.questionAnwser.findMany({
-      where: {
-        id: {
-          in: todaysGame.questionIds,
-        },
-      },
-    });
-
-    questions = result;
-  } else {
-    const result = await dbClient.puzzle.findMany({
-      where: {
-        id: {
-          in: todaysGame.puzzleIds,
-        },
-      },
-    });
-
-    puzzles = result;
-  }
-
-  const formatted = {
+  return {
     id: todaysGame.id,
     scheduledFor: todaysGame.scheduledFor,
     gameType: todaysGame.gameType,
+    questions,
+    puzzles,
+    isDefault: todaysGame.isDefault,
+    companyId: todaysGame.companyId,
+    isAllRigs: todaysGame.isAllRigs,
+    rigIds: todaysGame.rigIds,
     createdAt: todaysGame.createdAt,
     updatedAt: todaysGame.updatedAt,
-    questions: questions,
-    puzzles: puzzles,
   };
-
-  return formatted;
 };
 
 // get game schedule by scheduledFor

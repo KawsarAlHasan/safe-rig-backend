@@ -1,15 +1,16 @@
 model Puzzle {
-    id Int @id @default(autoincrement())
-
-    image String
-    title String?
-    marks Json?
-
-    time   Int
-    isUsed Boolean @default(false)
-
-    status AllStatus @default(ACTIVE)
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    id        Int       @id @default(autoincrement())
+    image     String
+    title     String?
+    marks     Json?
+    time      Int
+    isUsed    Boolean   @default(false)
+    status    AllStatus @default(ACTIVE)
+    // isDefault Boolean   @default(false)
+    // company   Company?  @relation(fields: [companyId], references: [id])
+    // companyId Int?
+    // isAllRigs Boolean   @default(false)
+    // rigIds    Int[]
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
 }

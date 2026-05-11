@@ -4,6 +4,11 @@ model Game {
     gameType     GameType
     puzzleIds    Int[]
     questionIds  Int[]
+    isDefault    Boolean  @default(false)
+    company      Company? @relation(fields: [companyId], references: [id])
+    companyId    Int?
+    isAllRigs    Boolean  @default(false)
+    rigIds       Int[]
     createdAt    DateTime @default(now())
     updatedAt    DateTime @updatedAt
 }

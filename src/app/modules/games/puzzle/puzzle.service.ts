@@ -8,9 +8,13 @@ import unlinkFile from "../../../../shared/unlinkFile";
 
 // create new Puzzle
 export const puzzleCreateService = async (payloadData: any) => {
-  const { image, title, marks, time } = payloadData;
+  const { image, title, marks, time, isDefault, companyId, isAllRigs, rigIds } =
+    payloadData;
 
-  // await dbClient.puzzle.deleteMany({});
+  // const isDefaultCheck = isDefault == "true" ? true : false;
+  // const numCompanyId = companyId ? Number(companyId) : companyId;
+  // const isAllRigsCheck = isAllRigs == "true" ? true : false;
+  // const numRigIds = rigIds ? JSON.parse(rigIds) : [];
 
   // create new Puzzle on prisma dbClient
   const result = await dbClient.puzzle.create({
@@ -19,6 +23,10 @@ export const puzzleCreateService = async (payloadData: any) => {
       title: title,
       marks: marks,
       time: parseInt(time),
+      // isDefault: isDefaultCheck,
+      // companyId: numCompanyId,
+      // isAllRigs: isAllRigsCheck,
+      // rigIds: numRigIds,
     },
   });
 

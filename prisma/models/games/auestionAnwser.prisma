@@ -1,6 +1,5 @@
 model QuestionAnwser {
-    id Int @id @default(autoincrement())
-
+    id            Int       @id @default(autoincrement())
     image         String?
     question      String
     option1       String?
@@ -9,10 +8,13 @@ model QuestionAnwser {
     option4       String?
     correctAnswer Int
     time          Int
-    isUsed        Boolean @default(false)
-
-    status AllStatus @default(ACTIVE)
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    isUsed        Boolean   @default(false)
+    status        AllStatus @default(ACTIVE)
+    // isDefault     Boolean   @default(false)
+    // company       Company?  @relation(fields: [companyId], references: [id])
+    // companyId     Int?
+    // isAllRigs     Boolean   @default(false)
+    // rigIds        Int[]
+    createdAt     DateTime  @default(now())
+    updatedAt     DateTime  @updatedAt
 }

@@ -17,7 +17,16 @@ export const questionCreateService = async (payloadData: any) => {
     option4,
     correctAnswer,
     time,
+    // isDefault,
+    // companyId,
+    // isAllRigs,
+    // rigIds,
   } = payloadData;
+
+  // const isDefaultCheck = isDefault == "true" ? true : false;
+  // const numCompanyId = companyId ? Number(companyId) : companyId;
+  // const isAllRigsCheck = isAllRigs == "true" ? true : false;
+  // const numRigIds = rigIds ? Number(rigIds) : rigIds;
 
   // check Question and Anwsar name
   const isExistInAllRigs = await dbClient.questionAnwser.findFirst({
@@ -44,6 +53,10 @@ export const questionCreateService = async (payloadData: any) => {
       option4: option4,
       correctAnswer: parseInt(correctAnswer),
       time: parseInt(time),
+      // isDefault: isDefaultCheck,
+      // companyId: numCompanyId,
+      // isAllRigs: isAllRigsCheck,
+      // rigIds: numRigIds,
     },
   });
 

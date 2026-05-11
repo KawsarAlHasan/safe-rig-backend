@@ -30,7 +30,17 @@ export const saveGameSchedule = catchAsync(
 // get game schedule for admin
 export const getGameScheduleForAdmin = catchAsync(
   async (req: Request, res: Response) => {
-    const result = await getGameScheduleForAdminService(req.params.date);
+    const payload = {
+      isDefault: req.query.isDefault,
+      companyId: req.query.companyId,
+      isAllRigs: req.query.isAllRigs,
+      rigIds: req.query["rigIds[]"],
+      dateQuery: req.params.date,
+    };
+
+    const result = await getGameScheduleForAdminService(payload);
+
+    console.log(result, "result");
 
     sendResponse(res, {
       success: true,

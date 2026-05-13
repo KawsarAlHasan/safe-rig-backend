@@ -208,3 +208,43 @@ export const getRigAreaTypeHazardService = async (
 
   return { area, hazard, cardType, rig, rigType };
 };
+
+// get admin dashboard overview
+export const getAdminDashboardOverviewService = async () => {
+  const companyCount = await dbClient.company.count();
+
+  const rigCount = await dbClient.rig.count();
+
+  const userCount = await dbClient.user.count();
+
+  const totalApprovedHeatmap = await dbClient.heatmap.count({
+    where: {
+      status: "APPROVED",
+    },
+  });
+
+  const totalPendingHeatmap = await dbClient.heatmap.count({
+    where: {
+      status: "PENDING",
+    },
+  });
+
+  // Sum of all active subscription prices
+  const totalSubscriptionBuyMoney = await dbClient.subscriptions.aggregate({
+    where: {
+      status: "ACTIVE",
+    },
+    _sum: {
+      price: true,
+    },
+  });
+
+  return {
+    companyCount,
+    rigCount,
+    userCount,
+    totalApprovedHeatmap,
+    totalPendingHeatmap,
+    totalSubscriptionBuyMoney: totalSubscriptionBuyMoney._sum.price || 0,
+  };
+};

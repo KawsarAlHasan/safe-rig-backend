@@ -96,7 +96,7 @@ export const checkCardSubmission = catchAsync(
     const result = await checkCardSubmissionService(user.id, user.companyId);
 
     sendResponse(res, {
-      success: result,
+      success: true, // result,
       statusCode: StatusCodes.OK,
       message: "You can submit a new card",
       data: getRig,

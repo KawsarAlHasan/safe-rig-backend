@@ -5,6 +5,7 @@ import sendResponse from "../../../shared/sendResponse";
 import resolveCompanyId from "../../../helpers/resolveCompanyId";
 import {
   getSingleHeatmapService,
+  getSingleHeatmapWithCardService,
   heatmapCreateService,
   heatmapGetService,
   updateHeatmapService,
@@ -73,6 +74,33 @@ export const getSingleHeatmap = catchAsync(
         heatmap: result?.heatmap,
         areas: result?.areas,
       },
+    });
+  },
+);
+
+// get single heatmap
+export const getSingleWithCardHeatmap = catchAsync(
+  async (req: Request, res: Response) => {
+    const id = req.params.id;
+
+    const companyId = resolveCompanyId(req);
+
+    const payload = {
+      id,
+      companyId,
+    };
+
+    const result = await getSingleHeatmapWithCardService(payload);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Heatmap fetched successfully",
+      // data: {
+      //   heatmap: result?.heatmap,
+      //   areas: result?.areas,
+      // },
+      data: result,
     });
   },
 );

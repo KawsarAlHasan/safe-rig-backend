@@ -6,6 +6,7 @@ import {
   createNewHeatmap,
   getAllHeatmaps,
   getSingleHeatmap,
+  getSingleWithCardHeatmap,
   heatmapStatusChange,
 } from "./heatmaps.controller";
 import fileUploadHandler from "../../middlewares/fileUploadHandler";
@@ -25,6 +26,7 @@ router.patch("/admin/status-change", adminAuth(), heatmapStatusChange);
 
 router.get("/admin/all", adminAuth(), getAllHeatmaps);
 router.get("/single/:id", getSingleHeatmap);
+router.get("/singlewithcard/:id", clientAuth(), getSingleWithCardHeatmap);
 
 // // ───── Client Routes ─────
 router.post(

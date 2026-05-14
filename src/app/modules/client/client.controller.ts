@@ -2,82 +2,83 @@ import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
-import {
-  adminCreateService,
-  deleteAdminService,
-  getAllAdminService,
-  updateAdminService,
-  updateAdminStatusService,
-} from "./admin.service";
 
-// create new Admin
-export const createNewAdmin = catchAsync(
+import resolveCompanyId from "../../../helpers/resolveCompanyId";
+import { deleteRigAdminService, getAllRigAdminService, rigAdminCreateService, updateRigAdminService } from "./client.service";
+
+// create new rig Admin
+export const createNewRigAdmin = catchAsync(
   async (req: Request, res: Response) => {
-    const { ...adminData } = req.body;
+    const companyId = resolveCompanyId(req);
 
-    const result = await adminCreateService(adminData);
+    const payload = { ...req.body, companyId };
+
+    const result = await rigAdminCreateService(payload);
 
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
-      message: "Admin created successfully",
+      message: "Rig Admin created successfully",
       data: result,
     });
   },
 );
 
-// get all Admin
-export const getAllAdmin = catchAsync(async (req: Request, res: Response) => {
-  const result = await getAllAdminService();
-
-  sendResponse(res, {
-    success: true,
-    statusCode: StatusCodes.OK,
-    message: "Admin fetched successfully",
-    data: result,
-  });
-});
-
-// Update an existing Admin
-export const updateAdmin = catchAsync(async (req: Request, res: Response) => {
-  const { ...adminData } = req.body;
-
-  const result = await updateAdminService(adminData);
-
-  sendResponse(res, {
-    success: true,
-    statusCode: StatusCodes.OK,
-    message: "Admin updated successfully",
-    data: result,
-  });
-});
-
-// status change
-export const adminStatusChange = catchAsync(
+// get all rig Admin
+export const getAllRigAdmin = catchAsync(
   async (req: Request, res: Response) => {
-    const { ...adminData } = req.body;
-
-    const result = await updateAdminStatusService(adminData);
+    const companyId = resolveCompanyId(req);
+    const result = await getAllRigAdminService(companyId, req.query);
 
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
-      message: "Admin status changed successfully",
+      message: "Rig Admin fetched successfully",
       data: result,
     });
   },
 );
 
-// Delete an existing Admin
-export const deleteAdmin = catchAsync(async (req: Request, res: Response) => {
-  const adminId = req.params.id;
-
-  const result = await deleteAdminService(adminId);
+// get admin profile
+export const adminProfile = catchAsync(async (req: Request, res: Response) => {
+  const admin = (req as any).decodedAdmin;
 
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
-    message: "Admin deleted successfully",
-    data: result,
+    message: "Admin profile fetched successfully",
+    data: admin,
   });
 });
+
+// Update an existing Rig Admin
+export const updateRigAdmin = catchAsync(
+  async (req: Request, res: Response) => {
+    const { ...adminData } = req.body;
+
+    const result = await updateRigAdminService(adminData);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Rig Admin updated successfully",
+      data: result,
+    });
+  },
+);
+
+// Delete an existing Rig Admin
+export const deleteRigAdmin = catchAsync(
+  async (req: Request, res: Response) => {
+    const adminId = req.params.id;
+
+    const result = await deleteRigAdminService(adminId);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Rig Admin deleted successfully",
+      data: result,
+    });
+  },
+);

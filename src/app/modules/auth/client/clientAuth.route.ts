@@ -1,36 +1,59 @@
 import express from "express";
 import validateRequest from "../../../middlewares/validateRequest";
-import { clientProfile, loginClient } from "./clientAuth.controller";
-import { loginZodSchema } from "./clientAuth.validation";
+import {
+  clientProfile,
+  createNewCompany,
+  loginClient,
+  resendClientCode,
+  verifyClientEmailOtp,
+} from "./clientAuth.controller";
+import {
+  companyZodSchema,
+  loginZodSchema,
+  resendCodeZodSchema,
+  verifyEmailZodSchema,
+} from "./clientAuth.validation";
 import { clientAuth } from "../../../middlewares/auth";
 const router = express.Router();
 
 router.post("/login", validateRequest(loginZodSchema), loginClient);
 router.get("/profile", clientAuth(), clientProfile);
 
+router.post("/signup", validateRequest(companyZodSchema), createNewCompany);
+
+router.post(
+  "/verify-email",
+  validateRequest(verifyEmailZodSchema),
+  verifyClientEmailOtp,
+);
+
+router.post(
+  "/resend-code",
+  validateRequest(resendCodeZodSchema),
+  resendClientCode,
+);
+
+// // sign in
+// router.post("/signin", validateRequest(loginZodSchema), userLogin);
+
 // router.post(
-//   '/forget-password',
-//   validateRequest(AuthValidation.createForgetPasswordZodSchema),
-//   AuthController.forgetPassword
+//   "/forgot-password",
+//   validateRequest(resendCodeZodSchema),
+//   forgotPassword,
 // );
 
 // router.post(
-//   '/verify-email',
-//   validateRequest(AuthValidation.createVerifyEmailZodSchema),
-//   AuthController.verifyEmail
+//   "/verify-otp",
+//   validateRequest(verifyEmailZodSchema),
+//   verifyOtp,
 // );
 
 // router.post(
-//   '/reset-password',
-//   validateRequest(AuthValidation.createResetPasswordZodSchema),
-//   AuthController.resetPassword
+//   "/set-password",
+//   validateRequest(setPasswordZodSchema),
+//   setPassword,
 // );
 
-// router.post(
-//   '/change-password',
-//   auth(USER_ROLES.ADMIN, USER_ROLES.USER),
-//   validateRequest(AuthValidation.createChangePasswordZodSchema),
-//   AuthController.changePassword
-// );
+// router.delete("/:id", permanentDeleteUser);
 
 export const ClientAuthRoutes = router;

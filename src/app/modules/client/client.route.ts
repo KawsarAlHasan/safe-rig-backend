@@ -1,23 +1,19 @@
 import express from "express";
-import validateRequest from "../../middlewares/validateRequest";
 import {
-  createNewAdmin,
-  getAllAdmin,
-  updateAdmin,
-  deleteAdmin,
-  adminStatusChange,
-} from "./admin.controller";
-import {
-  createAdminZodSchema,
-  updateAdminStatusZodSchema,
-  updateAdminZodSchema,
-} from "./admin.validation";
+  createNewRigAdmin,
+  getAllRigAdmin,
+  updateRigAdmin,
+  deleteRigAdmin,
+  adminProfile,
+} from "./client.controller";
+import { adminAuth, clientAuth } from "../../middlewares/auth";
 const router = express.Router();
 
-router.post("/create", validateRequest(createAdminZodSchema), createNewAdmin);
-router.get("/", getAllAdmin);
-router.patch("/update", validateRequest(updateAdminZodSchema), updateAdmin);
-router.patch("/update-status", adminStatusChange);
-router.delete("/:id", deleteAdmin);
+router.post("/create", clientAuth(), createNewRigAdmin);
+router.get("/", clientAuth(), getAllRigAdmin);
+router.put("/update", clientAuth(), updateRigAdmin);
+router.delete("/:id", clientAuth(), deleteRigAdmin);
 
-export const AdminRoutes = router;
+router.get("/profile", adminAuth(), adminProfile);
+
+export const ClientRoutes = router;

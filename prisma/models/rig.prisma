@@ -23,4 +23,5 @@ model Rig {
     heatmap         Heatmap[]
     rigAdmins       RigAdmin[]
     gameResults     GameResult[]
+    clients         Client[]
 }

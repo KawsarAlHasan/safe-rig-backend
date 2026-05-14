@@ -5,27 +5,18 @@ import { dbClient } from "../../../lib/prisma";
 import config from "../../../config";
 import { statusName } from "../../../shared/statusName";
 
-// create new Admin
-export const adminCreateService = async (adminData: any) => {
-  const { name, email, password, phone, roleId } = adminData;
+// create new rig Admin
+export const rigAdminCreateService = async (adminData: any) => {
+  const { name, email, password, phone, companyId, rigId } = adminData;
 
   // check if email already exists
-  const isExistEmail = await dbClient.admin.findUnique({
-    where: { email },
+  const isExistEmail = await dbClient.client.findUnique({
+    where: { email: email },
   });
 
   // check if email already exists
   if (isExistEmail) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Email already exists!");
-  }
-
-  // find role by roleId
-  const roleData = await dbClient.adminRole.findUnique({
-    where: { id: roleId },
-  });
-
-  if (!roleData) {
-    throw new ApiError(StatusCodes.NOT_FOUND, "Role not found!");
   }
 
   //hash password
@@ -34,144 +25,116 @@ export const adminCreateService = async (adminData: any) => {
     Number(config.bcrypt_salt_rounds),
   );
 
-  // create admin
-  const result = await dbClient.admin.create({
+  // create rigAdmin
+  const result = await dbClient.client.create({
     data: {
       name,
       email,
       phone,
       password: hashedPassword,
-      roleId: roleData.id,
-    },
-    include: {
-      role: true,
+      isMainClient: false,
+      companyId,
+      rigId,
     },
   });
 
-  // check admin creation
+  // check rig admin creation
   if (!result) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to create admin!");
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to create rig admin!");
   }
 
   return result;
 };
 
-// get all Admin
-export const getAllAdminService = async () => {
-  const result = await dbClient.admin.findMany({
+// get all rig Admin
+export const getAllRigAdminService = async (companyId: any, query: any) => {
+  const { rigId, status } = query;
+
+  // get rig admin
+  const result = await dbClient.client.findMany({
+    where: {
+      companyId: Number(companyId),
+      isMainClient: false,
+
+      ...(rigId && {
+        rigId: Number(rigId),
+      }),
+
+      ...(status && {
+        status,
+      }),
+    },
+
     include: {
-      role: {
-        include: {
-          permissions: true,
-        },
-      },
+      rig: true,
+    },
+
+    orderBy: {
+      id: "desc",
     },
   });
 
   // check admin creation
   if (!result) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to fetch admin!");
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to fetch rig admin!");
   }
 
-  // check if no admin
+  // check if no rig admin
   if (result.length === 0) {
-    throw new ApiError(StatusCodes.NOT_FOUND, "No admins found!");
+    throw new ApiError(StatusCodes.NOT_FOUND, "No rig admin found!");
   }
 
   return result;
 };
 
-// Update an existing Admin
-export const updateAdminService = async (adminData: any) => {
-  const { id, name, phone, roleId } = adminData;
+// Update an existing Rig Admin
+export const updateRigAdminService = async (adminData: any) => {
+  const { id, name, email, rigId } = adminData;
 
-  // check Admin exist
-  const isExistAdmin = await dbClient.admin.findUnique({
+  // check Rig Admin exist
+  const isExistRigAdmin = await dbClient.client.findUnique({
     where: { id: id },
   });
-  if (!isExistAdmin) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Admin doesn't exist!");
-  }
-
-  // find role by roleId
-  const roleData = await dbClient.adminRole.findUnique({
-    where: { id: roleId },
-  });
-
-  if (!roleData) {
-    throw new ApiError(StatusCodes.NOT_FOUND, "Role not found!");
+  if (!isExistRigAdmin) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Rig Admin doesn't exist!");
   }
 
   // update Admin
-  const result = await dbClient.admin.update({
+  const result = await dbClient.client.update({
     where: { id: id },
     data: {
       name: name,
-      phone: phone,
-      roleId: roleId,
-    },
-    include: {
-      role: true,
+      email: email,
+      rigId: rigId,
     },
   });
 
   if (!result) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to update admin!");
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to update rig admin!");
   }
 
   return result;
 };
 
-// status change
-export const updateAdminStatusService = async (adminData: any) => {
-  const { id, status } = adminData;
-
-  if (!statusName.includes(status)) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Invalid status!");
-  }
-
-  // check Admin exist
-  const isExistAdmin = await dbClient.admin.findUnique({
-    where: { id: id },
-  });
-  if (!isExistAdmin) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Admin doesn't exist!");
-  }
-
-  // status change
-  const result = await dbClient.admin.update({
-    where: { id: id },
-    data: {
-      status: status,
-    },
-  });
-
-  if (!result) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to status change!");
-  }
-
-  return result;
-};
-
-// Delete an existing Admin
-export const deleteAdminService = async (adminId: any) => {
+// Delete an existing rig Admin
+export const deleteRigAdminService = async (adminId: any) => {
   const id = parseInt(adminId);
 
   // check Admin exist
-  const isExistAdmin = await dbClient.admin.findUnique({
-    where: { id: id },
+  const isExistAdmin = await dbClient.client.findUnique({
+    where: { id: id, isMainClient: false },
   });
   if (!isExistAdmin) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Admin doesn't exist!");
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Rig Admin doesn't exist!");
   }
 
   // delete Admin
-  const result = await dbClient.admin.delete({
+  const result = await dbClient.client.delete({
     where: { id: id },
   });
 
   if (!result) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to delete admin!");
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to delete rig admin!");
   }
 
   return result;

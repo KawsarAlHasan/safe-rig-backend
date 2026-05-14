@@ -63,205 +63,417 @@ export const loginClientFromDB = async (payload: ILoginData) => {
   return { createToken };
 };
 
-export const clientProfileFromDB = async () => {
-  // const isExistClient = await dbClient.client.findUnique({
-  //   where: { id },
+// create new company and client
+export const companyAndClientCreateService = async (payload: any) => {
+  const { name, email, phone, clientName, clientEmail, clientPassword, logo } =
+    payload;
+
+  // // check if company exist
+  // const isExistCompany = await dbClient.company.findUnique({
+  //   where: { name },
   // });
-  return "test";
+  // if (isExistCompany) {
+  //   throw new ApiError(StatusCodes.BAD_REQUEST, "Company already exists!");
+  // }
+
+  // check if client exist
+  const isExistClient = await dbClient.client.findUnique({
+    where: { email: clientEmail },
+    include: { company: true },
+  });
+
+  if (
+    isExistClient?.company?.status == "PENDING" &&
+    isExistClient?.status == "PENDING"
+  ) {
+    await dbClient.client.delete({
+      where: { id: isExistClient.id },
+    });
+
+    await dbClient.company.delete({
+      where: { id: isExistClient.companyId },
+    });
+  } else if (isExistClient) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Client already exists!");
+  }
+
+  // create Company
+  const result = await dbClient.company.create({
+    data: {
+      name,
+      email,
+      phone,
+      logo,
+      status: "PENDING",
+    },
+  });
+
+  // check company creation
+  if (!result) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to create company!");
+  }
+
+  //hash password
+  const hashedPassword = await bcrypt.hash(
+    clientPassword,
+    Number(config.bcrypt_salt_rounds),
+  );
+
+  // create client
+  await dbClient.client.create({
+    data: {
+      name: clientName,
+      email: clientEmail,
+      password: hashedPassword,
+      isMainClient: true,
+      isVerified: false,
+      companyId: result.id,
+      status: "PENDING",
+    },
+  });
+
+  //send email
+  const otp = generateOTP();
+  const values = {
+    otp: otp,
+    companyName: name,
+    companyEmail: email,
+    companyPhone: phone,
+    clientName: clientName,
+    clientEmail: clientEmail,
+  };
+
+  await dbClient.otp.deleteMany({
+    where: {
+      email: clientEmail,
+    },
+  });
+
+  // otp saved to DB
+  const otpPayload = {
+    otp: otp,
+    email: clientEmail,
+    type: "CLIENT_EMAIL_VERIFICATION",
+    expiresAt: new Date(Date.now() + 5 * 60000),
+  };
+
+  await dbClient.otp.create({
+    data: otpPayload,
+  });
+
+  const createCompanyTemplate = emailTemplate.createCompany(values);
+  emailHelper(createCompanyTemplate);
+
+  return result;
 };
 
-// //forget password
-// const forgetPasswordToDB = async (email: string) => {
-//   const isExistUser = await User.isExistUserByEmail(email);
-//   if (!isExistUser) {
-//     throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
+// // verify otp code
+// export const verifyClientEmailToDB = async (payload: any) => {
+//   const { email, otp } = payload;
+
+//   const isExistClient = await dbClient.client.findUnique({
+//     where: { email },
+//   });
+//   if (!isExistClient) {
+//     throw new ApiError(StatusCodes.BAD_REQUEST, "Client doesn't exist!");
 //   }
 
-//   //send mail
-//   const otp = generateOTP();
-//   const value = {
-//     otp,
-//     email: isExistUser.email,
-//   };
-//   const forgetPassword = emailTemplate.resetPassword(value);
-//   emailHelper.sendEmail(forgetPassword);
-
-//   //save to DB
-//   const authentication = {
-//     oneTimeCode: otp,
-//     expireAt: new Date(Date.now() + 3 * 60000),
-//   };
-//   await User.findOneAndUpdate({ email }, { $set: { authentication } });
-// };
-
-// //verify email
-// const verifyEmailToDB = async (payload: IVerifyEmail) => {
-//   const { email, oneTimeCode } = payload;
-//   const isExistUser = await User.findOne({ email }).select("+authentication");
-//   if (!isExistUser) {
-//     throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
+//   const isExistOtp = await dbClient.otp.findFirst({
+//     where: { email, type: "CLIENT_EMAIL_VERIFICATION" },
+//   });
+//   if (!isExistOtp) {
+//     throw new ApiError(StatusCodes.BAD_REQUEST, "Otp doesn't exist!");
 //   }
 
-//   if (!oneTimeCode) {
-//     throw new ApiError(
-//       StatusCodes.BAD_REQUEST,
-//       "Please give the otp, check your email we send a code",
-//     );
-//   }
-
-//   if (isExistUser.authentication?.oneTimeCode !== oneTimeCode) {
+//   if (isExistOtp.otp !== otp) {
 //     throw new ApiError(StatusCodes.BAD_REQUEST, "You provided wrong otp");
 //   }
 
 //   const date = new Date();
-//   if (date > isExistUser.authentication?.expireAt) {
+//   if (date > isExistOtp.expiresAt) {
+//     await dbClient.otp.deleteMany({
+//       where: {
+//         email: email,
+//       },
+//     });
+
 //     throw new ApiError(
 //       StatusCodes.BAD_REQUEST,
 //       "Otp already expired, Please try again",
 //     );
 //   }
 
-//   let message;
-//   let data;
-
-//   if (!isExistUser.verified) {
-//     await User.findOneAndUpdate(
-//       { _id: isExistUser._id },
-//       { verified: true, authentication: { oneTimeCode: null, expireAt: null } },
-//     );
-//     message = "Email verify successfully";
-//   } else {
-//     await User.findOneAndUpdate(
-//       { _id: isExistUser._id },
-//       {
-//         authentication: {
-//           isResetPassword: true,
-//           oneTimeCode: null,
-//           expireAt: null,
-//         },
-//       },
-//     );
-
-//     //create token ;
-//     const createToken = cryptoToken();
-//     await ResetToken.create({
-//       user: isExistUser._id,
-//       token: createToken,
-//       expireAt: new Date(Date.now() + 5 * 60000),
-//     });
-//     message =
-//       "Verification Successful: Please securely store and utilize this code for reset password";
-//     data = createToken;
-//   }
-//   return { data, message };
-// };
-
-// //forget password
-// const resetPasswordToDB = async (
-//   token: string,
-//   payload: IAuthResetPassword,
-// ) => {
-//   const { newPassword, confirmPassword } = payload;
-//   //isExist token
-//   const isExistToken = await ResetToken.isExistToken(token);
-//   if (!isExistToken) {
-//     throw new ApiError(StatusCodes.UNAUTHORIZED, "You are not authorized");
-//   }
-
-//   //user permission check
-//   const isExistUser = await User.findById(isExistToken.user).select(
-//     "+authentication",
-//   );
-//   if (!isExistUser?.authentication?.isResetPassword) {
-//     throw new ApiError(
-//       StatusCodes.UNAUTHORIZED,
-//       "You don't have permission to change the password. Please click again to 'Forgot Password'",
-//     );
-//   }
-
-//   //validity check
-//   const isValid = await ResetToken.isExpireToken(token);
-//   if (!isValid) {
-//     throw new ApiError(
-//       StatusCodes.BAD_REQUEST,
-//       "Token expired, Please click again to the forget password",
-//     );
-//   }
-
-//   //check password
-//   if (newPassword !== confirmPassword) {
-//     throw new ApiError(
-//       StatusCodes.BAD_REQUEST,
-//       "New password and Confirm password doesn't match!",
-//     );
-//   }
-
-//   const hashPassword = await bcrypt.hash(
-//     newPassword,
-//     Number(config.bcrypt_salt_rounds),
-//   );
-
-//   const updateData = {
-//     password: hashPassword,
-//     authentication: {
-//       isResetPassword: false,
+//   // update company
+//   await dbClient.company.update({
+//     where: { id: isExistClient.companyId },
+//     data: {
+//       status: "ACTIVE",
 //     },
-//   };
-
-//   await User.findOneAndUpdate({ _id: isExistToken.user }, updateData, {
-//     new: true,
 //   });
+
+//   // update client
+//   await dbClient.client.update({
+//     where: { email },
+//     data: {
+//       isVerified: true,
+//       status: "ACTIVE",
+//     },
+//   });
+
+//   // delete otp
+//   await dbClient.otp.deleteMany({
+//     where: {
+//       email: email,
+//     },
+//   });
+
+//   //create token
+//   const createToken = createAuthToken({
+//     id: isExistClient.id,
+//     role: "client",
+//   });
+
+//   return { createToken };
 // };
 
-// const changePasswordToDB = async (
-//   user: JwtPayload,
-//   payload: IChangePassword,
-// ) => {
-//   const { currentPassword, newPassword, confirmPassword } = payload;
-//   const isExistUser = await User.findById(user.id).select("+password");
-//   if (!isExistUser) {
-//     throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
-//   }
+// verify otp code
+export const verifyClientEmailToDB = async (payload: any) => {
+  const { email, otp } = payload;
 
-//   //current password match
-//   if (
-//     currentPassword &&
-//     (await !User.isMatchPassword(currentPassword, isExistUser.password))
-//   ) {
-//     throw new ApiError(StatusCodes.BAD_REQUEST, "Password is incorrect");
-//   }
+  const isExistClient = await dbClient.client.findUnique({
+    where: { email },
+  });
+  if (!isExistClient) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Client doesn't exist!");
+  }
 
-//   //newPassword and current password
-//   if (currentPassword === newPassword) {
-//     throw new ApiError(
-//       StatusCodes.BAD_REQUEST,
-//       "Please give different password from current password",
-//     );
-//   }
-//   //new password and confirm password check
-//   if (newPassword !== confirmPassword) {
-//     throw new ApiError(
-//       StatusCodes.BAD_REQUEST,
-//       "Password and Confirm password doesn't matched",
-//     );
-//   }
+  const isExistOtp = await dbClient.otp.findFirst({
+    where: { email, type: "CLIENT_EMAIL_VERIFICATION" },
+  });
+  if (!isExistOtp) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Otp doesn't exist!");
+  }
 
-//   //hash password
-//   const hashPassword = await bcrypt.hash(
-//     newPassword,
-//     Number(config.bcrypt_salt_rounds),
-//   );
+  if (isExistOtp.otp !== otp) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "You provided wrong otp");
+  }
 
-//   const updateData = {
-//     password: hashPassword,
-//   };
-//   await User.findOneAndUpdate({ _id: user.id }, updateData, { new: true });
-// };
+  const date = new Date();
+  if (date > isExistOtp.expiresAt) {
+    await dbClient.otp.deleteMany({
+      where: { email: email },
+    });
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      "Otp already expired, Please try again",
+    );
+  }
 
-// export const AuthService = {
-//   verifyEmailToDB,
-//   loginUserFromDB,
-//   forgetPasswordToDB,
-//   resetPasswordToDB,
-//   changePasswordToDB,
-// };
+  // start transaction
+  const result = await dbClient.$transaction(async (tx) => {
+    // 1. company verify and ACTIVE
+    const updatedCompany = await tx.company.update({
+      where: { id: isExistClient.companyId },
+      data: { status: "ACTIVE" },
+    });
+
+    // 2. client verify and ACTIVE
+    await tx.client.update({
+      where: { email },
+      data: {
+        isVerified: true,
+        status: "ACTIVE",
+      },
+    });
+
+    // 3. delete otp
+    await tx.otp.deleteMany({
+      where: { email: email },
+    });
+
+    // 4. Check if already any Area exists for this company (to avoid duplication)
+    const existingAreas = await tx.area.count({
+      where: { companyId: updatedCompany.id },
+    });
+
+    if (existingAreas === 0) {
+      // ---------- Area ----------
+      const defaultAreas = await tx.area.findMany({
+        where: { isDefault: true, companyId: null },
+      });
+      for (const area of defaultAreas) {
+        await tx.area.create({
+          data: {
+            name: area.name,
+            color: area.color,
+            status: area.status,
+            companyId: updatedCompany.id,
+            isAllRigs: true,
+            rigIds: [],
+          },
+        });
+      }
+
+      // ---------- CardType ----------
+      const defaultCardTypes = await tx.cardType.findMany({
+        where: { isDefault: true, companyId: null },
+      });
+      for (const cardType of defaultCardTypes) {
+        await tx.cardType.create({
+          data: {
+            name: cardType.name,
+            status: cardType.status,
+            companyId: updatedCompany.id,
+            isAllRigs: true,
+            rigIds: [],
+          },
+        });
+      }
+
+      // ---------- Hazard ----------
+      const defaultHazards = await tx.hazard.findMany({
+        where: { isDefault: true, companyId: null },
+      });
+      for (const hazard of defaultHazards) {
+        await tx.hazard.create({
+          data: {
+            name: hazard.name,
+            status: hazard.status,
+            companyId: updatedCompany.id,
+            isAllRigs: true,
+            rigIds: [],
+          },
+        });
+      }
+
+      // ---------- Alert ----------
+      const defaultAlerts = await tx.alert.findMany({
+        where: { isDefault: true, companyId: null },
+      });
+      for (const alert of defaultAlerts) {
+        await tx.alert.create({
+          data: {
+            title: alert.title,
+            description: alert.description,
+            file: alert.file,
+            status: alert.status,
+            companyId: updatedCompany.id,
+            isAllRigs: true,
+            rigIds: [],
+          },
+        });
+      }
+
+      // ---------- Message ----------
+      const defaultMessages = await tx.message.findMany({
+        where: { isDefault: true, companyId: null },
+      });
+      for (const message of defaultMessages) {
+        await tx.message.create({
+          data: {
+            title: message.title,
+            description: message.description,
+            file: message.file,
+            sectionTitle: message.sectionTitle,
+            status: message.status,
+            companyId: updatedCompany.id,
+            isAllRigs: true,
+            rigIds: [],
+          },
+        });
+      }
+
+      // ---------- RigType ----------
+      const defaultRigTypes = await tx.rigType.findMany({
+        where: { isDefault: true, companyId: null },
+      });
+      for (const rigType of defaultRigTypes) {
+        await tx.rigType.create({
+          data: {
+            name: rigType.name,
+            status: rigType.status,
+            companyId: updatedCompany.id,
+            isAllRigs: true,
+            rigIds: [],
+          },
+        });
+      }
+
+      // ---------- Videos ----------
+      const defaultVideos = await tx.videos.findMany({
+        where: { isDefault: true, companyId: null },
+      });
+      for (const video of defaultVideos) {
+        await tx.videos.create({
+          data: {
+            title: video.title,
+            description: video.description,
+            position: video.position,
+            videoUrl: video.videoUrl,
+            thumbnail: video.thumbnail,
+            status: video.status,
+            companyId: updatedCompany.id,
+            isAllRigs: true,
+            rigIds: [],
+          },
+        });
+      }
+    }
+
+    return updatedCompany;
+  });
+
+  // create token
+  const createToken = createAuthToken({
+    id: isExistClient.id,
+    role: "client",
+  });
+
+  return { createToken };
+};
+
+// resend code
+export const resendClientCodeService = async (email: string) => {
+  const isExistClient = await dbClient.client.findUnique({
+    where: { email },
+    include: { company: true },
+  });
+  if (!isExistClient) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Client doesn't exist!");
+  }
+
+  //send email
+  const otp = generateOTP();
+
+  const values = {
+    otp: otp,
+    companyName: isExistClient?.company?.name || "",
+    companyEmail: isExistClient?.company?.email || "",
+    companyPhone: isExistClient?.company?.phone || "",
+    clientName: isExistClient?.name || "",
+    clientEmail: isExistClient?.email || "",
+  };
+
+  await dbClient.otp.deleteMany({
+    where: {
+      email: email,
+    },
+  });
+
+  // otp saved to DB
+  const otpPayload = {
+    otp: otp,
+    email: email,
+    type: "CLIENT_EMAIL_VERIFICATION",
+    expiresAt: new Date(Date.now() + 5 * 60000),
+  };
+
+  await dbClient.otp.create({
+    data: otpPayload,
+  });
+
+  const createCompanyTemplate = emailTemplate.createCompany(values);
+  emailHelper(createCompanyTemplate);
+
+  return isExistClient;
+};

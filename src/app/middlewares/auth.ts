@@ -103,7 +103,20 @@ export const clientAuth = (checkMainClient = false) => {
         );
       }
 
-      (req as any).decodedClient = client;
+      let currentSubscription = null;
+      if (client.companyId) {
+        currentSubscription = await dbClient.subscriptions.findFirst({
+          where: { companyId: client.companyId, status: "ACTIVE" },
+          include: {
+            plan: true,
+          },
+        });
+      }
+
+      (req as any).decodedClient = {
+        ...client,
+        mySubscription: currentSubscription,
+      };
       next();
     } catch (error: any) {
       next(error);

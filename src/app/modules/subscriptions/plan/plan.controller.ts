@@ -12,7 +12,7 @@ import {
 // create initial plan
 export const createInitialPlan = catchAsync(
   async (req: Request, res: Response) => {
-    if (1 !== 1) {
+    if (1 == 1) {
       await planCreateService();
     }
 

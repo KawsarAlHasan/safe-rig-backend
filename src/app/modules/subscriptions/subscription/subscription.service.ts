@@ -3,6 +3,7 @@ import ApiError from "../../../../errors/ApiError";
 import { dbClient } from "../../../../lib/prisma";
 import { stripe } from "../../../../config/stripe";
 import config from "../../../../config/index";
+import { SubscriptionStatus } from "../../../../../generated/prisma/enums";
 
 export const buySubscription = async (payload: any, companyId: any) => {
   const { planId, coupon, price, paymentMethod, durationType, email, baseUrl } =
@@ -52,6 +53,7 @@ export const buySubscription = async (payload: any, companyId: any) => {
     durationType,
     startDate,
     endDate: formattedEndDate,
+    status: SubscriptionStatus.ACTIVE,
   };
 
   const result = await dbClient.subscriptions.create({
@@ -82,8 +84,10 @@ export const buySubscription = async (payload: any, companyId: any) => {
       planId: String(planId),
       subscriptionId: String(result.id),
     },
-    success_url: `${config.FRONTEND_BASE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${config.FRONTEND_BASE_URL}/fail`,
+    // success_url: `${config.FRONTEND_BASE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+    // cancel_url: `${config.FRONTEND_BASE_URL}/fail`,
+    success_url: `${config.FRONTEND_BASE_URL}`,
+    cancel_url: `${config.FRONTEND_BASE_URL}`,
   });
 
   return session.url;

@@ -12,13 +12,13 @@ export const companyCreateService = async (payload: any) => {
   const { name, email, phone, clientName, clientEmail, clientPassword, logo } =
     payload;
 
-  // check if company exist
-  const isExistCompany = await dbClient.company.findUnique({
-    where: { name },
-  });
-  if (isExistCompany) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Company already exists!");
-  }
+  // // check if company exist
+  // const isExistCompany = await dbClient.company.findUnique({
+  //   where: { name },
+  // });
+  // if (isExistCompany) {
+  //   throw new ApiError(StatusCodes.BAD_REQUEST, "Company already exists!");
+  // }
 
   // check if client exist
   const isExistClient = await dbClient.client.findUnique({
@@ -293,19 +293,19 @@ export const updateCompanyService = async (payload: any) => {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Company doesn't exist!");
   }
 
-  // check duplicate name
-  if (name && name !== isExistCompany.name) {
-    const isDuplicateName = await dbClient.company.findUnique({
-      where: { name: name },
-    });
+  // // check duplicate name
+  // if (name && name !== isExistCompany.name) {
+  //   const isDuplicateName = await dbClient.company.findUnique({
+  //     where: { name: name },
+  //   });
 
-    if (isDuplicateName) {
-      throw new ApiError(
-        StatusCodes.BAD_REQUEST,
-        `Company with name ${name} already exists!`,
-      );
-    }
-  }
+  //   if (isDuplicateName) {
+  //     throw new ApiError(
+  //       StatusCodes.BAD_REQUEST,
+  //       `Company with name ${name} already exists!`,
+  //     );
+  //   }
+  // }
 
   const isExistClient = isExistCompany?.clients[0];
 

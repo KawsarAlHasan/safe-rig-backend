@@ -29,6 +29,7 @@ import { GlobalRoutes } from "../app/modules/globals/global.route";
 import { SubscriptionRoutes } from "../app/modules/subscriptions/subscription/subscription.route";
 import { RigAdminRoutes } from "../app/modules/rigAdmin/rigAdmin.route";
 import { MessageRoutes } from "../app/modules/contentManagement/messages/messages.route";
+import { ClientRoutes } from "../app/modules/client/client.route";
 
 const router = express.Router();
 
@@ -44,6 +45,10 @@ const apiRoutes = [
   {
     path: "/company",
     route: CompanyRoutes,
+  },
+  {
+    path: "/client",
+    route: ClientRoutes,
   },
   {
     path: "/app",

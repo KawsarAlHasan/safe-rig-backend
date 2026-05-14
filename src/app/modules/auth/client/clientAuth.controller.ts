@@ -1,21 +1,13 @@
-import { Request, Response } from 'express';
-import { StatusCodes } from 'http-status-codes';
-import catchAsync from '../../../../shared/catchAsync';
-import sendResponse from '../../../../shared/sendResponse';
-import { loginClientFromDB } from './clientAuth.service';
-
-// const verifyEmail = catchAsync(async (req: Request, res: Response) => {
-//   const { ...verifyData } = req.body;
-//   const result = await AuthService.verifyEmailToDB(verifyData);
-
-//   sendResponse(res, {
-//     success: true,
-//     statusCode: StatusCodes.OK,
-//     message: result.message,
-//     data: result.data,
-//   });
-// }); 
-
+import { Request, Response } from "express";
+import { StatusCodes } from "http-status-codes";
+import catchAsync from "../../../../shared/catchAsync";
+import sendResponse from "../../../../shared/sendResponse";
+import {
+  companyAndClientCreateService,
+  loginClientFromDB,
+  resendClientCodeService,
+  verifyClientEmailToDB,
+} from "./clientAuth.service";
 
 // login client
 export const loginClient = catchAsync(async (req: Request, res: Response) => {
@@ -25,63 +17,141 @@ export const loginClient = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
-    message: 'Client login successfully',
+    message: "Client login successfully",
     data: result.createToken,
   });
 });
 
-// get profile 
+// get profile
 export const clientProfile = catchAsync(async (req: Request, res: Response) => {
   const client = (req as any).decodedClient;
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
-    message: 'Client profile',
+    message: "Client profile",
     data: client,
   });
-})
+});
 
-// const forgetPassword = catchAsync(async (req: Request, res: Response) => {
-//   const email = req.body.email;
-//   const result = await AuthService.forgetPasswordToDB(email);
+// create new Company
+export const createNewCompany = catchAsync(
+  async (req: Request, res: Response) => {
+    // // Build base URL for uploaded file access
+    // const baseUrl = `${req.protocol}://${req.get("host")}`;
+
+    let logo;
+    // if (req.files && "image" in req.files && req.files.image[0]) {
+    //   logo = `${baseUrl}/images/${req.files.image[0].filename}`;
+    // }
+
+    const payload = {
+      ...req.body,
+      logo,
+    };
+
+
+
+    const result = await companyAndClientCreateService(payload);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Company created successfully",
+      data: result,
+    });
+  },
+);
+
+// verify email
+export const verifyClientEmailOtp = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await verifyClientEmailToDB(req.body);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Email verified successfully",
+      data: result.createToken,
+    });
+  },
+);
+
+// resend client code
+export const resendClientCode = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await resendClientCodeService(req.body.email);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Resend code successfully",
+    });
+  },
+);
+
+// // user sing in
+// export const userLogin = catchAsync(async (req: Request, res: Response) => {
+//   const result = await signInService(req.body);
 
 //   sendResponse(res, {
 //     success: true,
 //     statusCode: StatusCodes.OK,
-//     message: 'Please check your email, we send a OTP!',
-//     data: result,
+//     message: "User login successfully",
+//     data: {
+//       token: result.createToken,
+//       user: result.isExistUser,
+//     },
 //   });
 // });
 
-// const resetPassword = catchAsync(async (req: Request, res: Response) => {
-//   const token = req.headers.authorization;
-//   const { ...resetData } = req.body;
-//   const result = await AuthService.resetPasswordToDB(token!, resetData);
+// // forgot password
+// export const forgotPassword = catchAsync(
+//   async (req: Request, res: Response) => {
+//     await forgotPasswordService(req.body);
+
+//     sendResponse(res, {
+//       success: true,
+//       statusCode: StatusCodes.OK,
+//       message: "Password reset successfully",
+//     });
+//   },
+// );
+
+// // verify otp
+// export const verifyOtp = catchAsync(async (req: Request, res: Response) => {
+//   await verifyOtpService(req.body);
 
 //   sendResponse(res, {
 //     success: true,
 //     statusCode: StatusCodes.OK,
-//     message: 'Password reset successfully',
-//     data: result,
+//     message: "OTP verified successfully",
 //   });
 // });
 
-// const changePassword = catchAsync(async (req: Request, res: Response) => {
-//   const user = req.user;
-//   const { ...passwordData } = req.body;
-//   await AuthService.changePasswordToDB(user, passwordData);
+// // set password
+// export const setPassword = catchAsync(async (req: Request, res: Response) => {
+//   const result = await setPasswordService(req.body);
 
 //   sendResponse(res, {
 //     success: true,
 //     statusCode: StatusCodes.OK,
-//     message: 'Password changed successfully',
+//     message: "Password set successfully",
+//     data: result.createToken,
 //   });
 // });
 
-// export const AuthController = {
-//   verifyEmail,
-//   loginUser,
-//   forgetPassword,
-//   resetPassword,
-//   changePassword,
-// };
+// // Delete permanent User
+// export const permanentDeleteUser = catchAsync(
+//   async (req: Request, res: Response) => {
+//     const id = req.params.id;
+
+//     const result = await deleteUserService(id);
+
+//     sendResponse(res, {
+//       success: true,
+//       statusCode: StatusCodes.OK,
+//       message: "User deleted successfully",
+//       data: result,
+//     });
+//   },
+// );

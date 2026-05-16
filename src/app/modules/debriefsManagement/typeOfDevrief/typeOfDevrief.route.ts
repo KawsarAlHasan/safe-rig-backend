@@ -74,9 +74,6 @@ router.patch(
 
 router.delete("/client/:id", clientAuth(), permanentDeleteCardType);
 
-// ───── RigAdmin Routes ─────
-router.get("/client", rigAdminAuth(), getCardType);
-
 // ───── User Routes ─────
 router.get("/", userAuth(), getAllUserCardType);
 

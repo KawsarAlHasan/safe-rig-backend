@@ -3,7 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
 
-import resolveCompanyId from "../../../helpers/resolveCompanyId";
+import { resolveCompanyId } from "../../../helpers/resolveCompanyId";
 import { deleteRigAdminService, getAllRigAdminService, rigAdminCreateService, updateRigAdminService } from "./client.service";
 
 // create new rig Admin
@@ -11,6 +11,7 @@ export const createNewRigAdmin = catchAsync(
   async (req: Request, res: Response) => {
     const companyId = resolveCompanyId(req);
 
+    
     const payload = { ...req.body, companyId };
 
     const result = await rigAdminCreateService(payload);

@@ -30,7 +30,7 @@ export const videoCreateService = async (payloadData: any, companyId: any) => {
       companyId: companyId,
       isDefault: !companyId,
       isAllRigs: true, // isAllRigsCheck,
-      rigIds: rigIds,
+      rigIds: []  // rigIds,
     },
   });
 
@@ -220,6 +220,7 @@ export const getAllUserVideosService = async (companyId: any, rigId: any) => {
     where: {
       companyId: companyId,
       status: "ACTIVE",
+      position: "training",
       OR: [
         {
           rigIds: {

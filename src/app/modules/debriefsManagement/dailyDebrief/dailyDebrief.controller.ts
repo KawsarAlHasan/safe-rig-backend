@@ -3,11 +3,15 @@ import { StatusCodes } from "http-status-codes";
 import catchAsync from "../../../../shared/catchAsync";
 import sendResponse from "../../../../shared/sendResponse";
 
-import resolveCompanyId from "../../../../helpers/resolveCompanyId";
+import {
+  resolveCompanyId,
+  resolveRigId,
+} from "../../../../helpers/resolveCompanyId";
 import {
   checkDebriefService,
   createDebriefService,
   getAllActiveDebriefService,
+  getDebriefCardSubmissionService,
 } from "./dailyDebrief.service";
 import { dbClient } from "../../../../lib/prisma";
 
@@ -60,15 +64,35 @@ export const checkDebriefSubmission = catchAsync(
       },
     });
 
-    const result = await checkDebriefService(user.id, user.companyId);
+    // const result = await checkDebriefService(user.id, user.companyId);
 
     sendResponse(res, {
-      success: result,
+      success: true, // result,
       statusCode: StatusCodes.OK,
-      message: result
-        ? "You can submit a debrief"
-        : "You can't submit a debrief",
+      message: true ? "You can submit a debrief" : "You can't submit a debrief",
       data: getRig,
+    });
+  },
+);
+
+// get all CardSubmission
+export const getAllDebriefCardSubmission = catchAsync(
+  async (req: Request, res: Response) => {
+    const companyId = resolveCompanyId(req);
+    const rigIdResolve = resolveRigId(req);
+
+    const result = await getDebriefCardSubmissionService(
+      req.query,
+      companyId,
+      rigIdResolve,
+    );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Debrief Card Submission fetched successfully",
+      pagination: result.meta,
+      data: result.data,
     });
   },
 );

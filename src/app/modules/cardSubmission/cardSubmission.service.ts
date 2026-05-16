@@ -3,6 +3,9 @@ import ApiError from "../../../errors/ApiError";
 import { dbClient } from "../../../lib/prisma";
 import { IQuery } from "../../../types/company";
 import { Prisma } from "../../../../generated/prisma/client";
+import { emailHelper } from "../../../helpers/emailHelper";
+import { emailTemplate } from "../../../shared/emailTemplate";
+import { immediateActionEmailTemplate } from "../../../shared/immediateActionEmailTemplate";
 
 // submit card
 export const submitCardService = async (payload: any) => {
@@ -22,20 +25,20 @@ export const submitCardService = async (payload: any) => {
     submitAnonymously,
     submitDay,
   } = payload;
- 
+
   const today = new Date();
   const dateOnly = today.toISOString().split("T")[0];
 
   const finalDate = submitDay ? submitDay : dateOnly;
 
-  // check if card is already submitted
-  const isExistCardSubmission = await dbClient.cardSubmission.findFirst({
-    where: {
-      userId: userId,
-      companyId: companyId,
-      submitDay: finalDate,
-    },
-  });
+  // // check if card is already submitted
+  // const isExistCardSubmission = await dbClient.cardSubmission.findFirst({
+  //   where: {
+  //     userId: userId,
+  //     companyId: companyId,
+  //     submitDay: finalDate,
+  //   },
+  // });
 
   // if (isExistCardSubmission) {
   //   throw new ApiError(StatusCodes.BAD_REQUEST, "Card is already submitted!");
@@ -61,11 +64,89 @@ export const submitCardService = async (payload: any) => {
       immediateAction: isImmediateAction,
       submitAnonymously: isSubmitAnonymously,
       submitDay: finalDate,
+      isOpened: true,
     },
   });
 
   if (!result) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to submit card!");
+  }
+
+  // // if immediateAction is true, send email to client
+  // if (isImmediateAction) {
+  //   const rigAdmin = await dbClient.client.findMany({
+  //     where: {
+  //       rigId: rigId,
+  //       companyId: companyId,
+  //     },
+  //     select: {
+  //       name: true,
+  //       email: true,
+  //     },
+  //   });
+
+  //   const mainClient = await dbClient.client.findMany({
+  //     where: {
+  //       companyId: companyId,
+  //       isMainClient: true,
+  //     },
+  //     select: {
+  //       name: true,
+  //       email: true,
+  //     },
+  //   });
+
+  //   const values = {
+
+  //   };
+
+  //   const immediateActionEmail = emailTemplate.createCompany(values);
+  //   emailHelper(immediateActionEmail);
+  // }
+
+  if (isImmediateAction) {
+    const rigAdmin = await dbClient.client.findMany({
+      where: { rigId, companyId },
+      select: { name: true, email: true },
+    });
+
+    const mainClient = await dbClient.client.findMany({
+      where: { companyId, isMainClient: true },
+      select: { name: true, email: true },
+    });
+
+    // Rig admin + main client একসাথে পাঠানো
+    const recipients = [...rigAdmin, ...mainClient];
+
+    // user name নিন (anonymous হলে hide হবে)
+    const submitter = await dbClient.user.findUnique({
+      where: { id: userId },
+      select: { name: true },
+    });
+
+    for (const recipient of recipients) {
+      const { html, text } = immediateActionEmailTemplate({
+        recipientName: recipient.name || "Unknown",
+        submittedBy: submitter?.name ?? "Unknown",
+        isAnonymous: isSubmitAnonymously,
+        rigName: rigId,
+        areaName: String(areaId),
+        hazardName: String(hazardId),
+        riskSeverity: riskSeverity,
+        description: description,
+        actionTaken: isAction,
+        submitDay: finalDate,
+        cardId: result.id,
+        appName: process.env.APP_NAME ?? "SafetyApp",
+        appUrl: process.env.APP_URL ?? "https://yourapp.com",
+      });
+
+      await emailHelper({
+        to: recipient.email,
+        subject: `${process.env.APP_NAME} — Immediate Action Required`,
+        html,
+      });
+    }
   }
 
   return result;
@@ -162,7 +243,11 @@ export const checkCardSubmissionService = async (
 };
 
 // get card submission with search, filter and pagination
-export const getCardSubmissionService = async (query: any, companyId: any) => {
+export const getCardSubmissionService = async (
+  query: any,
+  companyId: any,
+  rigIdResolve: any,
+) => {
   const page = Number(query.page) || 1;
   const limit = Number(query.limit) || 10;
   const skip = (page - 1) * limit;
@@ -189,7 +274,11 @@ export const getCardSubmissionService = async (query: any, companyId: any) => {
     });
   }
 
-  if (query.rigId) {
+  if (rigIdResolve) {
+    andConditions.push({
+      rigId: Number(rigIdResolve),
+    });
+  } else if (query.rigId) {
     andConditions.push({
       rigId: Number(query.rigId),
     });
@@ -373,7 +462,7 @@ export const updateCardSubmissionService = async (id: any, payload: any) => {
     data: {
       closureNotes: closureNotes,
       evidence: evidence,
-      isOpened: true,
+      isOpened: false,
     },
   });
 

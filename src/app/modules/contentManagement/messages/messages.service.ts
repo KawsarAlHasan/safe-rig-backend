@@ -18,8 +18,8 @@ export const messageCreateService = async (roleData: any, companyId: any) => {
       sectionTitle: sectionTitle,
       companyId: companyId,
       isDefault: !companyId,
-      isAllRigs: isAllRigs,
-      rigIds: rigIds,
+      isAllRigs: true, // isAllRigs,
+      rigIds: [], //rigIds,
     },
   });
 

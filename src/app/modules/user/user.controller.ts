@@ -8,7 +8,7 @@ import {
   requestClientAndRigService,
   updateProfileService,
 } from "./user.service";
-import resolveCompanyId from "../../../helpers/resolveCompanyId";
+import { resolveCompanyId } from "../../../helpers/resolveCompanyId";
 
 // request client and rig
 export const requestClientAndRig = catchAsync(

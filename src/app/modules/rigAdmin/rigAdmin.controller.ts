@@ -8,7 +8,7 @@ import {
   rigAdminCreateService,
   updateRigAdminService,
 } from "./rigAdmin.service";
-import resolveCompanyId from "../../../helpers/resolveCompanyId";
+import { resolveCompanyId } from "../../../helpers/resolveCompanyId";
 
 // create new rig Admin
 export const createNewRigAdmin = catchAsync(

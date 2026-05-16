@@ -9,6 +9,8 @@ import unlinkFile from "../../../../shared/unlinkFile";
 export const alertCreateService = async (roleData: any, companyId: any) => {
   const { title, description, file, isAllRigs, rigIds } = roleData;
 
+  const isAllRigsCheck = isAllRigs == "true" ? true : false;
+
   // create new alert on prisma dbClient
   const result = await dbClient.alert.create({
     data: {
@@ -17,8 +19,8 @@ export const alertCreateService = async (roleData: any, companyId: any) => {
       file: file,
       companyId: companyId,
       isDefault: !companyId,
-      isAllRigs: isAllRigs,
-      rigIds: rigIds,
+      isAllRigs: true, //isAllRigsCheck,
+      rigIds: [], //rigIds,
     },
   });
 
@@ -34,13 +36,7 @@ export const alertCreateService = async (roleData: any, companyId: any) => {
 export const updateAlertService = async (payloadid: any, payloadData: any) => {
   const id = parseInt(payloadid);
 
-  const {
-    title,
-    description,
-    file,
-    isAllRigs,
-    rigIds,
-  } = payloadData;
+  const { title, description, file, isAllRigs, rigIds } = payloadData;
 
   // check if Alert exists
   const isExistAlert = await dbClient.alert.findUnique({

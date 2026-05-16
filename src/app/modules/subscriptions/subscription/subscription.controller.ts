@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import catchAsync from "../../../../shared/catchAsync";
-import resolveCompanyId from "../../../../helpers/resolveCompanyId";
+import { resolveCompanyId } from "../../../../helpers/resolveCompanyId";
 import {
   buySubscription,
   getMySubscriptionService,

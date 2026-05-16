@@ -3,7 +3,6 @@ import { StatusCodes } from "http-status-codes";
 import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
 
-import resolveCompanyId from "../../../helpers/resolveCompanyId";
 import {
   checkCardSubmissionService,
   getAllUserAreaTypeHazardService,
@@ -12,6 +11,7 @@ import {
   updateCardSubmissionService,
 } from "./cardSubmission.service";
 import { dbClient } from "../../../lib/prisma";
+import { resolveCompanyId, resolveRigId } from "../../../helpers/resolveCompanyId";
 
 // Interface for uploaded file info
 interface UploadedFileInfo {
@@ -108,8 +108,9 @@ export const checkCardSubmission = catchAsync(
 export const getAllCardSubmission = catchAsync(
   async (req: Request, res: Response) => {
     const companyId = resolveCompanyId(req);
+    const rigIdResolve = resolveRigId(req);
 
-    const result = await getCardSubmissionService(req.query, companyId);
+    const result = await getCardSubmissionService(req.query, companyId, rigIdResolve);
 
     sendResponse(res, {
       success: true,

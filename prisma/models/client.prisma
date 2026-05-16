@@ -12,11 +12,11 @@ model Client {
     company   Company? @relation(fields: [companyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
     companyId Int
 
-    rig       Rig?     @relation(fields: [rigId], references: [id])
-    rigId     Int?
+    rig   Rig? @relation(fields: [rigId], references: [id])
+    rigId Int?
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    @@unique([companyId, isMainClient(map: "only_one_main_per_company")])
+    // @@unique([companyId, isMainClient(map: "only_one_main_per_company")])
 }

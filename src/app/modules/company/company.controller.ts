@@ -11,7 +11,7 @@ import {
   updateCompanyService,
   updateCompanyStatusService,
 } from "./company.service";
-import resolveCompanyId from "../../../helpers/resolveCompanyId";
+import { resolveCompanyId } from "../../../helpers/resolveCompanyId";
 
 // create new Company
 export const createNewCompany = catchAsync(

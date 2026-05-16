@@ -3,7 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import catchAsync from "../../../../shared/catchAsync";
 import sendResponse from "../../../../shared/sendResponse";
 
-import resolveCompanyId from "../../../../helpers/resolveCompanyId";
+import { resolveCompanyId } from "../../../../helpers/resolveCompanyId";
 import {
   cardTypeCreateService,
   deleteCardTypeService,

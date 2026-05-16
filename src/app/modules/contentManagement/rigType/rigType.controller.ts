@@ -8,7 +8,7 @@ import {
   rigTypeCreateService,
   updateRigTypeService,
 } from "./rigType.service";
-import resolveCompanyId from "../../../../helpers/resolveCompanyId";
+import { resolveCompanyId } from "../../../../helpers/resolveCompanyId";
 
 // create new rig type
 export const createNewRigType = catchAsync(

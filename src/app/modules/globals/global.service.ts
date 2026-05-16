@@ -248,3 +248,9 @@ export const getAdminDashboardOverviewService = async () => {
     totalSubscriptionBuyMoney: totalSubscriptionBuyMoney._sum.price || 0,
   };
 };
+
+// get client dashboard overview
+export const getClientDashboardOverviewService = async (
+  companyId: any,
+  rigId: any,
+) => {};

@@ -4,7 +4,7 @@ import { dbClient } from "../../../lib/prisma";
 
 // get home page
 export const getHomeService = async (rigId: any, companyId: any) => {
-  const alerts = await dbClient.alert.findFirst({
+  const messages = await dbClient.message.findFirst({
     where: {
       companyId: companyId,
       status: "ACTIVE",
@@ -45,7 +45,7 @@ export const getHomeService = async (rigId: any, companyId: any) => {
   });
 
   const result = {
-    alerts,
+    messages,
     videos,
   };
 

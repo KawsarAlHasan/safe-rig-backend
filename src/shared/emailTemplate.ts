@@ -101,8 +101,19 @@ const createCompany = (values: any) => {
   return data;
 };
 
+const immediateActionEmail = (values: any) => {
+  const data = {
+    to: values.email,
+    subject: `${process.env.APP_NAME} - Immediate Action Required`,
+    html: ``,
+    text: ``,
+  };
+  return data;
+};
+
 export const emailTemplate = {
   createAccount,
   resetPassword,
   createCompany,
+  immediateActionEmail,
 };

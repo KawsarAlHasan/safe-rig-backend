@@ -133,7 +133,7 @@ export const getCardTypeService = async (query: any, companyId: any) => {
   if (query.rigId) {
     andConditions.push({
       rigIds: {
-        has: Number(query.rigId), // PostgreSQL array filter
+        has: Number(query.rigId),
       },
     });
   }
@@ -152,23 +152,47 @@ export const getCardTypeService = async (query: any, companyId: any) => {
   const whereCondition: Prisma.TypeOfDevriefWhereInput =
     andConditions.length > 0 ? { AND: andConditions } : {};
 
-  const result = await dbClient.typeOfDevrief.findMany({
-    where: whereCondition, // FIXED (important)
+  const dbData = await dbClient.typeOfDevrief.findMany({
+    where: whereCondition,
     orderBy: {
       id: "desc",
     },
   });
 
-  if (!result) {
-    throw new ApiError(
-      StatusCodes.BAD_REQUEST,
-      "Failed to fetch Type of Devriefs!",
-    );
+  if (!dbData) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to fetch Card Types!");
   }
 
-  if (result.length === 0) {
-    throw new ApiError(StatusCodes.NOT_FOUND, "No Type of Devriefs found!");
+  if (dbData.length === 0) {
+    throw new ApiError(StatusCodes.NOT_FOUND, "No Card Types found!");
   }
+
+  const allRigIds = dbData.flatMap((ct) => ct.rigIds);
+  const uniqueRigIds = [...new Set(allRigIds)];
+
+  let rigsMap = new Map();
+
+  if (uniqueRigIds.length > 0) {
+    const rigs = await dbClient.rig.findMany({
+      where: {
+        id: { in: uniqueRigIds },
+        status: "ACTIVE",
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+
+    rigsMap = new Map(rigs.map((rig) => [rig.id, rig]));
+  }
+
+  const result = dbData.map((cardType) => ({
+    ...cardType,
+    rigDetails: cardType.rigIds
+      .map((rigId) => rigsMap.get(rigId))
+      .filter((rig) => rig !== undefined),
+  }));
 
   return result;
 };
@@ -243,7 +267,7 @@ export const updateCardTypeService = async (payload: any, companyId: any) => {
       name: name || isExistCardType.name,
       isDefault: isDefault || isExistCardType.isDefault,
       companyId: companyId || isExistCardType.companyId,
-      isAllRigs: isAllRigs || isExistCardType.isAllRigs,
+      isAllRigs: isAllRigs,
       rigIds: rigIds || isExistCardType.rigIds,
     },
   });

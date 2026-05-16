@@ -2,9 +2,13 @@ import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
-import resolveCompanyId from "../../../helpers/resolveCompanyId";
+import {
+  resolveCompanyId,
+  resolveRigId,
+} from "../../../helpers/resolveCompanyId";
 import {
   getAdminDashboardOverviewService,
+  getClientDashboardOverviewService,
   getRigAreaTypeHazardService,
   globalStatusService,
 } from "./global.service";
@@ -39,13 +43,32 @@ export const getRigAreaTypeHazard = catchAsync(
 // get rig, area, type, hazard
 export const getAdminDashboardOverview = catchAsync(
   async (req: Request, res: Response) => {
-
     const result = await getAdminDashboardOverviewService();
 
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
       message: "Get admin dashboard overview successfully",
+      data: result,
+    });
+  },
+);
+
+// client dashboard overview
+export const clientDashboardOverview = catchAsync(
+  async (req: Request, res: Response) => {
+    const companyId = resolveCompanyId(req);
+    const rigIdResolve = resolveRigId(req);
+
+    const result = await getClientDashboardOverviewService(
+      companyId,
+      rigIdResolve,
+    );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Get client dashboard overview successfully",
       data: result,
     });
   },

@@ -5,7 +5,12 @@ import {
   rigAdminAuth,
   userAuth,
 } from "../../middlewares/auth";
-import { getAdminDashboardOverview, getRigAreaTypeHazard, globalStatus } from "./global.controller";
+import {
+  clientDashboardOverview,
+  getAdminDashboardOverview,
+  getRigAreaTypeHazard,
+  globalStatus,
+} from "./global.controller";
 
 const router = express.Router();
 
@@ -14,6 +19,7 @@ router.patch("/admin/status-change", adminAuth(), globalStatus);
 router.get("/admin/dashboard-overview", adminAuth(), getAdminDashboardOverview);
 
 // ───── Client Routes ─────
+router.get("/client/dashboard-overview", clientAuth(), clientDashboardOverview);
 router.patch("/client/status-change", clientAuth(), globalStatus);
 router.get("/rig-area-hazard-type", clientAuth(), getRigAreaTypeHazard);
 

@@ -43,6 +43,8 @@ export const rigAdminCreateService = async (adminData: any) => {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to create rig admin!");
   }
 
+  console.log(result, "result");
+
   return result;
 };
 

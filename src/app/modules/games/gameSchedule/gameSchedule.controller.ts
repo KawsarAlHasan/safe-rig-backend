@@ -11,7 +11,7 @@ import {
   questionSubmitService,
   saveGameScheduleService,
 } from "./gameSchedule.service";
-import resolveCompanyId from "../../../../helpers/resolveCompanyId";
+import { resolveCompanyId } from "../../../../helpers/resolveCompanyId";
 
 // save game schedule
 export const saveGameSchedule = catchAsync(

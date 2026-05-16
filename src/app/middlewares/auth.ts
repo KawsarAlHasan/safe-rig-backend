@@ -141,6 +141,20 @@ export const userAuth = (options: AuthOptions = {}) => {
         where: {
           id: decoded.id,
         },
+        include: {
+          company: {
+            select: {
+              id: true,
+              name: true,
+            }
+          },
+          rig: {
+            select: {
+              id: true,
+              name: true,
+            }
+          }
+        }
       });
 
       if (!user) {

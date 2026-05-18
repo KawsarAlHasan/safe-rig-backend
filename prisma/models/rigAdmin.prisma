@@ -1,0 +1,17 @@
+model RigAdmin {
+    id         Int       @id @default(autoincrement())
+    email      String    @unique
+    name       String?
+    phone      String?
+    profilePic String?
+    password   String
+    status     AllStatus @default(ACTIVE)
+
+    company   Company? @relation(fields: [companyId], references: [id])
+    companyId Int?
+    rig       Rig?     @relation(fields: [rigId], references: [id])
+    rigId     Int?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}

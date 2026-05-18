@@ -1,0 +1,53 @@
+import { StatusCodes } from "http-status-codes";
+import ApiError from "../../../errors/ApiError";
+import { dbClient } from "../../../lib/prisma";
+
+// get home page
+export const getHomeService = async (rigId: any, companyId: any) => {
+  const messages = await dbClient.message.findFirst({
+    where: {
+      companyId: companyId,
+      status: "ACTIVE",
+      OR: [
+        {
+          rigIds: {
+            has: rigId,
+          },
+        },
+        {
+          isAllRigs: true,
+        },
+      ],
+    },
+    orderBy: {
+      id: "desc",
+    },
+  });
+  const videos = await dbClient.videos.findFirst({
+    where: {
+      companyId: companyId,
+      status: "ACTIVE",
+      position: "homepage",
+      OR: [
+        {
+          rigIds: {
+            has: rigId,
+          },
+        },
+        {
+          isAllRigs: true,
+        },
+      ],
+    },
+    orderBy: {
+      id: "desc",
+    },
+  });
+
+  const result = {
+    messages,
+    videos,
+  };
+
+  return result;
+};

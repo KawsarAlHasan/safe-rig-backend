@@ -1,0 +1,45 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 1
+    },
+    "auditLog": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\error\\.4568c86a8b59286fd0dea35a88eef744ac646570-audit.json",
+    "files": [
+        {
+            "date": 1779026648598,
+            "name": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\error\\17-05-2026-20-error.log",
+            "hash": "6f7fbf8417e5d07a7a34451ee15bfe4e9a09c405a90d18ae11e449f5ee525bc1"
+        },
+        {
+            "date": 1779070837480,
+            "name": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\error\\18-05-2026-08-error.log",
+            "hash": "caf58f333bfb381f6325206f204483f598c9fdefc7404c96c31594f014b5aed5"
+        },
+        {
+            "date": 1779075265323,
+            "name": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\error\\18-05-2026-09-error.log",
+            "hash": "d121ed5d6b131a664db2236b48a5eb763a68428a8f31aee92108c7dd81c672ca"
+        },
+        {
+            "date": 1779076969673,
+            "name": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\error\\18-05-2026-10-error.log",
+            "hash": "1fa51ea9572ebc93f46e2e2f679ee83d0318d9e0ac1c8b0affbe86bd09850935"
+        },
+        {
+            "date": 1779093300607,
+            "name": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\error\\18-05-2026-14-error.log",
+            "hash": "e3e4eb2bf82cc68df6275ac0c7f447db2a583a6f9188241578b107959b1dc881"
+        },
+        {
+            "date": 1779098004724,
+            "name": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\error\\18-05-2026-15-error.log",
+            "hash": "df6748e69b5237273f7144b82d8cf858f75349cb68bae4b748b71662962b3785"
+        },
+        {
+            "date": 1779098608568,
+            "name": "C:\\Users\\kawsa\\Desktop\\saferig-backend\\winston\\error\\18-05-2026-16-error.log",
+            "hash": "c8a0ff46d18934791f3a5002ca2010c06011dfabd5efb2f25c8a7e653b018571"
+        }
+    ],
+    "hashType": "sha256"
+}

@@ -1,0 +1,20 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 1
+    },
+    "auditLog": "/home/sft/kawsar_vai/safe-rig-backend/winston/success/.9da55e59d24f52895e663eafc8fb3ce0afcbe149-audit.json",
+    "files": [
+        {
+            "date": 1778642740977,
+            "name": "/home/sft/kawsar_vai/safe-rig-backend/winston/success/13-05-2026-09-success.log",
+            "hash": "158889fe937aa74e4f2b8b11facad35f2d56f46d301f18149b1cb998865048c0"
+        },
+        {
+            "date": 1778667551396,
+            "name": "/home/sft/kawsar_vai/safe-rig-backend/winston/success/13-05-2026-16-success.log",
+            "hash": "8b73d8fb632b2025d55e59ca420c0342d5b4b4d155bda018d0763c2d04abfec7"
+        }
+    ],
+    "hashType": "sha256"
+}

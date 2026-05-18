@@ -1,0 +1,15 @@
+model DebriefQuestion {
+    id          Int       @id @default(autoincrement())
+    isDefault   Boolean   @default(false)
+    company     Company?  @relation(fields: [companyId], references: [id])
+    companyId   Int?
+    rig         Rig?      @relation(fields: [rigId], references: [id])
+    rigId       Int?
+    isAllRigs   Boolean   @default(false)
+    rigIds      Int[]
+    question    String?
+    placeholder String?
+    status      AllStatus @default(ACTIVE)
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+}

@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: safe_rig_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: safe_rig_user
+      POSTGRES_PASSWORD: safe_rig_pass
+      POSTGRES_DB: safe_rig_db
+    ports:
+      - "13501:5432"
+    volumes:
+      - safe_rig_pgdata:/var/lib/postgresql/data
+
+volumes:
+  safe_rig_pgdata:

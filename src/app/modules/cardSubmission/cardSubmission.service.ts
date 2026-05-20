@@ -431,7 +431,7 @@ export const getCardSubmissionService = async (
           },
         },
         {
-          description: {
+          employeeName: {
             contains: searchTerm,
             mode: "insensitive",
           },
@@ -459,6 +459,7 @@ export const getCardSubmissionService = async (
           profile: true,
           phone: true,
           position: true,
+          entryCompany: true,
         },
       },
       company: {

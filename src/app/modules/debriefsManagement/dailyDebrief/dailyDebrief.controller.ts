@@ -121,3 +121,22 @@ export const getAllDebriefCardSubmission = catchAsync(
     });
   },
 );
+
+// get active debrief by admin
+export const getAllActiveDebriefByAdmin = catchAsync(
+  async (req: Request, res: Response) => {
+    const user = (req as any).decodedUser;
+
+    const companyId = resolveCompanyId(req);
+    const rigIdResolve = resolveRigId(req);
+
+    const result = await getAllActiveDebriefService(companyId, rigIdResolve);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Daily debrief fetched successfully",
+      data: result,
+    });
+  },
+);

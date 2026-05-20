@@ -279,6 +279,12 @@ export const getDebriefCardSubmissionService = async (
             },
           },
         },
+        {
+          employeeName: {
+            contains: searchTerm,
+            mode: "insensitive",
+          },
+        },
       ],
     });
   }
@@ -302,6 +308,7 @@ export const getDebriefCardSubmissionService = async (
           profile: true,
           phone: true,
           position: true,
+          entryCompany: true,
         },
       },
       company: {

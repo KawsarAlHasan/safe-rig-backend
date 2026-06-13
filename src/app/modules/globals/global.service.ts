@@ -258,19 +258,38 @@ export const getClientDashboardOverviewService = async (
   startDate?: any,
   endDate?: any,
 ) => {
-  const cardWhere: any = {
+  const baseWhere: any = {
     companyId,
   };
 
   if (rigId) {
-    cardWhere.rigId = rigId;
+    baseWhere.rigId = rigId;
   }
 
+  const todayDateStr = new Date().toLocaleDateString("en-CA"); // "2026-06-13"
+
+  // For totalCards, openCards, closedCards, urgentActionRequired - use submitDay filter
+  const submitDayWhere: any = { ...baseWhere };
+
   if (startDate && endDate) {
-    cardWhere.createdAt = {
-      gte: new Date(startDate),
-      lte: new Date(endDate),
+    submitDayWhere.submitDay = {
+      gte: startDate,
+      lte: endDate,
     };
+  } else {
+    submitDayWhere.submitDay = todayDateStr;
+  }
+
+  // For chart data - same as submitDayWhere
+  const chartWhere: any = { ...baseWhere };
+
+  if (startDate && endDate) {
+    chartWhere.submitDay = {
+      gte: startDate,
+      lte: endDate,
+    };
+  } else {
+    chartWhere.submitDay = todayDateStr;
   }
 
   const todayStart = new Date();
@@ -304,34 +323,36 @@ export const getClientDashboardOverviewService = async (
     // Recent Cards
     recentSubmitedCards,
   ] = await Promise.all([
-    // ==========================
-    // Dashboard Overview
-    // ==========================
+    // Total Cards - using submitDay filter (same as getCompanyAnalysisService)
     dbClient.cardSubmission.count({
-      where: cardWhere,
+      where: submitDayWhere,
     }),
 
+    // Total Open Cards - using submitDay filter
     dbClient.cardSubmission.count({
       where: {
-        ...cardWhere,
+        ...submitDayWhere,
         isOpened: true,
       },
     }),
 
+    // Total Closed Cards - using submitDay filter
     dbClient.cardSubmission.count({
       where: {
-        ...cardWhere,
+        ...submitDayWhere,
         isOpened: false,
       },
     }),
 
+    // Urgent Action Required (HIGH risk) - using submitDay filter
     dbClient.cardSubmission.count({
       where: {
-        ...cardWhere,
+        ...submitDayWhere,
         riskSeverity: "HIGH",
       },
     }),
 
+    // Today's Submitting Cards - using createdAt for today's submissions
     dbClient.cardSubmission.count({
       where: {
         companyId,
@@ -343,16 +364,15 @@ export const getClientDashboardOverviewService = async (
       },
     }),
 
+    // Total Users
     dbClient.user.count({
       where: userWhere,
     }),
 
-    // ==========================
-    // Charts Data
-    // ==========================
+    // Chart Data - grouped by submitDay
     dbClient.cardSubmission.groupBy({
       by: ["submitDay"],
-      where: cardWhere,
+      where: chartWhere,
       _count: {
         id: true,
       },
@@ -361,22 +381,18 @@ export const getClientDashboardOverviewService = async (
       },
     }),
 
-    // ==========================
-    // Card Type Wise %
-    // ==========================
+    // Card Type Distribution - using submitDay filter
     dbClient.cardSubmission.groupBy({
       by: ["cardTypeId"],
-      where: cardWhere,
+      where: submitDayWhere,
       _count: {
         id: true,
       },
     }),
 
-    // ==========================
-    // Recent 10 Cards
-    // ==========================
+    // Recent Cards - using userWhere (no date filter for recent cards)
     dbClient.cardSubmission.findMany({
-      where: cardWhere,
+      where: userWhere,
       include: {
         user: {
           select: {
@@ -420,7 +436,6 @@ export const getClientDashboardOverviewService = async (
   // ====================================
   // Card Type Percentage Calculation
   // ====================================
-
   const totalCardCount =
     cardsByCardType.reduce((sum, item) => sum + item._count.id, 0) || 1;
 
@@ -428,37 +443,53 @@ export const getClientDashboardOverviewService = async (
     .map((item) => item.cardTypeId)
     .filter(Boolean);
 
-  const cardTypes = await dbClient.cardType.findMany({
-    where: {
-      id: {
-        in: cardTypeIds as number[],
+  let cardsByCardTypeWithPercentage: any[] = [];
+
+  if (cardTypeIds.length > 0) {
+    const cardTypes = await dbClient.cardType.findMany({
+      where: {
+        id: {
+          in: cardTypeIds as number[],
+        },
       },
-    },
-    select: {
-      id: true,
-      name: true,
-    },
-  });
+      select: {
+        id: true,
+        name: true,
+      },
+    });
 
-  const cardsByCardTypeWithPercentage = cardsByCardType.map((item) => {
-    const cardType = cardTypes.find((ct) => ct.id === item.cardTypeId);
-
-    return {
-      cardTypeId: item.cardTypeId,
-      cardTypeName: cardType?.name || "Unknown",
-      total: item._count.id,
-      percentage: Number(((item._count.id / totalCardCount) * 100).toFixed(2)),
-    };
-  });
+    cardsByCardTypeWithPercentage = cardsByCardType.map((item) => {
+      const cardType = cardTypes.find((ct) => ct.id === item.cardTypeId);
+      return {
+        cardTypeId: item.cardTypeId,
+        cardTypeName: cardType?.name || "Unknown",
+        total: item._count.id,
+        percentage: Number(
+          ((item._count.id / totalCardCount) * 100).toFixed(2),
+        ),
+      };
+    });
+  } else {
+    cardsByCardTypeWithPercentage = [];
+  }
 
   // ====================================
   // Chart Response Format
   // ====================================
-
   const chartData = cardSubmissionChartsData.map((item) => ({
     date: item.submitDay,
     total: item._count.id,
   }));
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("=== Client Dashboard Debug ===");
+    console.log("startDate:", startDate);
+    console.log("endDate:", endDate);
+    console.log("submitDayWhere:", JSON.stringify(submitDayWhere, null, 2));
+    console.log("totalCards:", totalCards);
+    console.log("chartData length:", chartData.length);
+    console.log("================================");
+  }
 
   return {
     dashboard: {
@@ -471,9 +502,7 @@ export const getClientDashboardOverviewService = async (
     },
 
     cardSubmissionChartsData: chartData,
-
     cardsByCardType: cardsByCardTypeWithPercentage,
-
     recentSubmitedCards,
   };
 };
@@ -485,26 +514,26 @@ export const getCompanyAnalysisService = async (
   startDate?: any,
   endDate?: any,
 ) => {
-  const cardWhere: any = {
+  const baseWhere: any = {
     companyId,
   };
 
   if (rigId) {
-    cardWhere.rigId = rigId;
+    baseWhere.rigId = rigId;
   }
+
+  const todayDateStr = new Date().toLocaleDateString("en-CA"); // "2026-06-13"
+
+  let chartAndFilterWhere: any = { ...baseWhere };
 
   if (startDate && endDate) {
-    cardWhere.createdAt = {
-      gte: new Date(startDate),
-      lte: new Date(endDate),
+    chartAndFilterWhere.submitDay = {
+      gte: startDate,
+      lte: endDate,
     };
+  } else {
+    chartAndFilterWhere.submitDay = todayDateStr;
   }
-
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
-
-  const todayEnd = new Date();
-  todayEnd.setHours(23, 59, 59, 999);
 
   const userWhere: any = {
     companyId,
@@ -535,26 +564,26 @@ export const getCompanyAnalysisService = async (
     // Dashboard Overview
     // ==========================
     dbClient.cardSubmission.count({
-      where: cardWhere,
+      where: baseWhere,
     }),
 
     dbClient.cardSubmission.count({
       where: {
-        ...cardWhere,
+        ...baseWhere,
         isOpened: true,
       },
     }),
 
     dbClient.cardSubmission.count({
       where: {
-        ...cardWhere,
+        ...baseWhere,
         isOpened: false,
       },
     }),
 
     dbClient.cardSubmission.count({
       where: {
-        ...cardWhere,
+        ...baseWhere,
         riskSeverity: "HIGH",
       },
     }),
@@ -563,10 +592,7 @@ export const getCompanyAnalysisService = async (
       where: {
         companyId,
         ...(rigId && { rigId }),
-        createdAt: {
-          gte: todayStart,
-          lte: todayEnd,
-        },
+        submitDay: todayDateStr,
       },
     }),
 
@@ -574,12 +600,9 @@ export const getCompanyAnalysisService = async (
       where: userWhere,
     }),
 
-    // ==========================
-    // Charts Data
-    // ==========================
     dbClient.cardSubmission.groupBy({
       by: ["submitDay"],
-      where: cardWhere,
+      where: chartAndFilterWhere,
       _count: {
         id: true,
       },
@@ -588,91 +611,88 @@ export const getCompanyAnalysisService = async (
       },
     }),
 
-    // ==========================
     // Area Wise Cards
-    // ==========================
     dbClient.cardSubmission.groupBy({
       by: ["areaId"],
-      where: cardWhere,
+      where: chartAndFilterWhere,
       _count: {
         id: true,
       },
     }),
 
-    // ==========================
     // Hazard Wise Cards
-    // ==========================
     dbClient.cardSubmission.groupBy({
       by: ["hazardId"],
-      where: cardWhere,
+      where: chartAndFilterWhere,
       _count: {
         id: true,
       },
     }),
   ]);
 
-  // ====================================
   // Area Wise Data Formatting
-  // ====================================
-
   const areaIds = areaWiseCards.map((item) => item.areaId).filter(Boolean);
 
-  const areas = await dbClient.area.findMany({
-    where: {
-      id: {
-        in: areaIds as number[],
+  let areaWiseCardsWithDetails: any[] = [];
+
+  if (areaIds.length > 0) {
+    const areas = await dbClient.area.findMany({
+      where: {
+        id: {
+          in: areaIds as number[],
+        },
       },
-    },
-    select: {
-      id: true,
-      name: true,
-      color: true,
-    },
-  });
+      select: {
+        id: true,
+        name: true,
+        color: true,
+      },
+    });
 
-  const areaWiseCardsWithDetails = areaWiseCards.map((item) => {
-    const area = areas.find((a) => a.id === item.areaId);
-    return {
-      areaId: item.areaId,
-      areaName: area?.name || "Unknown",
-      areaColor: area?.color || null,
-      total: item._count.id,
-    };
-  });
+    areaWiseCardsWithDetails = areaWiseCards.map((item) => {
+      const area = areas.find((a) => a.id === item.areaId);
+      return {
+        areaId: item.areaId,
+        areaName: area?.name || "Unknown",
+        areaColor: area?.color || null,
+        total: item._count.id,
+      };
+    });
+  }
 
-  // ====================================
   // Hazard Wise Data Formatting
-  // ====================================
-
   const hazardIds = hazardWiseCards
     .map((item) => item.hazardId)
     .filter(Boolean);
 
-  const hazards = await dbClient.hazard.findMany({
-    where: {
-      id: {
-        in: hazardIds as number[],
-      },
-    },
-    select: {
-      id: true,
-      name: true,
-    },
-  });
+  let hazardWiseCardsWithDetails: any[] = [];
 
-  const hazardWiseCardsWithDetails = hazardWiseCards.map((item) => {
-    const hazard = hazards.find((h) => h.id === item.hazardId);
-    return {
-      hazardId: item.hazardId,
-      hazardName: hazard?.name || "Unknown",
-      total: item._count.id,
-    };
-  });
+  if (hazardIds.length > 0) {
+    const hazards = await dbClient.hazard.findMany({
+      where: {
+        id: {
+          in: hazardIds as number[],
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+
+    hazardWiseCardsWithDetails = hazardWiseCards.map((item) => {
+      const hazard = hazards.find((h) => h.id === item.hazardId);
+      return {
+        hazardId: item.hazardId,
+        hazardName: hazard?.name || "Unknown",
+        total: item._count.id,
+      };
+    });
+  }
 
   // ====================================
   // Chart Response Format
   // ====================================
-
   const chartData = cardSubmissionChartsData.map((item) => ({
     date: item.submitDay,
     total: item._count.id,

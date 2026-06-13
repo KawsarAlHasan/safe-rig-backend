@@ -90,8 +90,8 @@ export const getAllRigAdminService = async (companyId: any, query: any) => {
 };
 
 // Update an existing Rig Admin
-export const updateRigAdminService = async (adminData: any) => {
-  const { id, name, email, rigId } = adminData;
+export const updateRigAdminService = async (payload: any) => {
+  const { id, name, email, rigId } = payload;
 
   // check Rig Admin exist
   const isExistRigAdmin = await dbClient.client.findUnique({
@@ -108,6 +108,63 @@ export const updateRigAdminService = async (adminData: any) => {
       name: name,
       email: email,
       rigId: rigId,
+    },
+  });
+
+  if (!result) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to update rig admin!");
+  }
+
+  return result;
+};
+
+// Update an existing Rig Admin
+export const updateClientProfileService = async (payload: any) => {
+  const {
+    id,
+    isMainClient,
+    companyId,
+    profilePic,
+    logo,
+    name,
+    phone,
+    companyName,
+    companyPhone,
+    companyEmail,
+  } = payload;
+
+  if (isMainClient) {
+    // check company exist
+    const isExistCompany = await dbClient.company.findUnique({
+      where: { id: companyId },
+    });
+    if (!isExistCompany) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Company doesn't exist!");
+    }
+
+    // update company
+    const result = await dbClient.company.update({
+      where: { id: companyId },
+      data: {
+        name: companyName || isExistCompany.name,
+        phone: companyPhone || isExistCompany.phone,
+        email: companyEmail || isExistCompany.email,
+        logo: logo || isExistCompany.logo,
+      },
+    });
+
+    if (!result) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to update company!");
+    }
+  }
+
+  // update Admin
+  const result = await dbClient.client.update({
+    where: { id: id },
+    data: {
+      profilePic: profilePic,
+      name: name,
+      phone: phone,
     },
   });
 
@@ -137,6 +194,53 @@ export const deleteRigAdminService = async (adminId: any) => {
 
   if (!result) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to delete rig admin!");
+  }
+
+  return result;
+};
+
+// updated password
+export const updatePasswordService = async (payload: any) => {
+  const { id, currentPassword, password } = payload;
+
+  // check rig admin exist
+  const isExistRigAdmin = await dbClient.client.findUnique({
+    where: { id: id },
+  });
+  if (!isExistRigAdmin) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Rig Admin doesn't exist!");
+  }
+
+  // check rig admin password
+  const isPasswordMatched = await bcrypt.compare(
+    currentPassword,
+    isExistRigAdmin.password,
+  );
+
+  // check rig admin password
+  if (!isPasswordMatched) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      "Current password is incorrect!",
+    );
+  }
+
+  //hash password
+  const hashedPassword = await bcrypt.hash(
+    password,
+    Number(config.bcrypt_salt_rounds),
+  );
+
+  // update rig admin password
+  const result = await dbClient.client.update({
+    where: { id: id },
+    data: {
+      password: hashedPassword,
+    },
+  });
+
+  if (!result) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to update rig admin!");
   }
 
   return result;

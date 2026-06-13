@@ -73,12 +73,7 @@ export const clientAuth = (checkMainClient = false) => {
           id: decoded.id,
         },
         include: {
-          company: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
+          company: true,
           rig: {
             select: {
               id: true,

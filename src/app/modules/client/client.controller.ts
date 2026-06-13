@@ -4,14 +4,20 @@ import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
 
 import { resolveCompanyId } from "../../../helpers/resolveCompanyId";
-import { deleteRigAdminService, getAllRigAdminService, rigAdminCreateService, updateRigAdminService } from "./client.service";
+import {
+  deleteRigAdminService,
+  getAllRigAdminService,
+  rigAdminCreateService,
+  updateClientProfileService,
+  updatePasswordService,
+  updateRigAdminService,
+} from "./client.service";
 
 // create new rig Admin
 export const createNewRigAdmin = catchAsync(
   async (req: Request, res: Response) => {
     const companyId = resolveCompanyId(req);
 
-    
     const payload = { ...req.body, companyId };
 
     const result = await rigAdminCreateService(payload);
@@ -68,6 +74,49 @@ export const updateRigAdmin = catchAsync(
   },
 );
 
+// update client by own profile
+export const updateClientProfile = catchAsync(
+  async (req: Request, res: Response) => {
+    const client = (req as any).decodedClient;
+
+    let profilePic;
+    let logo;
+
+    const files = req.files as {
+      [fieldname: string]: Express.Multer.File[];
+    };
+
+    // Build base URL for uploaded file access
+    const baseUrl = `${req.protocol}://${req.get("host")}`;
+
+    if (req.files && files?.profilePic?.[0]) {
+      profilePic = `${baseUrl}/images/${files.profilePic[0].filename}`;
+    }
+
+    if (req.files && files?.logo?.[0]) {
+      logo = `${baseUrl}/images/${files.logo[0].filename}`;
+    }
+
+    const payload = {
+      ...req.body,
+      id: client?.id,
+      isMainClient: client?.isMainClient,
+      companyId: client?.companyId,
+      profilePic: profilePic,
+      logo: logo,
+    };
+
+    const result = await updateClientProfileService(payload);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Rig Admin updated successfully",
+      data: result,
+    });
+  },
+);
+
 // Delete an existing Rig Admin
 export const deleteRigAdmin = catchAsync(
   async (req: Request, res: Response) => {
@@ -79,6 +128,24 @@ export const deleteRigAdmin = catchAsync(
       success: true,
       statusCode: StatusCodes.OK,
       message: "Rig Admin deleted successfully",
+      data: result,
+    });
+  },
+);
+
+// update password
+export const updatePassword = catchAsync(
+  async (req: Request, res: Response) => {
+    const id = (req as any).decodedClient.id;
+
+    const payload = { ...req.body, id: id };
+
+    const result = await updatePasswordService(payload);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Password updated successfully",
       data: result,
     });
   },

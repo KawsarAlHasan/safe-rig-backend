@@ -713,3 +713,15 @@ export const getCompanyAnalysisService = async (
     hazardWiseCards: hazardWiseCardsWithDetails,
   };
 };
+
+// export dashboard report
+export const exportDashboardReportService = async (payload: any) => {
+  return "export dashboard report";
+};
+
+// export company overall analysis report
+export const exportCompanyOverallAnalysisReportService = async (
+  payload: any,
+) => {
+  return "export company overall analysis report";
+};

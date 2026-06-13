@@ -6,6 +6,7 @@ import {
   userAuth,
 } from "../../middlewares/auth";
 import {
+  clientCompanyAnalysis,
   clientDashboardOverview,
   getAdminDashboardOverview,
   getRigAreaTypeHazard,
@@ -20,6 +21,7 @@ router.get("/admin/dashboard-overview", adminAuth(), getAdminDashboardOverview);
 
 // ───── Client Routes ─────
 router.get("/client/dashboard-overview", clientAuth(), clientDashboardOverview);
+router.get("/client/company-analysis", clientAuth(), clientCompanyAnalysis);
 router.patch("/client/status-change", clientAuth(), globalStatus);
 router.get("/rig-area-hazard-type", clientAuth(), getRigAreaTypeHazard);
 

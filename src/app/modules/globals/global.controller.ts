@@ -9,6 +9,7 @@ import {
 import {
   getAdminDashboardOverviewService,
   getClientDashboardOverviewService,
+  getCompanyAnalysisService,
   getRigAreaTypeHazardService,
   globalStatusService,
 } from "./global.service";
@@ -60,15 +61,43 @@ export const clientDashboardOverview = catchAsync(
     const companyId = resolveCompanyId(req);
     const rigIdResolve = resolveRigId(req);
 
+    const { startDate, endDate } = req.query;
+
     const result = await getClientDashboardOverviewService(
       companyId,
       rigIdResolve,
+      startDate,
+      endDate,
     );
 
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
       message: "Get client dashboard overview successfully",
+      data: result,
+    });
+  },
+);
+
+// client Company Analysis
+export const clientCompanyAnalysis = catchAsync(
+  async (req: Request, res: Response) => {
+    const companyId = resolveCompanyId(req);
+    const rigIdResolve = resolveRigId(req);
+
+    const { startDate, endDate } = req.query;
+
+    const result = await getCompanyAnalysisService(
+      companyId,
+      rigIdResolve,
+      startDate,
+      endDate,
+    );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Get client Company Analysis successfully",
       data: result,
     });
   },

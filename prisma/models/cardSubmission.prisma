@@ -26,7 +26,7 @@ model CardSubmission {
   isOpened          Boolean      @default(false)
   closureNotes      String?
   evidence          String?
-  submitDay         String?
+  submitDay         String?    // demo: 2026-05-17
 
   status    AllStatus @default(ACTIVE)
   createdAt DateTime  @default(now())

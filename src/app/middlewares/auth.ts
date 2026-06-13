@@ -72,6 +72,20 @@ export const clientAuth = (checkMainClient = false) => {
         where: {
           id: decoded.id,
         },
+        include: {
+          company: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          rig: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
       });
 
       if (!client) {
@@ -146,15 +160,15 @@ export const userAuth = (options: AuthOptions = {}) => {
             select: {
               id: true,
               name: true,
-            }
+            },
           },
           rig: {
             select: {
               id: true,
               name: true,
-            }
-          }
-        }
+            },
+          },
+        },
       });
 
       if (!user) {

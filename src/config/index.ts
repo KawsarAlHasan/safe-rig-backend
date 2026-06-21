@@ -19,6 +19,7 @@ export default {
     client_jwt_secret: process.env.CLIENT_JWT_SECRET,
     admin_jwt_secret: process.env.ADMIN_JWT_SECRET,
     rig_admin_jwt_secret: process.env.RIG_ADMIN_JWT_SECRET,
+    impersonate_jwt_secret: process.env.IMPERSONATION_JWT_SECRET,
     jwt_expire_in: process.env.JWT_EXPIRE_IN,
   },
   email: {

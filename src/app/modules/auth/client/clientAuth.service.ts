@@ -4,7 +4,11 @@ import { JwtPayload, Secret } from "jsonwebtoken";
 import config from "../../../../config/index";
 import ApiError from "../../../../errors/ApiError";
 import { emailHelper } from "../../../../helpers/emailHelper";
-import { createAuthToken } from "../../../../helpers/jwtHelper";
+import {
+  createAuthToken,
+  impersonateLoginToken,
+  verifyImpersonateToken,
+} from "../../../../helpers/jwtHelper";
 import { emailTemplate } from "../../../../shared/emailTemplate";
 import {
   IAuthResetPassword,
@@ -16,6 +20,38 @@ import cryptoToken from "../../../../util/cryptoToken";
 import generateOTP from "../../../../util/generateOTP";
 import { ResetToken } from "../../ResetToken/resetToken.model";
 import { dbClient } from "../../../../lib/prisma";
+
+// impersonate token generate
+export const impTokenGenerateService = async (payload: any) => {
+  //create token
+  const createToken = impersonateLoginToken({
+    id: payload.clientId,
+    email: payload.clientEmail,
+  });
+
+  return { createToken };
+};
+
+// impersonate login
+export const impersonateLoginService = async (token: string) => {
+  const decoded = verifyImpersonateToken(token);
+
+  const client = await dbClient.client.findUnique({
+    where: { id: decoded.clientId, email: decoded.clientEmail },
+  });
+
+  if (!client) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Client doesn't exist!");
+  }
+
+  //create token
+  const createToken = createAuthToken({
+    id: client.id,
+    role: "client",
+  });
+
+  return { createToken };
+};
 
 //login
 export const loginClientFromDB = async (payload: ILoginData) => {
@@ -166,75 +202,6 @@ export const companyAndClientCreateService = async (payload: any) => {
 
   return result;
 };
-
-// // verify otp code
-// export const verifyClientEmailToDB = async (payload: any) => {
-//   const { email, otp } = payload;
-
-//   const isExistClient = await dbClient.client.findUnique({
-//     where: { email },
-//   });
-//   if (!isExistClient) {
-//     throw new ApiError(StatusCodes.BAD_REQUEST, "Client doesn't exist!");
-//   }
-
-//   const isExistOtp = await dbClient.otp.findFirst({
-//     where: { email, type: "CLIENT_EMAIL_VERIFICATION" },
-//   });
-//   if (!isExistOtp) {
-//     throw new ApiError(StatusCodes.BAD_REQUEST, "Otp doesn't exist!");
-//   }
-
-//   if (isExistOtp.otp !== otp) {
-//     throw new ApiError(StatusCodes.BAD_REQUEST, "You provided wrong otp");
-//   }
-
-//   const date = new Date();
-//   if (date > isExistOtp.expiresAt) {
-//     await dbClient.otp.deleteMany({
-//       where: {
-//         email: email,
-//       },
-//     });
-
-//     throw new ApiError(
-//       StatusCodes.BAD_REQUEST,
-//       "Otp already expired, Please try again",
-//     );
-//   }
-
-//   // update company
-//   await dbClient.company.update({
-//     where: { id: isExistClient.companyId },
-//     data: {
-//       status: "ACTIVE",
-//     },
-//   });
-
-//   // update client
-//   await dbClient.client.update({
-//     where: { email },
-//     data: {
-//       isVerified: true,
-//       status: "ACTIVE",
-//     },
-//   });
-
-//   // delete otp
-//   await dbClient.otp.deleteMany({
-//     where: {
-//       email: email,
-//     },
-//   });
-
-//   //create token
-//   const createToken = createAuthToken({
-//     id: isExistClient.id,
-//     role: "client",
-//   });
-
-//   return { createToken };
-// };
 
 // verify otp code
 export const verifyClientEmailToDB = async (payload: any) => {

@@ -28,3 +28,25 @@ export const verifyAuthToken = (token: string, role: string) => {
   }
   return jwt.verify(token, secret as Secret) as JwtPayload;
 };
+
+export const impersonateLoginToken = (payload: any) => {
+  const secret = config.jwt.impersonate_jwt_secret;
+
+  return jwt.sign(
+    {
+      clientId: payload.id,
+      impersonated: true,
+      clientEmail: payload.email,
+    },
+    secret as string,
+    {
+      expiresIn: "1m",
+    },
+  );
+};
+
+export const verifyImpersonateToken = (token: string) => {
+  const secret = config.jwt.impersonate_jwt_secret;
+
+  return jwt.verify(token, secret as Secret) as JwtPayload;
+};

@@ -6,7 +6,9 @@ import {
   adminCreateService,
   deleteAdminService,
   getAllAdminService,
+  updateAdminProfileService,
   updateAdminService,
+  updatePasswordService,
 } from "./admin.service";
 
 // create new Admin
@@ -63,6 +65,38 @@ export const updateAdmin = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// Update admin by own profile
+export const updateAdminProfile = catchAsync(
+  async (req: Request, res: Response) => {
+    const id = (req as any).decodedAdmin.id;
+
+    let image;
+    if (req.files && "image" in req.files && req.files.image[0]) {
+      // Build base URL for uploaded file access
+      const baseUrl = `${req.protocol}://${req.get("host")}`;
+
+      image = `${baseUrl}/images/${req.files.image[0].filename}`;
+    }
+
+    const payload = {
+      id: id,
+      ...req.body,
+      profilePic: image,
+    };
+
+    // id, name, phone, profilePic
+
+    const result = await updateAdminProfileService(payload);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Admin updated successfully",
+      data: result,
+    });
+  },
+);
+
 // Delete an existing Admin
 export const deleteAdmin = catchAsync(async (req: Request, res: Response) => {
   const adminId = req.params.id;
@@ -76,3 +110,21 @@ export const deleteAdmin = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
+// update password
+export const updatePassword = catchAsync(
+  async (req: Request, res: Response) => {
+    const id = (req as any).decodedAdmin.id;
+
+    const payload = { ...req.body, id: id };
+
+    const result = await updatePasswordService(payload);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Password updated successfully",
+      data: result,
+    });
+  },
+);

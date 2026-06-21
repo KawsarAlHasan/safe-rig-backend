@@ -120,6 +120,35 @@ export const updateAdminService = async (adminData: any) => {
   return result;
 };
 
+// update admin profile
+export const updateAdminProfileService = async (payload: any) => {
+  const { id, name, phone, profilePic } = payload;
+
+  // check Admin exist
+  const isExistAdmin = await dbClient.admin.findUnique({
+    where: { id: id },
+  });
+  if (!isExistAdmin) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Admin doesn't exist!");
+  }
+
+  // update admin
+  const result = await dbClient.admin.update({
+    where: { id: id },
+    data: {
+      name: name || isExistAdmin.name,
+      phone: phone || isExistAdmin.phone,
+      profilePic: profilePic || isExistAdmin.profilePic,
+    },
+  });
+
+  if (!result) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to update admin!");
+  }
+
+  return result;
+};
+
 // Delete an existing Admin
 export const deleteAdminService = async (adminId: any) => {
   const id = parseInt(adminId);
@@ -139,6 +168,53 @@ export const deleteAdminService = async (adminId: any) => {
 
   if (!result) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to delete admin!");
+  }
+
+  return result;
+};
+
+// updated password
+export const updatePasswordService = async (payload: any) => {
+  const { id, currentPassword, password } = payload;
+
+  // check rig admin exist
+  const isExistAdmin = await dbClient.admin.findUnique({
+    where: { id: id },
+  });
+  if (!isExistAdmin) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Admin doesn't exist!");
+  }
+
+  // check rig admin password
+  const isPasswordMatched = await bcrypt.compare(
+    currentPassword,
+    isExistAdmin.password,
+  );
+
+  // check rig admin password
+  if (!isPasswordMatched) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      "Current password is incorrect!",
+    );
+  }
+
+  //hash password
+  const hashedPassword = await bcrypt.hash(
+    password,
+    Number(config.bcrypt_salt_rounds),
+  );
+
+  // update rig admin password
+  const result = await dbClient.admin.update({
+    where: { id: id },
+    data: {
+      password: hashedPassword,
+    },
+  });
+
+  if (!result) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to update admin!");
   }
 
   return result;

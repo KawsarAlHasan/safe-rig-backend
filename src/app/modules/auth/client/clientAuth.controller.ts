@@ -4,10 +4,41 @@ import catchAsync from "../../../../shared/catchAsync";
 import sendResponse from "../../../../shared/sendResponse";
 import {
   companyAndClientCreateService,
+  impersonateLoginService,
+  impTokenGenerateService,
   loginClientFromDB,
   resendClientCodeService,
   verifyClientEmailToDB,
 } from "./clientAuth.service";
+import config from "../../../../config";
+
+// impersonate token generate
+export const impersonateTokenGenerate = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await impTokenGenerateService(req.body);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Impersonate login successfully",
+      data: `${config.FRONTEND_BASE_URL}/impersonate?token=${result.createToken}`,
+    });
+  },
+);
+
+// impersonate login
+export const impersonateLogin = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await impersonateLoginService(req.body.token);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Client login successfully",
+      data: result.createToken,
+    });
+  },
+);
 
 // login client
 export const loginClient = catchAsync(async (req: Request, res: Response) => {
@@ -48,8 +79,6 @@ export const createNewCompany = catchAsync(
       ...req.body,
       logo,
     };
-
-
 
     const result = await companyAndClientCreateService(payload);
 

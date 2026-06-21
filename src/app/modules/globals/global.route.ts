@@ -10,6 +10,7 @@ import {
   clientDashboardOverview,
   exportCompanyOverallAnalysisReport,
   exportDashboardReport,
+  getAdminDashboard,
   getAdminDashboardOverview,
   getRigAreaTypeHazard,
   globalStatus,
@@ -20,6 +21,7 @@ const router = express.Router();
 // ───── Admin Routes ─────
 router.patch("/admin/status-change", adminAuth(), globalStatus);
 router.get("/admin/dashboard-overview", adminAuth(), getAdminDashboardOverview);
+router.get("/admin/dashboard", adminAuth(), getAdminDashboard);
 
 // ───── Client Routes ─────
 router.get("/client/dashboard-overview", clientAuth(), clientDashboardOverview);

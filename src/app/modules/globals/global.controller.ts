@@ -10,6 +10,7 @@ import {
   exportCompanyOverallAnalysisReportService,
   exportDashboardReportService,
   getAdminDashboardOverviewService,
+  getAdminDashboardrvice,
   getClientDashboardOverviewService,
   getCompanyAnalysisService,
   getRigAreaTypeHazardService,
@@ -46,7 +47,9 @@ export const getRigAreaTypeHazard = catchAsync(
 // get rig, area, type, hazard
 export const getAdminDashboardOverview = catchAsync(
   async (req: Request, res: Response) => {
-    const result = await getAdminDashboardOverviewService();
+    const { startDate, endDate } = req.query;
+
+    const result = await getAdminDashboardOverviewService(startDate, endDate);
 
     sendResponse(res, {
       success: true,
@@ -143,6 +146,22 @@ export const exportCompanyOverallAnalysisReport = catchAsync(
       startDate,
       endDate,
     });
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Export company overall analysis report successfully",
+      data: result,
+    });
+  },
+);
+
+// export company overall analysis report
+export const getAdminDashboard = catchAsync(
+  async (req: Request, res: Response) => {
+    const { startDate, endDate } = req.query;
+
+    const result = await getAdminDashboardrvice(startDate, endDate);
 
     sendResponse(res, {
       success: true,

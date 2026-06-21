@@ -212,7 +212,10 @@ export const getRigAreaTypeHazardService = async (
 };
 
 // get admin dashboard overview
-export const getAdminDashboardOverviewService = async () => {
+export const getAdminDashboardOverviewService = async (
+  startDate?: any,
+  endDate?: any,
+) => {
   const companyCount = await dbClient.company.count();
 
   const rigCount = await dbClient.rig.count();
@@ -250,6 +253,265 @@ export const getAdminDashboardOverviewService = async () => {
     totalSubscriptionBuyMoney: totalSubscriptionBuyMoney._sum.price || 0,
   };
 };
+
+// get Admin dashboard overview
+export const getAdminDashboardrvice = async (
+  startDate?: any,
+  endDate?: any,
+) => {
+  const todayDateStr = new Date().toLocaleDateString("en-CA");
+
+  // ---- 1. Filters ----
+  // For card & activity counts: if date range is given, filter by submitDay; otherwise no filter (all-time)
+  const countDateFilter =
+    startDate && endDate ? { submitDay: { gte: startDate, lte: endDate } } : {};
+
+  // ---- 2. Determine date range for trends ----
+  let trendStart: string, trendEnd: string;
+  if (startDate && endDate) {
+    trendStart = startDate;
+    trendEnd = endDate;
+  } else {
+    // All-time: find the earliest date from all relevant tables
+    const [minCard, minDebrief, minUser, minGame, minSub] = await Promise.all([
+      dbClient.cardSubmission.findFirst({
+        where: { status: "ACTIVE" },
+        orderBy: { submitDay: "asc" },
+        select: { submitDay: true },
+      }),
+      dbClient.dailyDebrief.findFirst({
+        where: { status: "ACTIVE" },
+        orderBy: { submitDay: "asc" },
+        select: { submitDay: true },
+      }),
+      dbClient.user.findFirst({
+        orderBy: { createdAt: "asc" },
+        select: { createdAt: true },
+      }),
+      dbClient.gameResult.findFirst({
+        orderBy: { createdAt: "asc" },
+        select: { createdAt: true },
+      }),
+      dbClient.subscriptions.findFirst({
+        orderBy: { createdAt: "asc" },
+        select: { createdAt: true },
+      }),
+    ]);
+
+    const dates: string[] = [];
+    if (minCard?.submitDay) dates.push(minCard.submitDay);
+    if (minDebrief?.submitDay) dates.push(minDebrief.submitDay);
+    if (minUser?.createdAt)
+      dates.push(minUser.createdAt.toISOString().split("T")[0]);
+    if (minGame?.createdAt)
+      dates.push(minGame.createdAt.toISOString().split("T")[0]);
+    if (minSub?.createdAt)
+      dates.push(minSub.createdAt.toISOString().split("T")[0]);
+
+    // If no data at all, fallback to today
+    if (dates.length === 0) {
+      trendStart = todayDateStr;
+      trendEnd = todayDateStr;
+    } else {
+      // Sort and take the earliest
+      dates.sort();
+      trendStart = dates[0];
+      trendEnd = todayDateStr;
+    }
+  }
+
+  const trendDates = getDateRange(trendStart, trendEnd);
+
+  // ---- 3. Card by Company ----
+  const cardCounts = await dbClient.cardSubmission.groupBy({
+    by: ["companyId"],
+    where: {
+      ...countDateFilter,
+      status: "ACTIVE",
+    },
+    _count: { id: true },
+  });
+
+  const companyIds = cardCounts
+    .map((c) => c.companyId)
+    .filter((id): id is number => id !== null);
+
+  const companies = await dbClient.company.findMany({
+    where: { id: { in: companyIds } },
+    select: { id: true, name: true },
+  });
+  const companyNameMap = new Map(companies.map((c) => [c.id, c.name]));
+
+  const cardByCompany = cardCounts.map((c) => ({
+    companyId: c.companyId!,
+    companyName: companyNameMap.get(c.companyId!) || "Unknown",
+    totalCards: c._count.id,
+  }));
+
+  // ---- 4. Top Clients by Activity (based on companies) ----
+  const cardActivityCounts = await dbClient.cardSubmission.groupBy({
+    by: ["companyId"],
+    where: {
+      ...countDateFilter,
+      status: "ACTIVE",
+    },
+    _count: { id: true },
+  });
+
+  const debriefActivityCounts = await dbClient.dailyDebrief.groupBy({
+    by: ["companyId"],
+    where: {
+      ...countDateFilter,
+      status: "ACTIVE",
+    },
+    _count: { id: true },
+  });
+
+  const activityMap = new Map<number, number>();
+  [...cardActivityCounts, ...debriefActivityCounts].forEach((item) => {
+    if (item.companyId !== null) {
+      const current = activityMap.get(item.companyId) || 0;
+      activityMap.set(item.companyId, current + item._count.id);
+    }
+  });
+
+  const activityCompanyIds = Array.from(activityMap.keys());
+  const activityCompanies = await dbClient.company.findMany({
+    where: { id: { in: activityCompanyIds } },
+    select: { id: true, name: true },
+  });
+  const activityCompanyMap = new Map(
+    activityCompanies.map((c) => [c.id, c.name]),
+  );
+
+  // Calculate top clients by activity with detailed breakdown
+  const topClientsPromises = Array.from(activityMap.entries()).map(
+    async ([companyId, totalActivity]) => {
+      // Get detailed activity data for each company
+      const [cardCount, debriefCount, userCount, gameCount] = await Promise.all(
+        [
+          dbClient.cardSubmission.count({
+            where: {
+              companyId: companyId,
+              ...countDateFilter,
+              status: "ACTIVE",
+            },
+          }),
+          dbClient.dailyDebrief.count({
+            where: {
+              companyId: companyId,
+              ...countDateFilter,
+              status: "ACTIVE",
+            },
+          }),
+          dbClient.user.count({
+            where: {
+              companyId: companyId,
+            },
+          }),
+          dbClient.gameResult.count({
+            where: {
+              companyId: companyId,
+            },
+          }),
+        ],
+      );
+
+      return {
+        clientId: companyId,
+        clientName: activityCompanyMap.get(companyId) || "Unknown",
+        totalActivity,
+        totalCards: cardCount,
+        totalDebriefs: debriefCount,
+        totalNewUsers: userCount,
+        totalGameSubmissions: gameCount,
+      };
+    },
+  );
+
+  // Wait for all promises to resolve
+  const topClientsByActivity = (await Promise.all(topClientsPromises))
+    .sort((a, b) => b.totalActivity - a.totalActivity)
+    .slice(0, 10);
+
+  // ---- 5. Platform Usage Trend ----
+  const platformUsageTrend = await Promise.all(
+    trendDates.map(async (dateStr) => {
+      const dateStart = new Date(dateStr + "T00:00:00.000Z");
+      const dateEnd = new Date(dateStr + "T23:59:59.999Z");
+
+      const [totalCards, totalDebriefs, totalNewUsers, totalGameSubmissions] =
+        await Promise.all([
+          dbClient.cardSubmission.count({
+            where: { submitDay: dateStr, status: "ACTIVE" },
+          }),
+          dbClient.dailyDebrief.count({
+            where: { submitDay: dateStr, status: "ACTIVE" },
+          }),
+          dbClient.user.count({
+            where: {
+              createdAt: { gte: dateStart, lte: dateEnd },
+            },
+          }),
+          dbClient.gameResult.count({
+            where: {
+              createdAt: { gte: dateStart, lte: dateEnd },
+            },
+          }),
+        ]);
+
+      const used =
+        totalCards + totalDebriefs + totalNewUsers + totalGameSubmissions;
+
+      return {
+        date: dateStr,
+        used,
+        totalCards,
+        totalDebriefs,
+        totalNewUsers,
+        totalGameSubmissions,
+      };
+    }),
+  );
+
+  // ---- 6. Subscription Buy Trend ----
+  const subscribtionBuyTrend = await Promise.all(
+    trendDates.map(async (dateStr) => {
+      const dateStart = new Date(dateStr + "T00:00:00.000Z");
+      const dateEnd = new Date(dateStr + "T23:59:59.999Z");
+
+      const result = await dbClient.subscriptions.aggregate({
+        where: {
+          createdAt: { gte: dateStart, lte: dateEnd },
+        },
+        _sum: { price: true },
+      });
+
+      const money = result._sum.price || 0;
+      return { date: dateStr, money };
+    }),
+  );
+
+  // ---- 7. Return ----
+  return {
+    cardByCompany,
+    topClientsByActivity,
+    platformUsageTrend,
+    subscribtionBuyTrend,
+  };
+};
+
+// Helper: generate array of date strings (YYYY-MM-DD) from start to end inclusive
+function getDateRange(start: string, end: string): string[] {
+  const dates: string[] = [];
+  let current = new Date(start + "T00:00:00.000Z");
+  const endDate = new Date(end + "T00:00:00.000Z");
+  while (current <= endDate) {
+    dates.push(current.toISOString().split("T")[0]);
+    current.setDate(current.getDate() + 1);
+  }
+  return dates;
+}
 
 // get client dashboard overview
 export const getClientDashboardOverviewService = async (

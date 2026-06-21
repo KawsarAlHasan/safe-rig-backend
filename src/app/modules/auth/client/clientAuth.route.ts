@@ -3,19 +3,28 @@ import validateRequest from "../../../middlewares/validateRequest";
 import {
   clientProfile,
   createNewCompany,
+  impersonateLogin,
+  impersonateTokenGenerate,
   loginClient,
   resendClientCode,
   verifyClientEmailOtp,
 } from "./clientAuth.controller";
 import {
   companyZodSchema,
+  impersonateZodSchema,
   loginZodSchema,
   resendCodeZodSchema,
   verifyEmailZodSchema,
 } from "./clientAuth.validation";
-import { clientAuth } from "../../../middlewares/auth";
+import { adminAuth, clientAuth } from "../../../middlewares/auth";
 const router = express.Router();
 
+router.post("/impersonate", adminAuth(), impersonateTokenGenerate);
+router.post(
+  "/impersonate-login",
+  validateRequest(impersonateZodSchema),
+  impersonateLogin,
+);
 router.post("/login", validateRequest(loginZodSchema), loginClient);
 router.get("/profile", clientAuth(), clientProfile);
 
@@ -32,28 +41,5 @@ router.post(
   validateRequest(resendCodeZodSchema),
   resendClientCode,
 );
-
-// // sign in
-// router.post("/signin", validateRequest(loginZodSchema), userLogin);
-
-// router.post(
-//   "/forgot-password",
-//   validateRequest(resendCodeZodSchema),
-//   forgotPassword,
-// );
-
-// router.post(
-//   "/verify-otp",
-//   validateRequest(verifyEmailZodSchema),
-//   verifyOtp,
-// );
-
-// router.post(
-//   "/set-password",
-//   validateRequest(setPasswordZodSchema),
-//   setPassword,
-// );
-
-// router.delete("/:id", permanentDeleteUser);
 
 export const ClientAuthRoutes = router;

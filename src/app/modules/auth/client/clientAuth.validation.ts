@@ -1,6 +1,12 @@
 import { z } from "zod";
 import { statusName } from "../../../../shared/statusName";
 
+export const impersonateZodSchema = z.object({
+  body: z.object({
+    token: z.string().min(1, "Token is required"),
+  }),
+});
+
 export const loginZodSchema = z.object({
   body: z.object({
     email: z

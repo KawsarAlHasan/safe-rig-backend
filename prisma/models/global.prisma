@@ -1,0 +1,13 @@
+model AppHome {
+    id        Int      @id @default(autoincrement())
+    messageId Int?
+    message   Message? @relation(fields: [messageId], references: [id])
+    videoId   Int?
+    videos    Videos?  @relation(fields: [videoId], references: [id])
+    companyId Int?
+    company   Company? @relation(fields: [companyId], references: [id])
+    rigId     Int?
+    rig       Rig?     @relation(fields: [rigId], references: [id])
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}

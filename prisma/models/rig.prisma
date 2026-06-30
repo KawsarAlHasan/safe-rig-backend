@@ -25,4 +25,5 @@ model Rig {
     gameResults      GameResult[]
     clients          Client[]
     debriefQuestions DebriefQuestion[]
+    appHomes         AppHome[]
 }

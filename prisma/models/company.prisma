@@ -32,6 +32,7 @@ model Company {
     games           Game[]
 
     debriefQuestions DebriefQuestion[]
+    appHomes AppHome[]
     // puzzles         Puzzle[]
     // questionAnwsers QuestionAnwser[]
 }

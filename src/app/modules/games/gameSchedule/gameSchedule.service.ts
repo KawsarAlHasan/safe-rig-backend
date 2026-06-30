@@ -205,35 +205,98 @@ export const getGameScheduleService = async (user: any) => {
   const today = new Date();
   const dateOnly = today.toISOString().split("T")[0];
 
-  // // check game result
-  // const gameResult = await dbClient.gameResult.findFirst({
-  //   where: {
-  //     userId: user.id,
-  //     date: dateOnly,
-  //   },
-  // });
+  const { companyId, rigId } = user;
 
-  // if (gameResult) {
-  //   throw new ApiError(StatusCodes.BAD_REQUEST, "This Game already played!");
-  // }
-
-  // get game schedule
-  const todaysGame = await dbClient.game.findFirst({
-    where: { scheduledFor: dateOnly },
+  // check game result
+  const gameResult = await dbClient.gameResult.findFirst({
+    where: {
+      userId: user.id,
+      date: dateOnly,
+    },
   });
 
-  if (!todaysGame) {
+  if (gameResult) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "This Game already played!");
+  }
+
+  let mainGame: any = null;
+
+  /**
+   * Priority 1
+   * Find game by Rig
+   */
+  mainGame = await dbClient.game.findFirst({
+    where: {
+      scheduledFor: dateOnly,
+      rigIds: {
+        has: rigId,
+      },
+    },
+    orderBy: {
+      id: "desc",
+    },
+  });
+
+  /**
+   * Priority 2
+   * Find game by Company + All Rigs
+   */
+  if (!mainGame) {
+    mainGame = await dbClient.game.findFirst({
+      where: {
+        scheduledFor: dateOnly,
+        companyId,
+        isAllRigs: true,
+      },
+      orderBy: {
+        id: "desc",
+      },
+    });
+  }
+
+  /**
+   * Priority 3
+   * Default Game
+   */
+  if (!mainGame) {
+    mainGame = await dbClient.game.findFirst({
+      where: {
+        scheduledFor: dateOnly,
+        isDefault: true,
+      },
+      orderBy: {
+        id: "desc",
+      },
+    });
+  }
+
+  /**
+   * Priority 4
+   * Default Game and date
+   */
+  if (!mainGame) {
+    mainGame = await dbClient.game.findFirst({
+      where: {
+        isDefault: true,
+      },
+      orderBy: {
+        id: "desc",
+      },
+    });
+  }
+
+  if (!mainGame) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Game schedule doesn't exist!");
   }
 
   let questions: any = [];
   let puzzles: any = [];
 
-  if (todaysGame?.gameType === "QUESTION") {
+  if (mainGame?.gameType === "QUESTION") {
     const result = await dbClient.questionAnwser.findMany({
       where: {
         id: {
-          in: todaysGame.questionIds,
+          in: mainGame.questionIds,
         },
       },
     });
@@ -243,7 +306,7 @@ export const getGameScheduleService = async (user: any) => {
     const result = await dbClient.puzzle.findMany({
       where: {
         id: {
-          in: todaysGame.puzzleIds,
+          in: mainGame.puzzleIds,
         },
       },
     });
@@ -259,17 +322,95 @@ export const getGameScheduleService = async (user: any) => {
   }
 
   const formatted = {
-    id: todaysGame.id,
-    scheduledFor: todaysGame.scheduledFor,
-    gameType: todaysGame.gameType,
-    createdAt: todaysGame.createdAt,
-    updatedAt: todaysGame.updatedAt,
+    id: mainGame.id,
+    scheduledFor: mainGame.scheduledFor,
+    gameType: mainGame.gameType,
+    createdAt: mainGame.createdAt,
+    updatedAt: mainGame.updatedAt,
     questions: questions,
     puzzles: puzzles,
   };
 
   return formatted;
 };
+
+// get game schedule by scheduledFor
+// export const getGameScheduleService = async (user: any) => {
+//   const today = new Date();
+//   const dateOnly = today.toISOString().split("T")[0];
+
+//   const {companyId, rigId} = user;
+
+//   // check game result
+//   const gameResult = await dbClient.gameResult.findFirst({
+//     where: {
+//       userId: user.id,
+//       date: dateOnly,
+//     },
+//   });
+
+//   if (gameResult) {
+//     throw new ApiError(StatusCodes.BAD_REQUEST, "This Game already played!");
+//   }
+
+//     let mainGame: any = null;
+
+//   // get game schedule
+//   const todaysGame = await dbClient.game.findFirst({
+//     where: { scheduledFor: dateOnly },
+//   });
+
+//   if (!todaysGame) {
+//     // hare would be others logic
+//     throw new ApiError(StatusCodes.BAD_REQUEST, "Game schedule doesn't exist!"); // currently not exist
+//   } else {
+//     mainGame = todaysGame;
+//   }
+
+//   let questions: any = [];
+//   let puzzles: any = [];
+
+//   if (mainGame?.gameType === "QUESTION") {
+//     const result = await dbClient.questionAnwser.findMany({
+//       where: {
+//         id: {
+//           in: mainGame.questionIds,
+//         },
+//       },
+//     });
+
+//     questions = result;
+//   } else {
+//     const result = await dbClient.puzzle.findMany({
+//       where: {
+//         id: {
+//           in: mainGame.puzzleIds,
+//         },
+//       },
+//     });
+
+//     // Parse marks from string to JSON
+//     const puzzlesWithParsedMarks = result.map((puzzle: any) => ({
+//       ...puzzle,
+//       marks: JSON.parse(puzzle.marks), // Convert string to array
+//       marksLength: JSON.parse(puzzle.marks).length,
+//     }));
+
+//     puzzles = puzzlesWithParsedMarks;
+//   }
+
+//   const formatted = {
+//     id: mainGame.id,
+//     scheduledFor: mainGame.scheduledFor,
+//     gameType: mainGame.gameType,
+//     createdAt: mainGame.createdAt,
+//     updatedAt: mainGame.updatedAt,
+//     questions: questions,
+//     puzzles: puzzles,
+//   };
+
+//   return formatted;
+// };
 
 // question submit service
 export const questionSubmitService = async (payload: {

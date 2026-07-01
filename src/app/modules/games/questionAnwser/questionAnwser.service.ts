@@ -2,7 +2,6 @@ import { StatusCodes } from "http-status-codes";
 import { Prisma } from "../../../../../generated/prisma/client";
 import ApiError from "../../../../errors/ApiError";
 import { dbClient } from "../../../../lib/prisma";
-import { statusName } from "../../../../shared/statusName";
 import { IQuery } from "../../../../types/company";
 import unlinkFile from "../../../../shared/unlinkFile";
 
@@ -65,6 +64,64 @@ export const questionCreateService = async (payloadData: any) => {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
       "Failed to create Question and Anwsar!",
+    );
+  }
+
+  return result;
+};
+
+// update Question and Anwsar
+export const updateQuestionCreateService = async (payloadData: any) => {
+  const {
+    id,
+    image,
+    question,
+    option1,
+    option2,
+    option3,
+    option4,
+    correctAnswer,
+    time,
+  } = payloadData;
+
+  // check Question and Anwsar name
+  const isExistInAllRigs = await dbClient.questionAnwser.findFirst({
+    where: {
+      id: parseInt(id),
+    },
+  });
+
+  if (!isExistInAllRigs) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      "Question and Anwsar doesn't exist!",
+    );
+  }
+
+  // update new Question and Anwsar on prisma dbClient
+  const result = await dbClient.questionAnwser.update({
+    where: {
+      id: parseInt(id),
+    },
+    data: {
+      image: image ? image : isExistInAllRigs.image,
+      question: question ? question : isExistInAllRigs.question,
+      option1: option1 ? option1 : isExistInAllRigs.option1,
+      option2: option2 ? option2 : isExistInAllRigs.option2,
+      option3: option3 ? option3 : isExistInAllRigs.option3,
+      option4: option4 ? option4 : isExistInAllRigs.option4,
+      correctAnswer: correctAnswer
+        ? parseInt(correctAnswer)
+        : isExistInAllRigs.correctAnswer,
+      time: time ? parseInt(time) : isExistInAllRigs.time,
+    },
+  });
+
+  // check role creation
+  if (!result) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      "Failed to update Question and Anwsar!",
     );
   }
 
@@ -165,213 +222,3 @@ export const deleteQuestionService = async (id: any) => {
 
   return result;
 };
-
-// // get Question and Anwsar
-// export const getRigTypeService = async (query: any, companyId: any) => {
-//   const andConditions: Prisma.RigTypeWhereInput[] = [];
-
-//   // Search by name
-//   if (query.search) {
-//     andConditions.push({
-//       name: {
-//         contains: query.search,
-//         mode: "insensitive",
-//       },
-//     });
-//   }
-
-//   // Status filter
-//   if (!query.status) {
-//     andConditions.push({
-//       status: "ACTIVE",
-//     });
-//   } else if (query.status === "all") {
-//     andConditions.push({
-//       NOT: {
-//         status: "DELETED",
-//       },
-//     });
-//   } else {
-//     andConditions.push({
-//       status: query.status,
-//     });
-//   }
-
-//   // Filter by isDefault
-//   if (query.isDefault !== undefined) {
-//     andConditions.push({
-//       isDefault: query.isDefault === "true" || query.isDefault === true,
-//     });
-//   }
-
-//   if (companyId) {
-//     andConditions.push({
-//       companyId: Number(companyId),
-//     });
-//   } else if (query.companyId) {
-//     andConditions.push({
-//       companyId: Number(query.companyId),
-//     });
-//   }
-
-//   // Filter by rigIds (array contains)
-//   if (query.rigId) {
-//     andConditions.push({
-//       rigIds: {
-//         has: Number(query.rigId), // PostgreSQL array filter
-//       },
-//     });
-//   }
-
-//   // multiple rigIds support
-//   if (query.rigIds) {
-//     const ids = query.rigIds.split(",").map((id: string) => Number(id));
-
-//     andConditions.push({
-//       rigIds: {
-//         hasSome: ids,
-//       },
-//     });
-//   }
-
-//   const whereCondition: Prisma.RigTypeWhereInput =
-//     andConditions.length > 0 ? { AND: andConditions } : {};
-
-//   const result = await dbClient.questionAnwser.findMany({
-//     where: whereCondition, // FIXED (important)
-//     orderBy: {
-//       id: "desc",
-//     },
-//   });
-
-//   if (!result) {
-//     throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to fetch Question and Anwsar!");
-//   }
-
-//   if (result.length === 0) {
-//     throw new ApiError(StatusCodes.NOT_FOUND, "No Question and Anwsars found!");
-//   }
-
-//   return result;
-// };
-
-// // Update an existing Question and Anwsar
-// export const updateRigTypeService = async (payload: any, companyId: any) => {
-//   const { id, name, isDefault, isAllRigs, rigIds } = payload;
-
-//   // check Question and Anwsar exist
-//   const isExistRigType = await dbClient.questionAnwser.findUnique({
-//     where: { id: id },
-//   });
-
-//   if (!isExistRigType) {
-//     throw new ApiError(StatusCodes.BAD_REQUEST, "Question and Anwsar doesn't exist!");
-//   }
-
-//   // check duplicate name
-//   if (name && name !== isExistRigType.name) {
-//     const isDuplicateName = await dbClient.questionAnwser.findFirst({
-//       where: { companyId: companyId, name: name },
-//     });
-
-//     if (isDuplicateName) {
-//       throw new ApiError(
-//         StatusCodes.BAD_REQUEST,
-//         `Question and Anwsar with name ${name} already exists!`,
-//       );
-//     }
-//   }
-
-//   // update Question and Anwsar
-//   const result = await dbClient.questionAnwser.update({
-//     where: { id: id },
-//     data: {
-//       name: name || isExistRigType.name,
-//       isDefault: isDefault || isExistRigType.isDefault,
-//       companyId: companyId || isExistRigType.companyId,
-//       isAllRigs: isAllRigs || isExistRigType.isAllRigs,
-//       rigIds: rigIds || isExistRigType.rigIds,
-//     },
-//   });
-
-//   if (!result) {
-//     throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to update Question and Anwsar!");
-//   }
-
-//   return result;
-// };
-
-// // status change
-// export const changeRigTypeStatusService = async (
-//   payload: any,
-//   companyId: any,
-// ) => {
-//   const { id, status } = payload;
-
-//   if (!statusName.includes(status)) {
-//     throw new ApiError(
-//       StatusCodes.BAD_REQUEST,
-//       `Invalid status! You can only change status to ${statusName}`,
-//     );
-//   }
-
-//   // build where condition
-//   const whereCondition: any = { id };
-
-//   if (companyId) {
-//     whereCondition.companyId = companyId;
-//   }
-
-//   // check RigType exist
-//   const isExistRigType = await dbClient.questionAnwser.findUnique({
-//     where: whereCondition,
-//   });
-//   if (!isExistRigType) {
-//     throw new ApiError(StatusCodes.BAD_REQUEST, "Question and Anwsar doesn't exist!");
-//   }
-
-//   // status change
-//   const result = await dbClient.questionAnwser.update({
-//     where: { id: id },
-//     data: {
-//       status: status,
-//     },
-//   });
-
-//   if (!result) {
-//     throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to status change!");
-//   }
-
-//   return result;
-// };
-
-// // permanent Question and Anwsar delete
-// export const deleteRigTypeService = async (paramsId: any, companyId: any) => {
-//   const id = parseInt(paramsId);
-
-//   // build where condition
-//   const whereCondition: any = { id };
-
-//   if (companyId) {
-//     whereCondition.companyId = companyId;
-//   }
-
-//   // check Question and Anwsar exist
-//   const isExistRigType = await dbClient.questionAnwser.findUnique({
-//     where: whereCondition,
-//   });
-//   if (!isExistRigType) {
-//     throw new ApiError(StatusCodes.BAD_REQUEST, "Question and Anwsar doesn't exist!");
-//   }
-
-//   // delete Question and Anwsar
-//   const result = await dbClient.questionAnwser.delete({
-//     where: { id: id },
-//   });
-
-//   if (!result) {
-//     throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to delete Question and Anwsar!");
-//   }
-
-//   return result;
-// };

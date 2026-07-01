@@ -38,6 +38,38 @@ export const puzzleCreateService = async (payloadData: any) => {
   return result;
 };
 
+// update Puzzle
+export const puzzleUpdateService = async (payloadData: any) => {
+  const { id, image, title, marks, time } = payloadData;
+
+  // existing puzzle
+  const existing = await dbClient.puzzle.findFirst({
+    where: { id: parseInt(id) },
+  });
+
+  if (!existing) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Puzzle doesn't exist!");
+  }
+
+  // update new Puzzle on prisma dbClient
+  const result = await dbClient.puzzle.update({
+    where: { id: parseInt(id) },
+    data: {
+      image: image ?? existing?.image,
+      title: title ?? existing?.title,
+      marks: marks ?? existing?.marks,
+      time: time ? parseInt(time) : existing?.time,
+    },
+  });
+
+  // check role creation
+  if (!result) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to create Puzzle!");
+  }
+
+  return result;
+};
+
 // get all Puzzle
 export const getAllPuzzleService = async (query: IQuery) => {
   const page = Number(query.page) || 1;

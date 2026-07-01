@@ -7,6 +7,7 @@ import {
   deleteQuestionService,
   getAllQuestionService,
   questionCreateService,
+  updateQuestionCreateService,
 } from "./questionAnwser.service";
 
 // create new Question and Anwsar
@@ -50,33 +51,31 @@ export const getAllQuestion = catchAsync(
   },
 );
 
-// // update Question and Anwsar
-// export const updateRigType = catchAsync(async (req: Request, res: Response) => {
-//   const companyId = resolveCompanyId(req);
+// update Question and Anwsar
+export const updateQuestion = catchAsync(
+  async (req: Request, res: Response) => {
+    let image;
+    if (req.files && "image" in req.files && req.files.image[0]) {
+      // Build base URL for uploaded file access
+      const baseUrl = `${req.protocol}://${req.get("host")}`;
 
-//   await updateRigTypeService(req.body, companyId);
+      image = `${baseUrl}/images/${req.files.image[0].filename}`;
+    }
 
-//   sendResponse(res, {
-//     success: true,
-//     statusCode: StatusCodes.OK,
-//     message: "Question and Anwsar updated successfully",
-//   });
-// });
+    const payload = {
+      ...req.body,
+      image,
+    };
 
-// // status change
-// export const rigTypeStatusChange = catchAsync(
-//   async (req: Request, res: Response) => {
-//     const companyId = resolveCompanyId(req);
+    await updateQuestionCreateService(payload);
 
-//     await changeRigTypeStatusService(req.body, companyId);
-
-//     sendResponse(res, {
-//       success: true,
-//       statusCode: StatusCodes.OK,
-//       message: "Question and Anwsar status changed successfully",
-//     });
-//   },
-// );
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Question and Anwsar updated successfully",
+    });
+  },
+);
 
 // Delete permanent Question and Anwsar
 export const permanentDeleteQuestion = catchAsync(

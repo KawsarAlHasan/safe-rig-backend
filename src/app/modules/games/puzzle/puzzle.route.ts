@@ -2,7 +2,7 @@ import express from "express";
 import validateRequest from "../../../middlewares/validateRequest";
 import { adminAuth, rigAdminAuth, userAuth } from "../../../middlewares/auth";
 import fileUploadHandler from "../../../middlewares/fileUploadHandler";
-import { createNewPuzzle, getAllPuzzles, permanentDeletePuzzle } from "./puzzle.controller";
+import { createNewPuzzle, getAllPuzzles, permanentDeletePuzzle, updateNewPuzzle } from "./puzzle.controller";
 
 const router = express.Router();
 
@@ -12,6 +12,14 @@ router.post(
   fileUploadHandler(),
   // validateRequest(createQuestionZodSchema),
   createNewPuzzle,
+);
+
+router.put(
+  "/update",
+  adminAuth(),
+  fileUploadHandler(),
+  // validateRequest(createQuestionZodSchema),
+  updateNewPuzzle,
 );
 
 // router.get("/all", adminAuth(), getAllPuzzles);

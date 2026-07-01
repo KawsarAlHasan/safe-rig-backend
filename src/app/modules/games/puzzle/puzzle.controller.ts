@@ -7,6 +7,7 @@ import {
   deletePuzzleService,
   getAllPuzzleService,
   puzzleCreateService,
+  puzzleUpdateService,
 } from "./puzzle.service";
 
 // create new Puzzle
@@ -31,6 +32,33 @@ export const createNewPuzzle = catchAsync(
       success: true,
       statusCode: StatusCodes.OK,
       message: "Puzzle created successfully",
+      data: result,
+    });
+  },
+);
+
+// update new Puzzle
+export const updateNewPuzzle = catchAsync(
+  async (req: Request, res: Response) => {
+    let image;
+    if (req.files && "image" in req.files && req.files.image[0]) {
+      // Build base URL for uploaded file access
+      const baseUrl = `${req.protocol}://${req.get("host")}`;
+
+      image = `${baseUrl}/images/${req.files.image[0].filename}`;
+    }
+
+    const payload = {
+      ...req.body,
+      image,
+    };
+
+    const result = await puzzleUpdateService(payload);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Puzzle updated successfully",
       data: result,
     });
   },

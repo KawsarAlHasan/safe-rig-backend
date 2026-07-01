@@ -1,7 +1,12 @@
 import express from "express";
 import validateRequest from "../../../middlewares/validateRequest";
 import { adminAuth, rigAdminAuth, userAuth } from "../../../middlewares/auth";
-import { createNewQuestion, getAllQuestion, permanentDeleteQuestion } from "./questionAnwser.controller";
+import {
+  createNewQuestion,
+  getAllQuestion,
+  permanentDeleteQuestion,
+  updateQuestion,
+} from "./questionAnwser.controller";
 import { createQuestionZodSchema } from "./questionAnwser.validation";
 import fileUploadHandler from "../../../middlewares/fileUploadHandler";
 
@@ -13,6 +18,14 @@ router.post(
   fileUploadHandler(),
   validateRequest(createQuestionZodSchema),
   createNewQuestion,
+);
+
+router.put(
+  "/update",
+  adminAuth(),
+  fileUploadHandler(),
+  validateRequest(createQuestionZodSchema),
+  updateQuestion,
 );
 
 // router.get("/all", adminAuth(), getAllQuestion);

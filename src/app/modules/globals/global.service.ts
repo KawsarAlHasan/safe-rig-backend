@@ -1,7 +1,9 @@
 import { StatusCodes } from "http-status-codes";
 import ApiError from "../../../errors/ApiError";
-import { dbClient } from "../../../lib/prisma";
 import { z } from "zod"; // optional but recommended
+import { dbClient } from "../../../lib/prisma";
+import safetyApiService from "../../../services/safeai.service";
+import { Prisma } from "../../../../generated/prisma/client";
 
 // Type-safe model map
 const modelMap = {
@@ -209,6 +211,434 @@ export const getRigAreaTypeHazardService = async (
   }
 
   return { area, hazard, cardType, rig, rigType };
+};
+
+// Helper to add days to a date
+const addDays = (date: Date, days: number): Date => {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+};
+
+// Format date as YYYY-MM-DD
+const formatDate = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+// Helper to fetch period data (hazards & areas) for a given date range and filter
+const getPeriodData = async (
+  startDateStr: string,
+  endDateStr: string,
+  filter: { companyId?: number; rigId?: number },
+): Promise<{
+  hazards: {
+    hazard_name: string;
+    high_count: number;
+    medium_count: number;
+    low_count: number;
+  }[];
+  areas: { area_name: string; count: number }[];
+}> => {
+  // Build where clause for the date range and company/rig filter
+  const whereClause: Prisma.CardSubmissionWhereInput = {
+    submitDay: {
+      gte: startDateStr,
+      lte: endDateStr,
+    },
+    hazardId: { not: null },
+    areaId: { not: null },
+  };
+
+  if (filter.rigId) {
+    whereClause.rigId = filter.rigId;
+  } else if (filter.companyId) {
+    whereClause.companyId = filter.companyId;
+  }
+
+  // 1. Get hazard & severity counts
+  const hazardSeverityCounts = await dbClient.cardSubmission.groupBy({
+    by: ["hazardId", "riskSeverity"],
+    where: whereClause,
+    _count: {
+      id: true,
+    },
+  });
+
+  // 2. Get area counts
+  const areaCounts = await dbClient.cardSubmission.groupBy({
+    by: ["areaId"],
+    where: whereClause,
+    _count: {
+      id: true,
+    },
+  });
+
+  // Process hazard data
+  // Aggregate totals per hazard and severity breakdown
+  const hazardMap = new Map<
+    number,
+    { total: number; high: number; medium: number; low: number }
+  >();
+
+  for (const item of hazardSeverityCounts) {
+    const hazardId = item.hazardId!;
+    const severity = item.riskSeverity;
+    const count = item._count.id;
+
+    if (!hazardMap.has(hazardId)) {
+      hazardMap.set(hazardId, { total: 0, high: 0, medium: 0, low: 0 });
+    }
+    const entry = hazardMap.get(hazardId)!;
+    entry.total += count;
+    if (severity === "HIGH") entry.high += count;
+    else if (severity === "MEDIUM") entry.medium += count;
+    else if (severity === "LOW") entry.low += count;
+  }
+
+  // Sort hazards by total count descending, take top 30
+  const sortedHazards = Array.from(hazardMap.entries())
+    .sort((a, b) => b[1].total - a[1].total)
+    .slice(0, 30);
+
+  // Fetch hazard names for the selected IDs
+  const hazardIds = sortedHazards.map(([id]) => id);
+  const hazardNamesMap = new Map<number, string>();
+  if (hazardIds.length > 0) {
+    const hazards = await dbClient.hazard.findMany({
+      where: { id: { in: hazardIds } },
+      select: { id: true, name: true },
+    });
+    for (const h of hazards) {
+      hazardNamesMap.set(h.id, h.name);
+    }
+  }
+
+  // Build hazards array
+  const hazardsResult = sortedHazards.map(([hazardId, counts]) => ({
+    hazard_name: hazardNamesMap.get(hazardId) || `Hazard #${hazardId}`,
+    high_count: counts.high,
+    medium_count: counts.medium,
+    low_count: counts.low,
+  }));
+
+  // Process area data
+  // Get area names
+  const areaIds = areaCounts.map((item) => item.areaId!).filter(Boolean);
+  const areaNamesMap = new Map<number, string>();
+  if (areaIds.length > 0) {
+    const areas = await dbClient.area.findMany({
+      where: { id: { in: areaIds } },
+      select: { id: true, name: true },
+    });
+    for (const a of areas) {
+      areaNamesMap.set(a.id, a.name);
+    }
+  }
+
+  const areasResult = areaCounts.map((item) => ({
+    area_name: areaNamesMap.get(item.areaId!) || `Area #${item.areaId}`,
+    count: item._count.id,
+  }));
+
+  return {
+    hazards: hazardsResult,
+    areas: areasResult,
+  };
+};
+
+// Main service function
+export const getAIHazardAnalysisService = async (payload: any) => {
+  const { companyId, rigId, startDate, endDate } = payload;
+
+  // Parse dates
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  // Calculate total days (inclusive)
+  const totalDays =
+    Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+  const halfDays = Math.floor(totalDays / 2);
+
+  // Determine previous and current periods
+  const previousStart = start;
+  const previousEnd = addDays(start, halfDays - 1);
+  const currentStart = addDays(start, halfDays);
+  const currentEnd = end;
+
+  // Convert to strings for query
+  const prevStartStr = formatDate(previousStart);
+  const prevEndStr = formatDate(previousEnd);
+  const currStartStr = formatDate(currentStart);
+  const currEndStr = formatDate(currentEnd);
+
+  // Build filter
+  const filter = rigId ? { rigId } : { companyId };
+
+  // Fetch data for both periods concurrently
+  const [previous_period, current_period] = await Promise.all([
+    getPeriodData(prevStartStr, prevEndStr, filter),
+    getPeriodData(currStartStr, currEndStr, filter),
+  ]);
+
+  // Call external AI service
+  const result = await safetyApiService.getWhatChanged({
+    previous_period,
+    current_period,
+  });
+
+  return result;
+};
+
+// get company ai hazard analysis
+export const getCompanyAIHazardAnalysisService = async (payload: any) => {
+  const { companyId, rigId, startDate, endDate } = payload;
+
+  // demo date: startDate: "2023-08-01", endDate: "2023-08-31"
+
+  // CardSubmission আর DailyDebrief এর submitDay দিয়ে সার্চ করবে
+
+  // আগে চেক দিবে rigId আছে কিনা? যদি rigId থাকে তাহলে সেই rigId দিয়ে DailyDebrief এবং CardSubmission এর rigId দিয়ে সার্চ করবে । 
+  // যদি rigId থাকে না তাহলে সেই companyId দিয়ে DailyDebrief এবং CardSubmission এর companyId দিয়ে সার্চ করবে
+
+  // 1. Generate Suggestions: top 3 hazards যাদের id দিয়ে সব চেয়ে বেশি card submission হয়েছে তাদের নাম
+  // {
+  //   "hazards": [
+  //     "missing_tagline",
+  //     "no_chain_strap"
+  //   ]
+  // }
+
+  // 2. Debrief Summary: maximum 20 answers per question randomly এটা আনতে হবে DailyDebrief থেকে
+  // {
+  //   "responses": [
+  //     {
+  //       "question": "What happened during today's shift?",
+  //       "answers": [
+  //         "Drilling operations were delayed for 30 minutes due to a hydraulic pressure drop.",
+  //         "A minor oil leak was detected and contained quickly.",
+  //         "Weather conditions caused slight delays in material transfer."
+  //       ]
+  //     },
+  //     {
+  //       "question": "What worked well today?",
+  //       "answers": [
+  //         "Communication between team members was smooth.",
+  //         "Safety protocols were followed properly.",
+  //         "Technical team response minimized downtime."
+  //       ]
+  //     },
+  //     {
+  //       "question": "What could be improved?",
+  //       "answers": [
+  //         "Preventive maintenance on pumps should be increased.",
+  //         "Tool availability needs improvement.",
+  //         "Shift handovers require better coordination."
+  //       ]
+  //     }
+  //   ]
+  // }
+
+  // 3. Root Cause Clustering: high severity দিয়ে যাদের(hazard) সবচেয়ে বেশি কার্ড সাবমিট হয়েছে তাদের মধ্যে থেকে top 3 hazard বের করতে হবে
+  // Top 3 hazard in high severity
+  // Top 3 areas
+  // Maximum 10 descriptions for each area randomly
+  //   {
+  //   "hazards": [
+  //     {
+  //       "hazard_name": "Slip Hazard",
+  //       "areas": [
+  //         {
+  //           "area_name": "Drilling Floor",
+  //           "descriptions": [
+  //             "Hydraulic oil leaking from the main pump created a slippery surface.",
+  //             "Oil spill remained on the floor after maintenance work.",
+  //             "Workers reported slippery conditions near the drilling equipment.",
+  //             "Small hydraulic leak observed around the pump connection."
+  //           ]
+  //         },
+  //         {
+  //           "area_name": "Pump Room",
+  //           "descriptions": [
+  //             "Oil leakage found near the pressure valve.",
+  //             "Lubricant spilled beside the hydraulic pump.",
+  //             "Maintenance team observed oil residue on the floor.",
+  //             "Minor leak detected from a hydraulic hose."
+  //           ]
+  //         },
+  //         {
+  //           "area_name": "Loading Bay",
+  //           "descriptions": [
+  //             "Grease mixed with rainwater created a slippery walkway.",
+  //             "Forklift left oil drips on the floor.",
+  //             "Spilled lubricant was found near the loading ramp.",
+  //             "Floor remained wet after equipment cleaning."
+  //           ]
+  //         }
+  //       ]
+  //     },
+  //     {
+  //       "hazard_name": "Housekeeping",
+  //       "areas": [
+  //         {
+  //           "area_name": "Workshop",
+  //           "descriptions": [
+  //             "Tools were left on the floor after maintenance.",
+  //             "Extension cables blocked the main walkway.",
+  //             "Waste materials were not disposed of properly.",
+  //             "Cleaning was not completed after the shift."
+  //           ]
+  //         },
+  //         {
+  //           "area_name": "Storage Area",
+  //           "descriptions": [
+  //             "Boxes were stacked in front of an emergency exit.",
+  //             "Pallets were stored outside the designated area.",
+  //             "Loose packaging materials were scattered on the floor.",
+  //             "Materials blocked access to equipment."
+  //           ]
+  //         },
+  //         {
+  //           "area_name": "Warehouse",
+  //           "descriptions": [
+  //             "Unused equipment was stored in the walkway.",
+  //             "Scrap materials accumulated near storage racks.",
+  //             "Housekeeping inspections were missed.",
+  //             "Cleaning schedule was not followed consistently."
+  //           ]
+  //         }
+  //       ]
+  //     },
+  //     {
+  //       "hazard_name": "PPE",
+  //       "areas": [
+  //         {
+  //           "area_name": "Rig Floor",
+  //           "descriptions": [
+  //             "Worker entered the area without safety glasses.",
+  //             "Helmet strap was not fastened correctly.",
+  //             "Protective gloves were removed during maintenance.",
+  //             "Face shield was not used while grinding."
+  //           ]
+  //         },
+  //         {
+  //           "area_name": "Workshop",
+  //           "descriptions": [
+  //             "Hearing protection was not worn.",
+  //             "Safety shoes did not meet site requirements.",
+  //             "Eye protection was missing during cutting work.",
+  //             "Worker ignored PPE requirements while operating machinery."
+  //           ]
+  //         },
+  //         {
+  //           "area_name": "Loading Bay",
+  //           "descriptions": [
+  //             "Reflective vest was not worn.",
+  //             "Worker entered without a safety helmet.",
+  //             "Safety goggles were missing during loading operations.",
+  //             "High-visibility clothing was not used."
+  //           ]
+  //         }
+  //       ]
+  //     }
+  //   ]
+  // }
+
+  // 4. Positive Trend Analysis: Send all hazard where previous_count > current_count
+  // startDate আর endDate এর মধ্যে সময় যত দিন আছে সেটা হলো current আর startDate আর endDate এর মধ্যে সময় যত দিন আছে ঠিক ততদিন আগে তত সময় হলো previous অর্থাৎ
+  // startDate: 2026-05-01 আর endDate: 2026-05-30 হয় তাহলে previous হবে 2026-04-01 আর 2026-04-30 এর মধ্যে সময় যত দিন আছে সেটা।
+  // এখানে current এ যত গুলো কার্ড সাবমিট হয়েছে সেটার কাউন্ট করা current_count একই ভাবে previous_count
+  // {
+  //   "hazards": [
+  //     {
+  //       "hazard_name": "Slip Hazard",
+  //       "previous_count": 28,
+  //       "current_count": 18
+  //     },
+  //     {
+  //       "hazard_name": "Housekeeping",
+  //       "previous_count": 35,
+  //       "current_count": 22
+  //     },
+  //     {
+  //       "hazard_name": "Manual Handling",
+  //       "previous_count": 20,
+  //       "current_count": 14
+  //     },
+  //     {
+  //       "hazard_name": "Working at Height",
+  //       "previous_count": 15,
+  //       "current_count": 12
+  //     },
+  //     {
+  //       "hazard_name": "Dropped Objects",
+  //       "previous_count": 18,
+  //       "current_count": 11
+  //     }
+  //   ]
+  // }
+
+  // 5. What-Changed Analysis:
+  // startDate আর endDate এর মধ্যে সময় যত দিন আছে সেটা হলো current আর startDate আর endDate এর মধ্যে সময় যত দিন আছে ঠিক ততদিন আগে তত সময় হলো previous অর্থাৎ
+  // startDate: 2026-05-01 আর endDate: 2026-05-30 হয় তাহলে previous হবে 2026-04-01 আর 2026-04-30 এর মধ্যে সময় যত দিন আছে সেটা।
+  // Top 10 hazard যাদের id দিয়ে কার্ড সাবমিট হয়েছে সেই গুলো বের করে তাদের high_count, medium_count, low_count কাউন্ট করা current_period একই ভাবে previous_period
+  // Top 10 hazard যাদের id দিয়ে কার্ড সাবমিট হয়েছে সেই গুলো বের করে তাদের মধ্যে যে area গুলো আছে সেই area এর কাউন্ট করা current_period একই ভাবে previous_period
+  //   {
+  //   "previous_period": {
+  //     "hazards": [
+  //       {
+  //         "hazard_name": "Slip Hazard",
+  //         "high_count": 12,
+  //         "medium_count": 20,
+  //         "low_count": 8
+  //       },
+  //       {
+  //         "hazard_name": "Housekeeping",
+  //         "high_count": 6,
+  //         "medium_count": 18,
+  //         "low_count": 22
+  //       }
+  //     ],
+  //     "areas": [
+  //       {
+  //         "area_name": "Drilling Floor",
+  //         "count": 34
+  //       },
+  //       {
+  //         "area_name": "Pump Room",
+  //         "count": 19
+  //       }
+  //     ]
+  //   },
+  //   "current_period": {
+  //     "hazards": [
+  //       {
+  //         "hazard_name": "Slip Hazard",
+  //         "high_count": 20,
+  //         "medium_count": 16,
+  //         "low_count": 10
+  //       },
+  //       {
+  //         "hazard_name": "Housekeeping",
+  //         "high_count": 4,
+  //         "medium_count": 15,
+  //         "low_count": 20
+  //       }
+  //     ],
+  //     "areas": [
+  //       {
+  //         "area_name": "Drilling Floor",
+  //         "count": 22
+  //       },
+  //       {
+  //         "area_name": "Pump Room",
+  //         "count": 26
+  //       }
+  //     ]
+  //   }
+  // }
 };
 
 // get admin dashboard overview

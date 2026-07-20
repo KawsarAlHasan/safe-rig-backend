@@ -14,7 +14,7 @@ model DailyDebrief {
     typeOfDevrief     TypeOfDevrief? @relation(fields: [typeOfDevriefId], references: [id])
     typeOfDevriefId   Int?
     questionAnswer    Json?
-    submitDay         String?
+    submitDay         String?   // demo: 2026-05-17
     submitAnonymously Boolean        @default(false)
     status            AllStatus      @default(ACTIVE)
     createdAt         DateTime       @default(now())

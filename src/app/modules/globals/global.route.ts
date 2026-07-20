@@ -12,6 +12,8 @@ import {
   exportDashboardReport,
   getAdminDashboard,
   getAdminDashboardOverview,
+  getAIHazardAnalysis,
+  getCompanyAIHazardAnalysis,
   getRigAreaTypeHazard,
   globalStatus,
 } from "./global.controller";
@@ -28,6 +30,8 @@ router.get("/client/dashboard-overview", clientAuth(), clientDashboardOverview);
 router.get("/client/company-analysis", clientAuth(), clientCompanyAnalysis);
 router.patch("/client/status-change", clientAuth(), globalStatus);
 router.get("/rig-area-hazard-type", clientAuth(), getRigAreaTypeHazard);
+router.get("/client/ai-hazard-analysis", clientAuth(), getCompanyAIHazardAnalysis);
+// router.get("/client/ai-hazard-analysis", clientAuth(), getAIHazardAnalysis);
 
 router.get("/client/dashboard-report", clientAuth(), exportDashboardReport);
 router.get(

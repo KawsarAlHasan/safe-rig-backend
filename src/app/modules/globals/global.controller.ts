@@ -11,11 +11,13 @@ import {
   exportDashboardReportService,
   getAdminDashboardOverviewService,
   getAdminDashboardrvice,
+  getAIHazardAnalysisService,
   getClientDashboardOverviewService,
   getCompanyAnalysisService,
   getRigAreaTypeHazardService,
   globalStatusService,
 } from "./global.service";
+import { getCompanyAIHazardAnalysisService } from "./ai.service";
 
 // status update global
 export const globalStatus = catchAsync(async (req: Request, res: Response) => {
@@ -34,6 +36,56 @@ export const getRigAreaTypeHazard = catchAsync(
     const companyId = resolveCompanyId(req);
 
     const result = await getRigAreaTypeHazardService(companyId, req.query);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Rig, Area, Card Type, Hazard fetched successfully",
+      data: result,
+    });
+  },
+);
+
+// get rig, area, type, hazard
+export const getAIHazardAnalysis = catchAsync(
+  async (req: Request, res: Response) => {
+    const companyId = resolveCompanyId(req);
+
+    const { startDate, endDate } = req.query;
+
+    const payload = {
+      companyId,
+      rigId: null,
+      startDate,
+      endDate,
+    };
+
+    const result = await getAIHazardAnalysisService(payload);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Rig, Area, Card Type, Hazard fetched successfully",
+      data: result,
+    });
+  },
+);
+
+// get rig, area, type, hazard
+export const getCompanyAIHazardAnalysis = catchAsync(
+  async (req: Request, res: Response) => {
+    const companyId = resolveCompanyId(req);
+
+    const { startDate, endDate } = req.query;
+
+    const payload = {
+      companyId,
+      rigId: null,
+      startDate,
+      endDate,
+    };
+
+    const result = await getCompanyAIHazardAnalysisService(payload);
 
     sendResponse(res, {
       success: true,

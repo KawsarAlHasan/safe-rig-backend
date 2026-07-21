@@ -18,7 +18,7 @@ const router = express.Router();
 router.post(
   "/create",
   userAuth(),
-  validateRequest(createCardSubmissionZodSchema),
+  // validateRequest(createCardSubmissionZodSchema),
   imageOrVideoUploadHandler(),
   createNewCardSubmission,
 );

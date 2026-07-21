@@ -13,7 +13,7 @@ const httpServer = createServer(app);
 httpServer.listen(port, () => {
   console.log(
     colors.green.bold(
-      `✅ SafeRig Server is running on port http://${config.ip_address}:${port}`,
+      `✅ SafeRig 360 Server is running on port http://${config.ip_address}:${port}`,
     ),
   );
 });

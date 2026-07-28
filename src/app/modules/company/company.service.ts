@@ -12,14 +12,6 @@ export const companyCreateService = async (payload: any) => {
   const { name, email, phone, clientName, clientEmail, clientPassword, logo } =
     payload;
 
-  // // check if company exist
-  // const isExistCompany = await dbClient.company.findUnique({
-  //   where: { name },
-  // });
-  // if (isExistCompany) {
-  //   throw new ApiError(StatusCodes.BAD_REQUEST, "Company already exists!");
-  // }
-
   // check if client exist
   const isExistClient = await dbClient.client.findUnique({
     where: { email: clientEmail },
@@ -28,40 +20,227 @@ export const companyCreateService = async (payload: any) => {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Client already exists!");
   }
 
-  // create Company
-  const result = await dbClient.company.create({
-    data: {
-      name,
-      email,
-      phone,
-      logo,
-    },
-  });
-
-  // check company creation
-  if (!result) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to create company!");
-  }
-
-  //hash password
+  // hash password
   const hashedPassword = await bcrypt.hash(
     clientPassword,
     Number(config.bcrypt_salt_rounds),
   );
 
-  // create client
-  await dbClient.client.create({
-    data: {
-      name: clientName,
-      email: clientEmail,
-      password: hashedPassword,
-      isMainClient: true,
-      companyId: result.id,
-    },
+  // start transaction
+  const result = await dbClient.$transaction(async (tx) => {
+    // 1. create Company
+    const company = await tx.company.create({
+      data: {
+        name,
+        email,
+        phone,
+        logo,
+      },
+    });
+
+    if (!company) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to create company!");
+    }
+
+    // 2. create client
+    await tx.client.create({
+      data: {
+        name: clientName,
+        email: clientEmail,
+        password: hashedPassword,
+        isMainClient: true,
+        companyId: company.id,
+      },
+    });
+
+    // 3. Check if already any Area exists for this company (to avoid duplication)
+    const existingAreas = await tx.area.count({
+      where: { companyId: company.id },
+    });
+
+    if (existingAreas === 0) {
+      // ---------- Area ----------
+      const defaultAreas = await tx.area.findMany({
+        where: { isDefault: true, companyId: null },
+      });
+      for (const area of defaultAreas) {
+        await tx.area.create({
+          data: {
+            name: area.name,
+            color: area.color,
+            status: area.status,
+            companyId: company.id,
+            isAllRigs: true,
+            rigIds: [],
+          },
+        });
+      }
+
+      // ---------- CardType ----------
+      const defaultCardTypes = await tx.cardType.findMany({
+        where: { isDefault: true, companyId: null },
+      });
+      for (const cardType of defaultCardTypes) {
+        await tx.cardType.create({
+          data: {
+            name: cardType.name,
+            status: cardType.status,
+            companyId: company.id,
+            isAllRigs: true,
+            rigIds: [],
+          },
+        });
+      }
+
+      // ---------- Hazard ----------
+      const defaultHazards = await tx.hazard.findMany({
+        where: { isDefault: true, companyId: null },
+      });
+      for (const hazard of defaultHazards) {
+        await tx.hazard.create({
+          data: {
+            name: hazard.name,
+            status: hazard.status,
+            companyId: company.id,
+            isAllRigs: true,
+            rigIds: [],
+          },
+        });
+      }
+
+      // ---------- Alert ----------
+      const defaultAlerts = await tx.alert.findMany({
+        where: { isDefault: true, companyId: null },
+      });
+      for (const alert of defaultAlerts) {
+        await tx.alert.create({
+          data: {
+            title: alert.title,
+            description: alert.description,
+            file: alert.file,
+            status: alert.status,
+            companyId: company.id,
+            isAllRigs: true,
+            rigIds: [],
+          },
+        });
+      }
+
+      // ---------- Message ----------
+      const defaultMessages = await tx.message.findMany({
+        where: { isDefault: true, companyId: null },
+      });
+      for (const message of defaultMessages) {
+        await tx.message.create({
+          data: {
+            title: message.title,
+            description: message.description,
+            file: message.file,
+            sectionTitle: message.sectionTitle,
+            status: message.status,
+            companyId: company.id,
+            isAllRigs: true,
+            rigIds: [],
+          },
+        });
+      }
+
+      // ---------- RigType ----------
+      const defaultRigTypes = await tx.rigType.findMany({
+        where: { isDefault: true, companyId: null },
+      });
+      for (const rigType of defaultRigTypes) {
+        await tx.rigType.create({
+          data: {
+            name: rigType.name,
+            status: rigType.status,
+            companyId: company.id,
+            isAllRigs: true,
+            rigIds: [],
+          },
+        });
+      }
+
+      // ---------- Videos ----------
+      const defaultVideos = await tx.videos.findMany({
+        where: { isDefault: true, companyId: null },
+      });
+      for (const video of defaultVideos) {
+        await tx.videos.create({
+          data: {
+            title: video.title,
+            description: video.description,
+            position: video.position,
+            videoUrl: video.videoUrl,
+            thumbnail: video.thumbnail,
+            status: video.status,
+            companyId: company.id,
+            isAllRigs: true,
+            rigIds: [],
+          },
+        });
+      }
+    }
+
+    return company;
   });
 
   return result;
 };
+// export const companyCreateService = async (payload: any) => {
+//   const { name, email, phone, clientName, clientEmail, clientPassword, logo } =
+//     payload;
+
+//   // // check if company exist
+//   // const isExistCompany = await dbClient.company.findUnique({
+//   //   where: { name },
+//   // });
+//   // if (isExistCompany) {
+//   //   throw new ApiError(StatusCodes.BAD_REQUEST, "Company already exists!");
+//   // }
+
+//   // check if client exist
+//   const isExistClient = await dbClient.client.findUnique({
+//     where: { email: clientEmail },
+//   });
+//   if (isExistClient) {
+//     throw new ApiError(StatusCodes.BAD_REQUEST, "Client already exists!");
+//   }
+
+//   // create Company
+//   const result = await dbClient.company.create({
+//     data: {
+//       name,
+//       email,
+//       phone,
+//       logo,
+//     },
+//   });
+
+//   // check company creation
+//   if (!result) {
+//     throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to create company!");
+//   }
+
+//   //hash password
+//   const hashedPassword = await bcrypt.hash(
+//     clientPassword,
+//     Number(config.bcrypt_salt_rounds),
+//   );
+
+//   // create client
+//   await dbClient.client.create({
+//     data: {
+//       name: clientName,
+//       email: clientEmail,
+//       password: hashedPassword,
+//       isMainClient: true,
+//       companyId: result.id,
+//     },
+//   });
+
+//   return result;
+// };
 
 // get all company
 export const getAllCompanyService = async (query: IQuery) => {

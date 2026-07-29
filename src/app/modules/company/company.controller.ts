@@ -34,7 +34,7 @@ export const createNewCompany = catchAsync(
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
-      message: "Company created successfully",
+      message: "Company created successfully via admin",
       data: result,
     });
   },

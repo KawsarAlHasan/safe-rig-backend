@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "start": "node dist/server.js"
+    "dev": "node api.js && tsx watch src/server.ts",
+    "start": "node api.js && node dist/server.js"
   },
   "keywords": [],
   "author": "",
@@ -43,6 +43,7 @@
     "i": "^0.3.7",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.1.1",
+    "node-fetch": "^3.3.2",
     "nodemailer": "^8.0.4",
     "pg": "^8.20.0",
     "socket.io": "^4.8.3",
